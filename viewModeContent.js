@@ -70,17 +70,33 @@ function parseViewModeTicketInDocument(doc) {
   if (!doc) return null;
   const ticket = {};
 
-  const inputObjectId = doc.querySelector('input#OBJECT_ID');
-  const spanObjectId = doc.querySelector('span#OBJECT_ID');
+  const inputObjectId = doc.querySelector('input#OBJECT_ID')
+    || doc.querySelector('input#objectID')
+    || doc.querySelector('input[name="OBJECT_ID" i]')
+    || doc.querySelector('input[name="objectID" i]');
+  const spanObjectId = doc.querySelector('span#OBJECT_ID')
+    || doc.querySelector('span[id*="OBJECT_ID" i]');
   const rawObjectId = inputObjectId?.value || spanObjectId?.textContent;
 
   if (rawObjectId) {
     ticket['Service Order No'] = cleanText(rawObjectId);
   }
 
-  const rows = doc.querySelectorAll('table.sertb_brdr tr');
+  function getCellValue(cell) {
+    if (!cell) return '';
+    const input = cell.querySelector('input[type="text"], input[type="hidden"], select, textarea');
+    if (input) {
+      if (input.tagName === 'SELECT') {
+        return cleanText(input.options[input.selectedIndex]?.text || input.value);
+      }
+      if (input.value) return cleanText(input.value);
+    }
+    return cleanText(cell.textContent);
+  }
+
+  const rows = doc.querySelectorAll('table.sertb_brdr tr, table.ser_tb tr, table tr');
   for (const row of rows) {
-    const labelCells = Array.from(row.querySelectorAll('td.ser_ti'));
+    const labelCells = Array.from(row.querySelectorAll('td.ser_ti, th.ser_ti, td.title'));
     for (const cell of labelCells) {
       const labelText = cleanText(cell.textContent);
       if (!labelText) continue;
@@ -88,7 +104,7 @@ function parseViewModeTicketInDocument(doc) {
       const valueCell = cell.nextElementSibling;
       if (!valueCell) continue;
 
-      const rawValue = cleanText(valueCell.textContent);
+      const rawValue = getCellValue(valueCell);
       if (!rawValue) continue;
 
       if (labelText.includes('Phone No')) {
@@ -118,11 +134,11 @@ function parseViewModeTicketInDocument(doc) {
     const win = doc.defaultView || window;
     const lObj = win._l || (typeof _l !== 'undefined' ? _l : null);
     if (lObj) {
-      if (!ticket['Service Order No'] && lObj.ObjectId) {
-        ticket['Service Order No'] = cleanText(lObj.ObjectId.toString());
+      if (!ticket['Service Order No'] && (lObj.ObjectId || lObj.ASC_JOB_NO || lObj.SO_NO)) {
+        ticket['Service Order No'] = cleanText((lObj.ObjectId || lObj.ASC_JOB_NO || lObj.SO_NO).toString());
       }
-      if (!ticket['Model Name'] && lObj.MODEL) {
-        ticket['Model Name'] = cleanText(lObj.MODEL.toString());
+      if (!ticket['Model Name'] && (lObj.MODEL || lObj.MODEL_NAME)) {
+        ticket['Model Name'] = cleanText((lObj.MODEL || lObj.MODEL_NAME).toString());
       }
       if (!ticket['Engineer'] && lObj.ENGINEERNAME) {
         ticket['Engineer'] = cleanText(lObj.ENGINEERNAME.toString());
@@ -155,12 +171,22 @@ function parseViewModeTicketInDocument(doc) {
     }
   }
 
-  // Fallback 3: check Service Order No element
+  // Fallback 3: check Service Order No element / URL search params
   if (!ticket['Service Order No']) {
-    const objEl = doc.querySelector('input#OBJECT_ID') || doc.querySelector('span#OBJECT_ID');
+    const objEl = doc.querySelector('input#OBJECT_ID') || doc.querySelector('input#objectID') || doc.querySelector('span#OBJECT_ID');
     if (objEl) {
       ticket['Service Order No'] = cleanText(objEl.value || objEl.textContent);
     }
+  }
+  if (!ticket['Service Order No']) {
+    try {
+      const win = doc.defaultView || window;
+      const urlObj = new URL(win.location.href);
+      const urlSo = urlObj.searchParams.get('objectID') || urlObj.searchParams.get('objectId') || urlObj.searchParams.get('soNo') || urlObj.searchParams.get('SO_NO');
+      if (urlSo) {
+        ticket['Service Order No'] = cleanText(urlSo);
+      }
+    } catch (e) {}
   }
 
   if (!ticket['Service Order No'] && !ticket['Customer Name']) {
@@ -1033,10 +1059,27 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function showHealthReportDialog(ticket) {
-  if (!ticket || !_fabShadow) return;
+function getFabShadow() {
+  if (_fabShadow) return _fabShadow;
+  let targetDoc = document;
+  try {
+    if (window.top && window.top.document) {
+      targetDoc = window.top.document;
+    }
+  } catch (e) {}
+  const host = targetDoc.getElementById(FAB_HOST_ID);
+  if (host && host.shadowRoot) {
+    _fabShadow = host.shadowRoot;
+    return _fabShadow;
+  }
+  return null;
+}
 
-  const existing = _fabShadow.querySelector('.health-wrapper');
+function showHealthReportDialog(ticket) {
+  const shadow = getFabShadow();
+  if (!ticket || !shadow) return;
+
+  const existing = shadow.querySelector('.health-wrapper');
   if (existing) existing.remove();
 
   const wrapper = document.createElement('div');
@@ -1130,12 +1173,13 @@ function showHealthReportDialog(ticket) {
   wrapper.querySelector('#btnHealthAcknowledge').addEventListener('click', close);
   wrapper.addEventListener('click', (e) => { if (e.target === wrapper) close(); });
 
-  _fabShadow.appendChild(wrapper);
+  shadow.appendChild(wrapper);
 }
 
 async function handleReportClick() {
-  if (!_fabShadow) return;
-  const reportBtn = _fabShadow.querySelector('.report-btn');
+  const shadow = getFabShadow();
+  if (!shadow) return;
+  const reportBtn = shadow.querySelector('.report-btn');
   if (reportBtn) {
     reportBtn.style.pointerEvents = 'none';
     reportBtn.style.opacity = '0.7';
@@ -1160,15 +1204,22 @@ async function handleReportClick() {
 
 /**
  * Create the Shadow DOM host and inject FAB + toast into it.
- * Host is appended to <html> (documentElement) to be immune to
- * body transforms and overflow constraints.
+ * Host is appended to top document (or current) to prevent frame duplication.
  */
 function createFab() {
   if (!shouldShowFab()) return;
-  if (document.getElementById(FAB_HOST_ID)) return;
+
+  let targetDoc = document;
+  try {
+    if (window.top && window.top.document) {
+      targetDoc = window.top.document;
+    }
+  } catch (e) {}
+
+  if (targetDoc.getElementById(FAB_HOST_ID)) return;
 
   // Host element: fixed at bottom-right corner, zero size, overflow visible
-  const host = document.createElement('div');
+  const host = targetDoc.createElement('div');
   host.id = FAB_HOST_ID;
   // Critical host inline styles with !important via setAttribute
   host.setAttribute('style', [
@@ -1239,17 +1290,18 @@ function createFab() {
   shadow.appendChild(toast);
 
   // Append host to <html>, not <body>, to escape any body-level constraints
-  (document.documentElement || document.body).appendChild(host);
+  (targetDoc.documentElement || targetDoc.body).appendChild(host);
 }
 
 /** Show a toast inside the shadow DOM */
 function showFabToast(message, type, durationMs) {
   type       = type       || 'success';
   durationMs = durationMs || 3200;
-  if (!_fabShadow) return;
-  const toast = _fabShadow.querySelector('.fab-toast');
+  const shadow = getFabShadow();
+  if (!shadow) return;
+  const toast = shadow.querySelector('.fab-toast');
   if (!toast) return;
-  const icon = type === 'success' ? 'âœ“' : type === 'error' ? 'âœ—' : 'â„¹';
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
   toast.className = 'fab-toast ' + type;
   toast.innerHTML = '<span style="margin-right:6px">' + icon + '</span>' + message;
   if (toast._timer) clearTimeout(toast._timer);
@@ -1260,15 +1312,17 @@ function showFabToast(message, type, durationMs) {
 
 /** Toggle loading state on the FAB button */
 function setFabLoading(on) {
-  if (!_fabShadow) return;
-  const btn = _fabShadow.querySelector('.fab-btn');
+  const shadow = getFabShadow();
+  if (!shadow) return;
+  const btn = shadow.querySelector('.fab-btn');
   if (btn) btn.classList.toggle('loading', on);
 }
 
 /** Brief color pulse on the FAB after success */
 function pulseGreen() {
-  if (!_fabShadow) return;
-  const btn = _fabShadow.querySelector('.fab-btn');
+  const shadow = getFabShadow();
+  if (!shadow) return;
+  const btn = shadow.querySelector('.fab-btn');
   if (!btn) return;
   btn.style.background = 'linear-gradient(135deg,#0d9e4f 0%,#34d399 100%)';
   btn.style.boxShadow  = '0 6px 24px rgba(13,158,79,0.5),0 2px 8px rgba(0,0,0,0.18)';
@@ -1278,7 +1332,7 @@ function pulseGreen() {
   }, 2000);
 }
 
-// â”€â”€ Helpers (same as before) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers (same as before) ──────────────────────────────────────────────────
 
 function mergeColumns111(existing, incoming) {
   const merged = Array.isArray(existing) ? existing.slice() : [];
@@ -1315,7 +1369,7 @@ function getProduct111(model) {
   return 'UNKNOWN';
 }
 
-// â”€â”€ Main FAB click handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main FAB click handler ────────────────────────────────────────────────────
 async function handleFabClick() {
   setFabLoading(true);
   try {
@@ -1350,7 +1404,7 @@ async function handleFabClick() {
       return;
     }
 
-    // 4. Append & save â€” NO download
+    // 4. Append & save — NO download
     const updatedData    = existingData.concat([ticket]);
     const updatedColumns = mergeColumns111(existingColumns, incomingColumns);
     await chrome.storage.session.set({
@@ -1360,7 +1414,7 @@ async function handleFabClick() {
     });
 
     // 5. Feedback
-    const soNo  = ticket['Service Order No'] || 'â€”';
+    const soNo  = ticket['Service Order No'] || '—';
     const cName = ticket['Customer Name']    || '';
     showFabToast(
       'Added to 1-1-1 Report (' + updatedData.length + ' total)\nSO: ' + soNo + (cName ? '\n' + cName : ''),
@@ -1485,7 +1539,12 @@ async function autoAddManualTicketIfEnabled() {
   
   // Periodic poll fallback (clears once created)
   const pollTimer = setInterval(() => {
-    if (document.getElementById(FAB_HOST_ID)) {
+    let targetDoc = document;
+    try {
+      if (window.top && window.top.document) targetDoc = window.top.document;
+    } catch(e) {}
+
+    if (targetDoc.getElementById(FAB_HOST_ID)) {
       clearInterval(pollTimer);
       return;
     }
@@ -1494,4 +1553,5 @@ async function autoAddManualTicketIfEnabled() {
 })();
 
 })();
+
 
