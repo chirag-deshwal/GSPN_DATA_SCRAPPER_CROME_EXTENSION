@@ -1,0 +1,256 @@
+/* for RO */
+	function openAppointmentList(event) {
+		
+		$("addressLayer").style.left = Event.pointerX(event)+100;
+		$("addressLayer").style.top = Event.pointerY(event)-100;	
+
+  		var f = $("detailForm");
+  		if(f.MODEL.value.blank()){
+  			alert(RO_MSG_MODEL);
+    		f.MODEL.focus();
+    		return false;
+  		}	
+		if(f.STREET.value.blank())
+  		{
+  			alert(RO_MSG_STREET);
+    		f.STREET.focus();
+    		return false;
+  		}
+		if (f.CITY.value.blank())
+  		{
+  			alert(RO_MSG_CITY);
+    		f.CITY.focus();
+    		return false;
+  		}
+		if (f.REGION.value.blank())
+  		{
+  			alert(RO_MSG_REGION);
+    		f.REGION.focus();
+    		return false;
+  		}
+		if (f.POST_CODE.value.blank())
+  		{
+			alert(RO_MSG_ZIPCODE);
+    		f.POST_CODE.focus();
+    		return false;
+  		}
+  		var zipcode_no = trim(f.POST_CODE.value);
+  		if ( !validZipCodeForRo(zipcode_no) )
+  		{
+  			alert(RO_MSG_CORRECT_ZIPCODE);
+  			f.POST_CODE.focus();
+    		return false;
+  		}
+		if (f.SYMPTOM_CAT1.value.blank() 
+				|| f.SYMPTOM_CAT2.value.blank()
+				|| f.SYMPTOM_CAT3.value.blank())
+  		{
+  			alert(RO_MSG_CUST_SYMPTOM);
+  			f.SYMPTOM_CAT1.focus();
+    		return false;
+  		}
+		
+		$("scheduleFrm").MODEL.value = f.MODEL.value;
+		$("scheduleFrm").STREET.value = f.STREET.value;
+		$("scheduleFrm").CITY.value = f.CITY.value;
+		$("scheduleFrm").REGION.value = f.REGION.value;
+		$("scheduleFrm").POST_CODE.value = f.POST_CODE.value;
+		$("scheduleFrm").SYMPTOM_CAT1.value = f.SYMPTOM_CAT1.value;
+		$("scheduleFrm").SYMPTOM_CAT2.value = f.SYMPTOM_CAT2.value;
+		$("scheduleFrm").SYMPTOM_CAT3.value = f.SYMPTOM_CAT3.value;
+		
+		
+		verifyAddress();
+	}
+	function popupAppointment(){
+		haveToReload = true;
+		var win=window.open("","ROAppointmentList",'toolbar=no,location=no,directories=no,status=no,menubar=no,resizable=no,copyhistory=no,scrollbars=yes,top=0,left=200,width=720,height=800');
+		$("scheduleFrm").action="/svctracking/svcorder/TicketAppointmentList.jsp";
+		$("scheduleFrm").target = "ROAppointmentList";
+		$("scheduleFrm").submit();
+		if(win == null) {
+            alert(RO_MSG_OFF_POPUPBLOCKER);
+        }
+        else {        
+            win.focus();
+                      	
+        }
+	}
+	
+/**
+ * 1. address verification
+ * 2. if different input address and response address then display candidaties address
+ */
+ 	var jsonAddrObj;
+	function verifyAddress(){
+	 	var frm = $("detailForm");
+	 	var frmAddr = $("frmAddress");
+	 	
+		frmAddr.address.value = frm.STREET.value;
+		frmAddr.addressDetail.value = "";
+		frmAddr.city.value = frm.CITY.value;
+		frmAddr.state.value = frm.REGION.value;
+		frmAddr.zipcode.value = frm.POST_CODE.value;
+		frmAddr.country.value = "US";
+		
+		
+		$('progressloading').startWaiting();
+		
+		frmAddr.cmd.value = 'AddressVerificationCmd';
+		AjaxRequest(urlPattern,"frmAddress", setGridJsonAddrObject);		
+
+ 	}  	
+	 	
+ 	function setGridJsonAddrObject(response){
+		try {
+			jsonAddrObj = response.responseText.evalJSON();
+
+			if (jsonAddrObj.success) {
+				
+				if(jsonAddrObj.addrReturnCode == "Y"){
+					//if(isAddressOk()){						
+						popupAppointment();	
+						$('progressloading').stopWaiting();
+						return;
+					//}	
+				}
+				
+				var confirmCandidateAddr = RO_MSG_INVALID_ADDRESS1 ;
+				var noChangesAddress = RO_MSG_INVALID_ADDRESS2;
+				
+				if(jsonAddrObj.addrReturnCode == "A"){
+					if(confirm(confirmCandidateAddr)) {
+						gridAddrDraw();
+						showHideAddressLayer(true);
+					}else {
+						alert(noChangesAddress);
+						popupAppointment();
+					}//if		
+				}else{
+					if(confirm(confirmCandidateAddr)) {
+						$("detailForm").STREET.select();
+					}else {
+						alert(noChangesAddress);
+						popupAppointment();
+					}
+				}
+
+				
+			} else {				
+				if (jsonAddrObj.error) {
+					cfExceptionPop(jsonAddrObj);
+				}
+			}
+		} catch (e) {}
+		$('progressloading').stopWaiting();
+ 	}
+ 	
+ 	function isAddressOk(){
+ 		var addressOk = false;
+ 		var frm = $("detailForm");
+	 	var address = frm.STREET.value.toUpperCase().strip();
+	 	var city = frm.CITY.value.toUpperCase().strip();
+	 	var state = frm.REGION.value.toUpperCase().strip();
+	 	var zipcode = frm.POST_CODE.value.toUpperCase().strip();
+		
+		if (jsonAddrObj != null) {
+			var length = jsonAddrObj.EtCandidates.length;
+			if(length > 0){
+				var obj = jsonAddrObj.EtCandidates[0];
+				if(obj.address.toUpperCase().strip() != address
+						|| obj.city.toUpperCase().strip() != city
+						|| obj.state.toUpperCase().strip() != state
+						|| obj.zipcode.toUpperCase().strip() != zipcode
+					){
+					addressOk = true;	
+				}								
+			}//if(length > 0){
+ 		}//if (jsonAddrObj != null) {
+ 			
+ 	}//function
+ 		
+	function gridAddrDraw(currPage, currBlock) {
+		if (jsonAddrObj != null) {
+			
+			var tbodyObj = $('addressListDiv');
+			clearGridJsonObject(tbodyObj);	
+			
+			var olTag = new Element("ol");
+			
+			var length = jsonAddrObj.EtCandidates.length;
+			totRow = length;
+			for (var i = 0; i < length; i++) {
+				
+				var obj = jsonAddrObj.EtCandidates[i];
+				
+				var liTag = new Element("li");
+				
+				var address = obj.streetNoRange + " " + obj.address;
+				var addressDetail = obj.addressDetail;
+				var city = obj.city;
+				var state = obj.state;
+				var zipcode = obj.zipcode;
+				
+				var addressText = address;
+				if(addressDetail.length > 0){
+					addressText += "," + addressDetail;
+				}
+				addressText += ", " + city;
+				addressText += ", " + state;
+				addressText += "  " + zipcode;
+				
+				
+				var addressList = "<a href=\"javascript:selectAddress('" + address + "','" + addressDetail + "','" + city + "','" + state + "','" + zipcode + "')\">";
+				addressList += addressText;
+				addressList += "</a>";
+				
+				liTag.insert(addressList);
+				olTag.insert({bottom : liTag});
+			}//for
+			tbodyObj.insert({bottom : olTag});
+		}
+ 	}
+ 	
+	function showHideAddressLayer(flag){
+		if(flag){
+			$("addressLayer").show();
+		}else{
+			$("addressLayer").hide();
+		}
+	}
+	function selectAddress(address, addressDetail, city, state, zipcode) {
+		var frm = $("detailForm");
+	 	frm.STREET.value = address;
+	 	frm.CITY.value = city;
+	 	frm.REGION.value = state;
+	 	frm.POST_CODE.value = zipcode;
+	 	
+	 	showHideAddressLayer(false);
+
+	    if(address.indexOf("-") >= 0) {
+	        alert( RO_MSG_MODIFY_HOUSENUMBER );
+	        frm.STREET.select();
+	    }
+	}	
+
+	function validZipCodeForRo(zipcode){
+		var valid = true;
+		if( loginUserCorpCode == "C310"){
+	  		
+			if (zipcode.length != 5 && zipcode.length != 10)
+	  		{
+	  			valid = false;
+	  		}	
+	  		
+		}else if( loginUserCorpCode == "C330"){
+			
+			zipcode = zipcode.replaceAll(" " , "");
+			if (zipcode.length != 6)
+	  		{
+	  			valid = false;
+	  		}
+			
+		}
+		
+		return valid;
+	}

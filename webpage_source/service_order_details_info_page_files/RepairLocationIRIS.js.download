@@ -1,0 +1,220 @@
+		
+	//service tracking, warranty claim
+	var RepairLocationIRIS = Class.create({   
+		
+		initialize: function(){     
+		} ,
+		
+		IRIS : false,
+		EIA : false,
+		NSAM : false,
+		condition : "",
+		symptom : "",
+		defect : "",
+		repair : "",
+		locations : [],	//repair part location
+		types : [],	//part item type
+		parts : [],	// repair part code
+		items : [], //wty condition TXT or MAT or CON
+		wtyPage : false,	//wty change page
+		svcPage : false,	//ticket change page
+		prodCd : "",	//used to define two variables : isRefrigerator,isWashMachine
+		isRefrigerator : false,		//IRIS Codes(need the location) depend on the product is the refrige and the wash
+		isWashMachine : false,	//IRIS Codes(need the location) depend on the product is the refrige and the wash
+				
+		/*  IRIS codes that location is madatory  */
+		getIRISCodes: function(){
+			// codes that location need
+			var arrLocationNeedCode = [];
+			
+			this.setProductCode();
+
+			if(this.isRefrigerator || this.isWashMachine){
+				if(this.IRIS){
+					arrLocationNeedCode = [
+					                    /*condition */  	[],
+					                    /* symptom */   ["120","A50","A51","A5X","B50","B54","C50","C53","C71","C75","B5X","C5X"],
+					                    /*defect */   		[],
+					                    /* repair*/   		["D","A1","I1"]
+				                    	];
+				}
+				if(this.EIA){
+					arrLocationNeedCode = [
+						                    /*condition */  	[],
+						                    /* symptom */   [],
+						                    /*defect */   		["LEAK","HE9","HEA","HF2","HFA","HFB","HG6","HGB","HGD","HGC","HG8"],
+						                    /* repair */  	 	["RECH","SOLD","WM14","SEAL","RP01","RP02","RP03","RP11","RA04","RA06","AP05","AP07","AP13","AP15","AP16","CA02","CP01"]
+					                    	];
+				}
+				if(this.NSAM){
+					arrLocationNeedCode = [
+						                    /*condition */  	[],
+						                    /* symptom */   ["HE9","HEA","HF2","HG6","HGB","HGC","HGD","HG8"],
+						                    /*defect */   		[],
+						                    /* repair */  		["A13","A15","A19","B01","B02","X07"]
+					                    	];
+				}			
+			}else{//if(this.isRefrigerator || this.isWashMachine){
+				if(this.IRIS){
+					arrLocationNeedCode = [
+					                    /*condition */  	[],
+					                    /* symptom */   [],
+					                    /*defect */   		[],
+					                    /* repair*/   		["C","D"]
+				                    	];
+				}
+				if(this.EIA){
+					arrLocationNeedCode = [
+						                    /*condition */  	[],
+						                    /* symptom */   [],
+						                    /*defect */   		[],
+						                    /* repair*/  		["ALEL","SOLD"]
+					                    	];
+				}
+				if(this.NSAM){
+					arrLocationNeedCode = [
+						                    /*condition */  	[],
+						                    /* symptom */   [],
+						                    /*defect */   		[],
+						                    /* repair*/  		["C09","B01"]
+					                    	];
+				}							
+			}//if(this.isRefrigerator || this.isWashMachine){
+			return arrLocationNeedCode;
+		},
+		
+		needLocation: function(){
+			var need = false;
+			var conditionValid = false;
+			var symptomValid = false;
+			var defectValid = false;
+			var repairValid = false;
+			
+			var arrLocationNeedCode = this.getIRISCodes();
+			
+			if(this.condition == undefined || this.condition == null ||  this.condition.blank() || arrLocationNeedCode[0].length == 0){
+				conditionValid = true;		 
+			}else{
+				conditionValid = arrLocationNeedCode[0].indexOf(this.condition) == -1 ;
+			}
+			
+			if(this.symptom == undefined || this.symptom == null || this.symptom.blank() || arrLocationNeedCode[1].length == 0){
+				symptomValid = true;		 
+			}else{
+				symptomValid = arrLocationNeedCode[1].indexOf(this.symptom) == -1 ;
+			}
+			
+			if(this.defect == undefined || this.defect == null || this.defect.blank() || arrLocationNeedCode[2].length == 0){
+				defectValid = true;		 
+			}else{
+				defectValid = arrLocationNeedCode[2].indexOf(this.defect) == -1 ;
+			}
+			
+			if(this.repair == undefined || this.repair == null || this.repair.blank() || arrLocationNeedCode[3].length == 0){
+				repairValid = true;		 
+			}else{
+				repairValid = arrLocationNeedCode[3].indexOf(this.repair) == -1 ;
+			}
+			
+			need = !(conditionValid && symptomValid && defectValid && repairValid);
+			
+			return need;
+		},	
+		
+		/* if everythig OK then return true*/
+		isOK: function(){
+			var vaid = true;
+			var need = this.needLocation();
+			var hasLoc = false;
+			if(this.wtyPage){
+				hasLoc = this.hasLocationWty();
+			}else{
+				hasLoc = this.hasLocation();
+			}
+			
+			if(need & !hasLoc){
+				vaid = false;
+			}
+			return vaid;
+			//return true;
+			
+		},
+
+		hasLocation: function(){
+			var hasLoc = false;	//only location
+			var hasLocPart = false;	// location & part code
+			var len = this.locations.length;
+			for(var i = 0; i < len; i++){
+				var loc = this.locations[i];
+				var part = this.parts[i];
+				
+				if(this.isRefrigerator || this.isWashMachine){
+
+					if(part.value.blank() && !loc.value.blank()){
+						hasLoc = true;
+					}
+					
+				}else{//if(this.isRefrigerator || this.isWashMachine){
+
+					if(loc.value.blank()){
+						//loc.removeClass("inputRO").addClass("inputF").prop("readonly", false);
+						loc.readOnly = false;
+						loc.className = "inputF";
+					}else{
+						hasLoc = true;
+					}
+
+				}//if(this.isRefrigerator || this.isWashMachine){
+				
+				
+			}//for(var i = 0; i < len; i++){
+			return hasLoc;
+		},
+		
+		hasLocationWty: function(){
+			var hasLoc = false;
+			var len = this.locations.length;
+			
+			for(var i = 0; i < len; i++){
+				var loc = this.locations[i];
+				var item = this.items[i];
+				
+				if(this.isRefrigerator || this.isWashMachine){
+
+					if(item.value == "TXT" && !loc.value.blank()){
+						hasLoc = true;
+					}
+					
+				}else{//if(this.isRefrigerator || this.isWashMachine){
+
+					if(loc.value.blank()){
+						//loc.removeClass("inputRO").addClass("inputF").prop("readonly", false);
+						loc.readOnly = false;
+						loc.className = "inputF";
+					}else{
+						hasLoc = true;
+					}
+
+				}//if(this.isRefrigerator || this.isWashMachine){
+				
+			}
+			return hasLoc;
+		},
+		
+		isREF_WM: function(){
+			return this.isRefrigerator || this.isWashMachine;
+		},
+		
+		setProductCode: function(){
+			this.isRefrigerator = this.prodCd == "REF";
+			this.isWashMachine = this.prodCd == "WSM";
+			
+			if(this.wtyPage){/*  not check for REF, WSM logic in wty page */
+				this.isRefrigerator = false;
+				this.isWashMachine = false;				
+			}
+			
+		}
+				
+		
+	});		

@@ -1,0 +1,41 @@
+#addressLayer {
+    position:absolute;
+    left:160px;
+    top:315px;
+    width:355px;
+    z-index:1;
+}
+.outbox {
+    width: 350px;
+    background-color: #F0F0EC;
+    border: 1px #b5aaa4 solid;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    color: #666666;
+    line-height: 14px;
+}
+.inbox {
+    background-color: #F0F0EC;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    color: #888888;
+    padding: 10px 5px 10px 5px;
+    line-height: 14px;
+}
+.headtit {
+    background-color: #b5aaa4;
+    padding: 2px 2px 2px 5px;
+    color: #FFFFFF;
+    font-weight: bold;
+    }
+.headtit2 {
+    background-color: #b5aaa4;
+    padding: 0px;
+    color: #FFFFFF;
+    font-weight: bold;
+    width: 350px;
+    border: 1px #b5aaa4 solid;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    }
+.style_1a {font-weight: bold}

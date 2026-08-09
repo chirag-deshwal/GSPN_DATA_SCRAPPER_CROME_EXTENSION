@@ -1,0 +1,3974 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0076)https://biz2.samsungcsportal.com/svctracking/common/SVCPopCustomerSearch.jsp -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GSPN</title>
+
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true">
+
+<link rel="stylesheet" type="text/css" href="./PopCustomerSearch.jsp_files/gspn.css">
+
+<link rel="stylesheet" type="text/css" href="./PopCustomerSearch.jsp_files/jquery-ui-1.8.18.custom.css">
+<link rel="stylesheet" type="text/css" href="./PopCustomerSearch.jsp_files/timePicker.css">
+<link rel="stylesheet" type="text/css" href="./PopCustomerSearch.jsp_files/layout.css">
+<link rel="stylesheet" type="text/css" href="./PopCustomerSearch.jsp_files/protoload.css">
+
+<style type="text/css">
+<!--
+.loading {
+	background-position: center center;
+	text-align: center;	
+	background-color: transparent;
+}
+
+
+-->
+</style>
+
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/dragtable.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/hashtable.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/json_sans_eval.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/paging.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/common.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/prototype.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/protoload.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/sorttable.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/jquery-1.7.1.min.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/jquery-ui-1.8.18.custom.min.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/jquery.timePicker.min.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/jquery.printElement.min.js.download"></script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/jquery.tablesorter.min.js.download"></script>
+<script type="text/javascript">
+	/**
+	 * Prototype.js 와 jQuery 와의 충돌을 방지 (jQuery를 사용하는 변수에는 $ 대신 $j 를  사용)
+	 */
+	var $j = jQuery.noConflict();
+</script>
+<script type="text/javascript">
+	var dateFormat = 'dd.mm.yy';
+	var zeroDate = '00.00.0000';
+</script>
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/date.js.download"></script>
+
+<script type="text/javascript">
+	var loginUserDateFormat = "dd.MM.yyyy";
+	
+	/**
+	 * 법인별 사용자 boolean변수
+	 */
+	var isAmericaRegion = false;
+	var isEuropeRegion = false;
+	var isAsiaRegion = true;
+	var isChinaRegion = false;	
+
+	var isAfUser = false;
+	var isMeaUser = false;
+	var isCisUser = false;
+	var isEuUser = false;
+
+	var isEaUser = false;
+	var isJpUser = false;
+	var isWaUser = true;
+	var isCnUser = false;
+
+	var isLaUser = false;
+	var isNaUser = false;
+
+	/*
+	 * 중국 법인통합
+	 */
+	var isNewChina = false;
+	/**
+	 * 사용자Center Type
+	 */
+	var isFscUser = false;
+
+	/**
+	 * 로그인 사용자의 법인 정보
+	 */
+	var loginUserCorpCode = "C550";
+	var loginUserCorpName = "SIEL";
+	var svcUserCorpCode = "C550";
+	
+	var isWtyIntegrationCorpCode = true;
+	var isWtyIntegration = true;
+
+	var isBlockFlash = true;
+
+	/**
+	 * paging.js에서 사용
+	 */
+	var prevPageChar = 'Prev.';
+	var nextPageChar = 'Next';
+
+	/**
+	 * common.js에서 사용
+	 */
+	var addToCartSuccessMsg = 'successfuly added into Cart';
+	var addToCartFailMsg = 'failed';
+	var dataNotFoundMsg = 'No Data Found.';
+	
+	var Gmsg = new Array();
+	Gmsg[0] = "item should be filled up";
+	Gmsg[1] = "You can input only number.";
+	Gmsg[2] = "Incorrect E-mail Format!";
+	/**
+	 * 페이징 처리시 한 페이지당 화면에 출력할 개수
+	 */
+	var numPerPage = '100'
+
+	/**
+	 * 현재 선택된 페이지 번호
+	 */
+	var searchPageNo = 0;
+
+	/**
+	 * 현재 선택된 블럭번호
+	 */
+	var searchBlckNo = 0;
+
+	/**
+	 * 그리드 데이터의 출력 시작번호
+	 */
+	var displayBeginRow = 0;
+
+	/**
+	 * 그리드 데이터의 출력 마지막 번호
+	 */
+	var displayFinishRow = 0;
+
+	/**
+	 * 총 그리드 데이터
+	 */
+	var totRow = 0;
+
+	/**
+	 * Url Mapping Controller
+	 */
+	var urlPattern = '/gspn/operate.do';
+
+	/**
+	 * Cache Url Mapping Controller
+	 */
+	var cacheUrlPattern = '/gspn/cache.do';
+
+	/**
+	 * SAP 데이터를 그리드에 페이징 처리를
+	 * 위한 시작 데이터와 마지막 데이터의 처리함수.
+	 */
+	function setDisplayRow() {
+		if (searchPageNo == 0) {
+			displayBeginRow = 0;
+			displayFinishRow = (searchPageNo + 1) * numPerPage;
+		} else {
+			displayBeginRow = searchPageNo * numPerPage;
+			displayFinishRow = (searchPageNo + 1) * numPerPage;					
+		}
+	}
+
+	/**
+	 * 변수 데이터 초기화
+	 */
+	function initialDisplayRowVariable() {
+		searchPageNo = 0;
+		searchBlckNo = 0;
+		displayBeginRow = 0;
+		displayFinishRow = 0;
+		totRow = 0;
+	}
+
+	/**
+	 * IE and Opera
+	 */
+	if (window.attachEvent) {
+		window.attachEvent("onload", neviDir);
+		window.attachEvent("onunload", neviDir);
+	} else {
+		window.addEventListener("DOMContentLoaded", neviDir, false);
+		window.addEventListener("unload", neviDir, false);
+	}
+
+	
+	function neviDir() {
+		try{
+			if (eval("parent.rightContents") == undefined) {
+				return;
+			}
+	
+			if (parent.$('leftMenuForm') != null) {
+				var navigation = "";
+				var title = "";
+				var menuUrl = "";
+				if (parent.$('leftMenuForm').naviDir != null) {
+					navigation = parent.$('leftMenuForm').naviDir.value;
+				}
+				if (parent.$('leftMenuForm').titleDir != null) {
+					title = parent.$('leftMenuForm').titleDir.value;
+				}
+				var naviDir = "<img src='/img/locater_arrow.gif' width='9' height='9' align='absmiddle'> " + navigation;
+				if (parent.$('leftMenuForm').menuUrl != null) {
+					menuUrl = parent.$('leftMenuForm').menuUrl.value;
+				}
+	
+				if (document.getElementById('naviDiv') != null) {
+					document.getElementById('naviDiv').innerHTML = naviDir;
+				}
+				if (document.getElementById('titleDiv') != null) {
+					document.getElementById('titleDiv').innerHTML = title;
+				}
+				
+	            /*
+	             * 미주 통합
+	             - RH-002
+	             - 화면상단 Support Link 제공                                 
+	             - 2015-10-26
+	          */  
+		          
+				
+	
+				if (menuUrl != "") {
+					authButton(menuUrl);
+				}
+			}
+		}catch(e){
+			
+		}
+	}
+
+	/**
+	 * Display command-registred buttons.
+	 */
+	function authButton(menuUrl) {
+		$('authForm').action = urlPattern;
+		$('authForm').cmd.value = 'AuthCommandListCmd';
+		$('authForm').menuUrl.value = menuUrl;
+		AjaxRequest(urlPattern, "authForm", setJsonObject);
+	}
+
+	function setJsonObject(response) {
+		var jsonObjBtn = eval('(' + response.responseText + ')');
+
+		if (jsonObjBtn.success) {
+			var length = jsonObjBtn.cmdLists.length;
+			for ( var i = 0; i < length; i++) {
+				if (document.getElementById(jsonObjBtn.cmdLists[i].commandId) != null) {
+					document.getElementById(jsonObjBtn.cmdLists[i].commandId).style.display = "block";
+				}
+			}
+		}
+	}
+
+	/**
+	 * Timezone 날짜 함수
+	 */
+	function calcTzDate(offset) {
+		// create Date object for current location
+		var d = new Date();
+
+		// convert to msec
+		// add local time zone offset 
+		// get UTC time in msec
+		var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+		// create new Date object for different city
+		// using supplied offset
+		var nd = new Date(utc + (3600000 * offset));
+
+		var tmpyy = nd.getFullYear();
+		var ls_yy = (tmpyy > 99) ? tmpyy : 1900 + tmpyy;
+
+		var tmpmon = nd.getMonth();
+		var ls_mon = (tmpmon < 9) ? "0" + (tmpmon + 1) : tmpmon + 1;
+
+		var tmpday = nd.getDate();
+		var ls_day = (tmpday < 10) ? "0" + tmpday : tmpday;
+
+		var tmphh = nd.getHours();
+		var ls_hh = (tmphh < 10) ? "0" + tmphh : tmphh;
+
+		var tmpmm = nd.getMinutes();
+		var ls_mm = (tmpmm < 10) ? "0" + tmpmm : tmpmm;
+
+		// return time as a string
+		return ls_yy.toString() + ls_mon.toString() + ls_day.toString();
+	}
+
+	/**
+	 * Timezone 시간 함수
+	 */
+	function calcTzTime(offset) {
+		// create Date object for current location
+		var d = new Date();
+
+		// convert to msec
+		// add local time zone offset 
+		// get UTC time in msec
+		var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+		// create new Date object for different city
+		// using supplied offset
+		var nd = new Date(utc + (3600000 * offset));
+
+		var tmphh = nd.getHours();
+		var ls_hh = (tmphh < 10) ? "0" + tmphh : tmphh;
+
+		var tmpmm = nd.getMinutes();
+		var ls_mm = (tmpmm < 10) ? "0" + tmpmm : tmpmm;
+
+		// return time as a string
+		return ls_hh.toString() + ls_mm.toString();
+	}
+
+	/**
+	 * 새로고침(F5), Ctrl+R, Ctrl+N 방지
+	 */
+	function preventRefreshEvent() {
+		if (event.keyCode == 116) {
+			event.keyCode = 2;
+			return false;
+		} else if (event.ctrlKey
+				&& (event.keyCode == 78 || event.keyCode == 82)) {
+			return false;
+		}
+	}
+
+	
+
+	document.onkeydown = preventRefreshEvent;
+	
+	function btnCommonFileUpload(callBackName, action) {
+    
+	    var url = "/common/commonFileUpload.jsp";
+	    	    
+	    w = window.open(url, "common_attach", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=100,left=200,width=550,height=250');
+	    w.focus();
+	
+	    $('commonAttach').action = url;
+	    $('commonAttach').actionParam.value = action;
+	    $('commonAttach').callBackName.value = callBackName;
+	    $('commonAttach').target = "common_attach";
+	    $('commonAttach').submit();
+	    
+	    w.focus();
+	    
+	}
+</script>
+<style>
+
+</style>
+<style type="text/css" id="ulaa-puvi-font">
+      @font-face {
+            font-family: 'Zoho-Puvi-Regular';
+            src: url('chrome-extension://licikmkfpnkmbeenopoiknbfpkkfbfkj/fonts/Puvi/Zoho-Puvi-Regular.woff') format('woff2');
+        }
+  </style></head>
+
+<body style="background-color: transparent; height:100%;">
+<form id="formHelp" method="post" action="https://biz2.samsungcsportal.com/gspn/operate.do">
+<input type="hidden" name="cmd" value="">
+<input type="hidden" name="MENUID" value="">
+</form>
+<form id="commonAttach" method="post" action="https://biz2.samsungcsportal.com/svctracking/common/SVCPopCustomerSearch.jsp">
+<input type="hidden" id="callBackName" name="callBackName" value="">
+<input type="hidden" id="actionParam" name="actionParam" value="">
+</form>
+<form id="authForm" name="authForm" method="post" style="display: inline;">
+	<input type="hidden" name="cmd" value="">
+	<input type="hidden" name="menuUrl" value="">
+	<input type="hidden" name="subRegionCd" value="WA">
+	<input type="hidden" name="aclId" value="Rahul_1990">
+</form>
+<div id="progressloading" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; text-align: center; background: rgb(255, 255, 255); opacity: 0.75; z-index: 1; display: none;">
+    <table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
+        <tbody><tr>
+            <td class="loading"><img src="./PopCustomerSearch.jsp_files/loading.gif" width="32" height="32"></td>
+        </tr>
+    </tbody></table>
+</div>
+
+
+
+
+
+
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/check.js.download"></script>
+
+
+<title>G-SPN : Customer Search/Create</title>
+<link href="./PopCustomerSearch.jsp_files/gspn(1).css" rel="stylesheet" type="text/css">
+<!-- IMEI PROJECT -->
+<script type="text/javascript" src="./PopCustomerSearch.jsp_files/CommonIMEI.js.download"></script>
+<style type="text/css"> 
+<!-- 
+.popup { 
+      background-color: #efefef; 
+      height: 300px; width: 500px; 
+      border: 5px solid #666; 
+      position: absolute; visibility: hidden; 
+      font-family: arial; 
+      font-size: 11px; text-align: justify; 
+      padding: 5px; overflow: auto; 
+      z-index: 2; 
+} 
+.popup_bg { 
+      position: absolute; 
+      visibility: hidden; 
+      height: 100%; width: 100%; 
+      left: 0px; top: 0px; 
+      filter: alpha(opacity=70); /* for IE */ 
+      opacity: 0.7; /* CSS3 standard */ 
+      background-color: #efefef; 
+      z-index: 1; 
+} 
+.close_button { 
+      font-family: Verdana, Geneva, sans-serif; 
+      font-size: small; font-weight: bold; 
+      float: right; color: #666; 
+      display: block; text-decoration: none; 
+      border: 2px solid #666; 
+      padding: 0px 3px 0px 3px; 
+}
+--> 
+</style>
+<script type="text/javascript">
+	//china version intergration 2016/08/01 js1.baek
+	var isOutBound;
+	if(isChinaRegion) isOutBound = opener.$j('[name=detailForm] [name=isOutBound]').val();
+	var isCP = false;
+	var b2bContactCreate = false;
+	var addrCheckCnt = 0;
+	/**
+	 * Json Object(그리드 데이터) 객체
+	 */
+	var jsonObj ;
+
+	var doChangeFlag = false;
+	var SVCRequestNo = false;
+	var	isCreatedSAUser = false;
+	
+	//=================================================================================//
+	//제  목 : 인도 Demand OTP link with GSPN
+	//수정일 : 2015.09.15
+	//수정자 : 채보람 (로젠 솔루션)
+	//내  용 : Mobile Phone 번호 담을 변수 선언
+	var customerMobile_no = "";
+	//=================================================================================//
+	
+
+
+	/**
+	 * 화면 초기화 메소드
+	 */
+	function initialize() {
+		//화면 Load 후 자동검색
+		//china version intergration 2016/08/01 js1.baek
+		
+		$("spanDealerDiv").show();
+		
+					if('6884683658'!= ''){
+						selectCustomer('6884683658');
+					}
+			        else if (($('lastName').value != '' && $('firstName').value != '') || $('phone').value != '') {
+			            displaySearch(0,0);
+			        }
+				
+				setCodeList('COUNTRY');
+				setTitle('BP_TITLE');
+			
+
+	}
+	
+	function onlyChangeBp(bp) {
+		$("divcustomerdetail").hide();
+		
+			$("divcustomerchange").show();
+		
+		$("divcustomerproduct").hide();
+		$("divbuttonchange").hide();
+		$("divbuttonsave").hide();
+		$("divcustomercreate").hide();
+		
+		setCodeList('COUNTRY');
+		setTitle('BP_TITLE');
+
+		displayDetail(0,0,bp);
+	}
+
+	/**
+	 * 화면 검색 메소드
+	 */
+	 
+	function displaySearchfromSA(currPage, currBlock) {
+		
+		
+		if($('saBtnAccountId').value.indexOf('@') >= 0){
+			$('IV_EMAIL').value = $('saEmail').value;
+			$('phone').value = '';
+			$('uniqueID').value = '';
+			$('bpno').value = '';
+		}else{
+			var tempPhoneNo = '';
+		
+			if(('C550' == 'C630' && $('saBtnAccountId').value.substring(0,2) == '86') 
+				|| ('C550' == 'C550' && $('saBtnAccountId').value.substring(0,2) == '91')){
+				tempPhoneNo = $('saBtnAccountId').value.substring(2,$('saBtnAccountId').value.length);
+			}else{
+				tempPhoneNo =  $('saBtnAccountId').value;
+			}
+			$('phone').value = tempPhoneNo;
+			$('IV_EMAIL').value = '';
+			$('uniqueID').value = '';
+			$('bpno').value = '';
+		}
+		
+		
+		
+			$('firstName').value = $('saNameFirst').value;
+			$('lastName').value = $('saNameLast').value;		
+		
+		
+
+		
+		displaySearch(0,0);
+	}
+
+	//onlySAQRSearch
+	function onlySAQRSearch(currPage, currBlock) {
+		searchPageNo = currPage;
+		searchBlckNo = currBlock;
+
+		/**
+		 * 프로그래바를 진행시킨다.
+		 */
+		$('pagingProcess').startWaiting();
+		$('searchForm').action = urlPattern;
+		$('searchForm').cmd.value = 'SVCPopCustomerSearchCmd';
+		$('searchForm').currPage.value = currPage;
+		$('searchForm').numPerPage.value = numPerPage;
+
+		//clear input filed
+		$('phone').value = '';
+		$('IV_EMAIL').value = '';
+		$('uniqueID').value = '';
+		$('bpno').value = '';
+
+		
+		AjaxRequest(urlPattern, "searchForm", setGridJsonObject);
+	}
+	
+	function displaySearch(currPage, currBlock) {
+		//china version intergration 2016/08/01 js1.baek
+		
+
+		searchPageNo = currPage;
+		searchBlckNo = currBlock;
+
+		/**
+		 * 프로그래바를 진행시킨다.
+		 */
+		$('pagingProcess').startWaiting();
+		$('searchForm').action = urlPattern;
+		$('searchForm').cmd.value = 'SVCPopCustomerSearchCmd';
+		$('searchForm').currPage.value = currPage;
+		$('searchForm').numPerPage.value = numPerPage;
+
+		if( true && $('searchForm').chkDealer.checked ){
+			
+			$('searchForm').bpKind.value = "D001";
+			$('searchForm').IV_DIVISION.value = "";
+			
+		}else{
+			$('searchForm').bpKind.value = "";
+			
+			$('searchForm').IV_DIVISION.value = "X";
+			
+		}
+		
+		AjaxRequest(urlPattern, "searchForm", setGridJsonObject);
+	}
+
+
+	/**
+	 * Grid 객체 설정
+	 */
+	function setGridJsonObject(response) {
+
+		try {
+			jsonObj = eval('('+response.responseText+')');
+			$("divcustomerlist").show();
+			$("divcustomerdetail").hide();
+			
+			$("divcustomerchange").hide();
+			$("divcustomerproduct").hide();
+			$("divcustomercreate").hide();
+			$("divbuttonsave").hide();
+			$("divbuttonchangesave").hide();
+			$("divbuttonchange").hide();
+
+			if (jsonObj.success) {
+   			  updateSelectedBP('','');
+			  gridDraw(searchPageNo, searchBlckNo);
+			} else {
+				var colsLength = '8';
+				
+				
+				appendGridNoObjectDisplay('searchContentTableBody', colsLength,
+				'No Data Found.', 'pagingProcess');
+				if( jsonObj.retmsg != undefined && jsonObj.retmsg != ''){
+				 	alert(jsonObj.retmsg);
+				 }
+
+			}
+		} catch (e) {}
+	}
+
+	function gridDraw(currPage, currBlock) {
+
+		if (jsonObj != null) {
+			/** TBody  객체 ID */
+
+			var tbodyObj = $('searchContentTableBody');
+
+			/**
+			 * 프로그래바를 진행시킨다.
+			 */
+			$('pagingProcess').startWaiting();
+
+
+			/** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+			clearGridJsonObject(tbodyObj);
+
+			searchPageNo = currPage;
+			searchBlckNo = currBlock;
+
+			/**
+			 * SAP 데이터를 그리드에 페이징 처리를
+			 * 위한 시작 데이터와 마지막 데이터의 처리함수호출.
+			 */
+			setDisplayRow();
+			var tdTag = null;
+			var length = jsonObj.dataLists.length;
+			totRow = length;
+			for (var i = displayBeginRow; i < length; i++) {
+				/** 마지막 출력 데이터 여부 */
+				if (i >= displayFinishRow) {
+					break;
+				}
+
+				var trTag = document.createElement("tr");
+
+				/** S/N */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(i+1));
+				trTag.appendChild(tdTag);
+
+				/** NAME */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				//tdTag.style.cursor = "hand";
+				aTag = document.createElement("a");
+				aTag.href='javascript:selectCustomer("'+jsonObj.dataLists[i].CONSUMER+'")';
+				/*tdTag.onclick = (function(CONSUMER) {
+					return function() {
+						selectCustomer(CONSUMER);
+					}
+				})(jsonObj.dataLists[i].CONSUMER);*/
+				aTag.appendChild(document.createTextNode(jsonObj.dataLists[i].NAME_FIRST));
+				aTag.appendChild(document.createTextNode(" "));
+				aTag.appendChild(document.createTextNode(jsonObj.dataLists[i].NAME_LAST));
+				tdTag.appendChild(aTag);
+				trTag.appendChild(tdTag);
+				//china version intergration 2016/08/01 js1.baek
+				
+				
+				/** ADDRNUMBER */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].STREET3));
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].STREET2));
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].STREET1));
+				trTag.appendChild(tdTag);
+
+				/** POST_CODE-Zip Code */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].POST_CODE));
+				trTag.appendChild(tdTag);
+
+				/** Country */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].COUNTRY));
+				trTag.appendChild(tdTag);
+
+				/** HOME_PHONE */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].HOME_PHONE));
+				trTag.appendChild(tdTag);
+
+				/** MOBILE_PHONE */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].MOBILE_PHONE));
+				trTag.appendChild(tdTag);
+				//china version intergration 2016/08/01 js1.baek
+				
+
+				/** CONSUMER */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.dataLists[i].UNIQUE_ID));
+				trTag.appendChild(tdTag);
+
+				
+				
+				tbodyObj.appendChild(trTag);
+			}
+
+				/**
+			 * 데이터가 존재하지 않을 경우 화면에 데이터가 없다는 출력을
+			 * 표시한다. 3->8 로 update
+			 */
+			if (length == 0) {
+				var colsLength = '8';
+				
+				appendGridNoObjectDisplay('searchContentTableBody', colsLength,
+						'No Data Found.');
+			}
+
+			/**
+			 * 그리드 데이터 로딩완료 함수호출.
+			 */
+			loadingComplete(searchPageNo, searchBlckNo, totRow, '', 'SAP');
+		}
+	}
+		
+	function displaySearchSA2() {
+		/**
+		 * 프로그래바를 진행시킨다.
+		 */
+		$('pagingProcess').startWaiting();
+		$('saBpBySaForm').action = urlPattern;
+		$('saBpBySaForm').IV_ACCOUNT_ID.value = $('saForm').IV_ACCOUNT_ID.value;
+
+		initSaForm();
+		AjaxRequest(urlPattern, "saBpBySaForm", setGridJsonObjectSA2);
+	}
+	
+	
+	function setGridJsonObjectSA2(response) {
+
+		try {
+			var jsonObj2 = eval('('+response.responseText+')');
+
+			if (jsonObj2.success) {
+				if(jsonObj2.dataLists[0].CONSUMER != $('searchForm').BP_NO.value && jsonObj2.dataLists.length == 1){
+					alert("Related BP is existed (BP number : "+jsonObj2.dataLists[0].CONSUMER+")");
+					selectCustomer(jsonObj2.dataLists[0].CONSUMER);
+				}
+			}
+			
+			displaySearchSA();
+				
+		}
+		catch(e){
+			alert(e);
+			$('pagingProcess').stopWaiting();
+		}
+		$('pagingProcess').stopWaiting();
+	}
+
+	function displaySearchSA() {
+		/**
+		 * 프로그래바를 진행시킨다.
+		 */
+		$('pagingProcess').startWaiting();
+		$('saForm').action = urlPattern;
+		$('saForm').cmd.value = 'SamsungAccountSearchCmd';
+
+		initSaForm();
+		AjaxRequest(urlPattern, "saForm", setGridJsonObjectSA);
+	}
+	
+	function initSaForm(){
+		$('ACC_CHECK').innerHTML = '';
+		$('MARKETING_YN').innerHTML = '';
+		$('DIF_CHECK').innerHTML = '';
+		$('SA_AUTHENTICATION').innerHTML = '';
+		$('AUTH_STATUS').innerHTML = '';
+		
+		$('J_STATUS').value = '';
+		$('C_STATUS').value = '';
+		$('M_STATUS').value = '';		
+		
+		$('btnSaRegA').disabled = true;
+		$('btnSaRegD').disabled = true;
+		$('btnBpAuthA').disabled = true;
+		$('btnBpAuthD').disabled = true;
+		$('btnOptInA').disabled = true;
+		$('btnOptInD').disabled = true;
+		
+		$('saNameFirst').value = '';
+		$('saNameLast').value = '';
+		$('saEmail').value = '';
+		
+		$('btnSearchBySA').style.display = 'none';
+		
+		$('saBtnAccountId').value = '';
+	}
+	
+	function setGridJsonObjectSA(response) {
+
+		try {
+			var jsonObj2 = eval('('+response.responseText+')');
+
+			if (jsonObj2.success) {
+				$('ACC_CHECK').innerHTML = jsonObj2.EsSainfo.ACC_CHECK;
+				$('MARKETING_YN').innerHTML = jsonObj2.EsSainfo.MARKETING_YN;
+				$('DIF_CHECK').innerHTML = jsonObj2.EsSainfo.DIF_CHECK;
+				$('SA_AUTHENTICATION').innerHTML = jsonObj2.EsSainfo.SA_AUTHENTICATION;
+				$('AUTH_STATUS').innerHTML = jsonObj2.EsSainfo.AUTH_STATUS;
+				
+				$('J_STATUS').value = jsonObj2.EsStatusDesc.j_STATUS;
+				$('C_STATUS').value = jsonObj2.EsStatusDesc.c_STATUS;
+				$('M_STATUS').value = jsonObj2.EsStatusDesc.m_STATUS;		
+				
+				$('saNameFirst').value = jsonObj2.EsSainfo.NAME_FIRST;
+				$('saNameLast').value = jsonObj2.EsSainfo.NAME_LAST;
+				$('saEmail').value = jsonObj2.EsSainfo.EMAIL;
+				
+				if($('saNameFirst').value != '' || $('saNameLast').value != '' || $('saEmail').value != '')
+					$('btnSearchBySA').style.display = '';
+				
+				$('btnSaRegA').disabled = jsonObj2.EsButtonFlag.BUT_SA_REG_A == '';
+				$('btnSaRegD').disabled = jsonObj2.EsButtonFlag.BUT_SA_REG_D == '';
+				$('btnBpAuthA').disabled = jsonObj2.EsButtonFlag.BUT_BP_AUTH_A == '';
+				$('btnBpAuthD').disabled = jsonObj2.EsButtonFlag.BUT_BP_AUTH_D == '';
+				$('btnOptInA').disabled = jsonObj2.EsButtonFlag.BUT_OPT_IN_A == '';
+				$('btnOptInD').disabled = jsonObj2.EsButtonFlag.BUT_OPT_IN_D == '';
+				
+				if(jsonObj2.EsSainfo.ACCOUNT != null && jsonObj2.EsSainfo.ACCOUNT.length >0){
+					$('saBtnAccountId').value = jsonObj2.EsSainfo.ACCOUNT;			
+				}else{
+					$('saBtnAccountId').value = $('saForm').IV_ACCOUNT_ID.value;
+				}
+			} else {
+				
+			}
+		} catch (e) {
+			alert(e);
+			$('pagingProcess').stopWaiting();
+		}
+		$('pagingProcess').stopWaiting();
+	}
+	
+	
+	
+	
+	function saBtn(type) {
+		/**
+		 * 프로그래바를 진행시킨다.
+		 */
+		$('pagingProcess').startWaiting();
+		$('saBtnForm').action = urlPattern;
+		$('saBtnForm').cmd.value = 'SamsungAccountOnClickCmd';
+		//$('saBtnForm').saBtnAccountId.value = $('saForm').IV_ACCOUNT_ID.value;
+		//$('saBtnForm').saBtnPartner.value = $('D_CONSUMER').value;
+		$('saBtnForm').saBtnType.value = type;
+	
+		AjaxRequest(urlPattern, "saBtnForm", setGridJsonObjectSaBtn);
+	}
+
+	function setGridJsonObjectSaBtn(response) {
+
+		try {
+			var jsonObj2 = eval('('+response.responseText+')');
+
+			if (jsonObj2.success) {
+			  displaySearchSA();
+			} else {
+			  alert(jsonObj2.message);
+			}
+		} catch (e) {
+			alert(e);
+			$('pagingProcess').stopWaiting();
+		}
+		$('pagingProcess').stopWaiting();
+	}
+	
+	function updateSelectedBP(bp, name){
+		
+	}
+	
+	/**
+	 * Customer 선택
+	 */
+	function selectCustomer(CONSUMER)
+	{
+		displayDetail(0,0,CONSUMER);
+	}
+
+	function displayDetail(currPage, currBlock, CONSUMER){
+		$('searchForm').BP_NO.value = CONSUMER;
+		$('searchForm').IV_ASC_CODE.value = opener.$j('[name=detailForm] [name=ASC_CODE]').val();
+		$('pagingProcess').startWaiting();
+		$('searchForm').action = urlPattern;
+		$('searchForm').cmd.value = 'SVCPopCustomerDetailCmd';
+		AjaxRequest(urlPattern, "searchForm", setGridjsonDetailObject);
+	}
+	
+	function displayProductDetail(currPage, currBlock , flag){
+		$('detailProductForm').BP_NO.value = jsonObj.dataLists[0].CONSUMER;
+		$('detailProductForm').action = urlPattern;
+		$('detailProductForm').cmd.value = 'SVCPopCustomerDetailCmd';
+		$('detailProductForm').PRODUCT.value = flag;
+		
+		setTitle3("BP_TITLE");
+		
+		AjaxRequest(urlPattern, "detailProductForm", setGridjsonDetailObject);
+
+	}
+
+	function viewComment(objectId)	{
+		$('progressloading').startWaiting();
+		$('serviceReqCmtForm').IV_OBJECT_ID.value = objectId;
+		AjaxRequest(urlPattern, "serviceReqCmtForm", setGridJsonObjectCmt);
+	}
+	
+	function setGridJsonObjectCmt(response) {
+		try {
+			$('progressloading').stopWaiting();
+			var jsonObjSR = eval('('+response.responseText+')');
+			var comment = "";
+			if (jsonObjSR.success) {
+				for(var z =0 ; z < jsonObjSR.EtText.length; z++) {
+					comment += jsonObjSR.EtText[z].TEXT + "<br>";
+				}
+				$('popup1').innerHTML = comment;
+				openpopup('popup1');
+
+			} else {
+				if (jsonObj.error) {
+					cfExceptionPop(jsonObj);
+					return;
+				}
+			}
+		} catch (e) {}
+		finally{
+		}
+	}
+	function openpopup(id){ 
+	      //Calculate Page width and height 
+	      var pageWidth = window.innerWidth; 
+	      var pageHeight = window.innerHeight; 
+	      if (typeof pageWidth != "number"){ 
+	      if (document.compatMode == "CSS1Compat"){ 
+	            pageWidth = document.documentElement.clientWidth; 
+	            pageHeight = document.documentElement.clientHeight; 
+	      } else { 
+	            pageWidth = document.body.clientWidth; 
+	            pageHeight = document.body.clientHeight; 
+	      } 
+	      }  
+	      //Make the background div tag visible... 
+	      var divbg = document.getElementById('bg'); 
+	      divbg.style.visibility = "visible"; 
+	        
+	      var divobj = document.getElementById(id); 
+	      divobj.style.visibility = "visible"; 
+	      if (navigator.appName=="Microsoft Internet Explorer") 
+	      computedStyle = divobj.currentStyle; 
+	      else computedStyle = document.defaultView.getComputedStyle(divobj, null); 
+	      //Get Div width and height from StyleSheet 
+	      var divWidth = parseInt(computedStyle.width.replace('px', '')); 
+	      var divHeight = parseInt(computedStyle.height.replace('px', '')); 
+	      var divLeft = (pageWidth - divWidth) / 2; 
+	      var divTop = (pageWidth - divHeight) / 2; //pageHeight - 50; 
+	      //Set Left and top coordinates for the div tag 
+	      divobj.style.left = divLeft + "px"; 
+	      divobj.style.top = divTop + "px"; 
+	      //Put a Close button for closing the popped up Div tag 
+	      if(divobj.innerHTML.indexOf("closepopup('" + id +"')") < 0 ) 
+	      divobj.innerHTML = "<a href=\"#\" onclick=\"closepopup('" + id +"')\"><span class=\"close_button\">X</span></a>" + divobj.innerHTML; 
+	} 
+	function closepopup(id){ 
+	      var divbg = document.getElementById('bg'); 
+	      divbg.style.visibility = "hidden"; 
+	      var divobj = document.getElementById(id); 
+	      divobj.style.visibility = "hidden"; 
+	}
+
+	/**
+	 * Grid 객체 설정
+	 */
+	function setGridjsonDetailObject(response) {
+		try {
+			$('pagingProcess').stopWaiting();
+			jsonObj = eval('('+response.responseText+')');
+			if (jsonObj.success) {
+				if(jsonObj.dataLists[0].C_SA == 'Y') {
+					isCreatedSAUser = true;
+				}
+				
+					$("divcustomerlist").hide();
+					
+					
+							$("divcustomerproduct").show();
+						
+						$("divcustomerdetail").show();
+						$("divbuttonchange").show();
+					
+	
+					//dummy BP 일 경우 $("divbuttonchange").hide();
+					var consumerNo = jsonObj.dataLists[0].CONSUMER;
+					var isDummyBp = consumerNo.substring(consumerNo.length-6, consumerNo.length);
+					//alert(isDummyBp);
+					if (isDummyBp == '000000'){
+						$("btnChangePad").hide();
+					} else {
+						
+						$("btnChangePad").show();
+						
+					}
+					// SIEL 법인 BP mobile number change 못하도록 지정한 대상 ASC check 2016.02.22 jiw
+					
+					$("divcustomercreate").hide();
+					$("divbuttonsave").hide();
+					$("divbuttonchangesave").hide();
+					
+					gridSvcOrderDraw(searchPageNo, searchBlckNo);
+					
+					gridDetailDraw(searchPageNo, searchBlckNo);
+					
+					
+				
+			} else {
+				appendGridNoObjectDisplay('detailContentTableBody', '10','No Data Found.', 'pagingProduct');
+			}
+		} catch (e) {}
+	}
+
+	function gridDetailDraw(currPage, currBlock) {
+
+		if (jsonObj != null) {
+
+			/**display**/
+		    $('D_NAME_FIRST').value = jsonObj.dataLists[0].NAME_FIRST;
+		    $('D_NAME_LAST').value =  jsonObj.dataLists[0].NAME_LAST;
+		    $('D_CONSUMER').value =  jsonObj.dataLists[0].CONSUMER;
+			if(jsonObj.dataLists[0].C_SA == 'Y') {
+				$('D_SAMSUNG_ACCOUNT').value =  'Samsung Account';
+			}
+		    $('D_GENDER').value = jsonObj.dataLists[0].GENDER_DESC;
+
+		    
+			$('D_UNIQUE_ID').value = jsonObj.dataLists[0].UNIQUE_ID + " - " + jsonObj.dataLists[0].BP_GRADE;
+			
+  		    $('D_PREFERENCE_CHANNEL').value = jsonObj.dataLists[0].PREFERENCE_CHANNEL_DESC;
+  		    
+  		  	$('D_LANGU').value = jsonObj.dataLists[0].LANGU_DESC;	/* LANG 추가 jiw 2015.01.15  */
+  		  	
+    		$('D_HOME_PHONE').value = jsonObj.dataLists[0].HOME_PHONE;
+			$('D_OFFICE_PHONE').value = jsonObj.dataLists[0].OFFICE_PHONE;
+			$('D_MOBILE_PHONE').value = jsonObj.dataLists[0].MOBILE_PHONE;
+			
+			//=================================================================================//
+			//제  목 : 인도 Demand OTP link with GSPN
+			//수정일 : 2015.09.15
+			//수정자 : 채보람 (로젠 솔루션)
+			//내  용 : 인도일 경우 Mobile Phone 번호를 필수로 한다.
+			
+				customerMobile_no = jsonObj.dataLists[0].MOBILE_PHONE;
+			
+			//=================================================================================//
+			
+		    $('D_FAX').value = jsonObj.dataLists[0].FAX ;
+			$('D_EMAIL').value = jsonObj.dataLists[0].EMAIL ;
+			
+			
+			
+			$('D_CONTACT_FLAG').value = jsonObj.dataLists[0].D_CONTACT_FLAG_DESC ;
+			$('D_STREET1').value = jsonObj.dataLists[0].STREET1 ;
+			$('D_STREET2').value = jsonObj.dataLists[0].STREET2 ;
+			$('D_STREET3').value = jsonObj.dataLists[0].STREET3 ;
+			$('D_DISTRICT').value = jsonObj.dataLists[0].DISTRICT;
+			$('D_CITY').value = jsonObj.dataLists[0].CITY;
+			$('D_CITY_CODE').value = jsonObj.dataLists[0].CITY_CODE;
+			
+				$('D_CITY_CODE').value = jsonObj.dataLists[0].CITY_CODE;
+			
+			$('D_REGION').value = jsonObj.dataLists[0].REGION;
+			$('D_REGION_CODE').value = jsonObj.dataLists[0].REGION_CODE;
+			$('D_COUNTRY').value = jsonObj.dataLists[0].COUNTRY;
+			$('D_POST_CODE').value = jsonObj.dataLists[0].POST_CODE;
+			$('D_OFFICE_PHONE_EXT').value = jsonObj.dataLists[0].OFFICE_PHONE_EXT;
+			//$('D_TITLE').value = jsonObj.dataLists[0].TITLE;
+			setTitle3("BP_TITLE");
+
+			/**change**/
+			$('NAME_FIRST').value = jsonObj.dataLists[0].NAME_FIRST;
+			$('NAME_LAST').value =  jsonObj.dataLists[0].NAME_LAST;
+			$('CONSUMER').value =  jsonObj.dataLists[0].CONSUMER;
+			if(jsonObj.dataLists[0].C_SA == 'Y') {
+				$('SAMSUNG_ACCOUNT').value =  'Samsung Account';
+			}
+			$('GENDER').value = jsonObj.dataLists[0].GENDER;
+			$('UNIQUE_ID').value = jsonObj.dataLists[0].UNIQUE_ID;
+			$('PREFERENCE_CHANNEL').value = jsonObj.dataLists[0].PREFERENCE_CHANNEL;
+			
+			$('LANGU').value = jsonObj.dataLists[0].LANGU;	/* LANG 추가 jiw 2015.01.15  */
+			
+			$('HOME_PHONE').value = jsonObj.dataLists[0].HOME_PHONE;
+			$('OFFICE_PHONE').value = jsonObj.dataLists[0].OFFICE_PHONE;
+			$('MOBILE_PHONE').value = jsonObj.dataLists[0].MOBILE_PHONE;
+			$('FAX').value = jsonObj.dataLists[0].FAX ;
+			$('EMAIL').value = jsonObj.dataLists[0].EMAIL ;
+			
+			
+			
+			$('CONTACT_FLAG').value = jsonObj.dataLists[0].CONTACT_FLAG ;
+			$('STREET1').value = jsonObj.dataLists[0].STREET1 ;
+			$('STREET2').value = jsonObj.dataLists[0].STREET2 ;
+			$('STREET3').value = jsonObj.dataLists[0].STREET3 ;
+			$('DISTRICT').value = jsonObj.dataLists[0].DISTRICT;
+			$('CITY').value = jsonObj.dataLists[0].CITY;
+			$('CITY_CODE').value = jsonObj.dataLists[0].CITY_CODE;
+			
+				$('CITY_CODE').value = jsonObj.dataLists[0].CITY_CODE;
+			
+			$('REGION').value = jsonObj.dataLists[0].REGION;
+			$('REGION_CODE').value = jsonObj.dataLists[0].REGION_CODE;
+			$('COUNTRY').value = jsonObj.dataLists[0].COUNTRY;
+			$('POST_CODE').value = jsonObj.dataLists[0].POST_CODE;
+			//$('changeForm').TITLE.value = jsonObj.dataLists[0].TITLE;
+			/**change title setting */
+			//china version intergration 2016/08/01 js1.baek
+			
+				setComboValue($('changeForm').TITLE,jsonObj.dataLists[0].TITLE);
+				setComboValue($('changeForm').BP_TYPE,jsonObj.dataLists[0].BP_TYPE);
+			
+			$('OFFICE_PHONE_EXT').value = jsonObj.dataLists[0].OFFICE_PHONE_EXT;
+			
+			/** TBody  객체 ID */
+
+			var tbodyObj = $('detailContentTableBody');
+
+			/** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+			clearGridJsonObject(tbodyObj);
+
+			searchPageNo = currPage;
+			searchBlckNo = currBlock;
+			/**
+			 * SAP 데이터를 그리드에 페이징 처리를
+			 * 위한 시작 데이터와 마지막 데이터의 처리함수호출.
+			 */
+			setDisplayRow();
+			var tdTag = null;
+			var length = jsonObj.productlists.length;
+			/**
+			* SAP client product 데이터는 max 51건 가지고 올수 있음
+			*/
+			
+			for (var i = 0; i < length; i++) {
+	
+				var trTag = document.createElement("tr");
+	
+				/** checkbox */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+	               var inputTag=new Element("input",{'type':'checkbox','name':'chkObj','value':i});
+	               inputTag.onclick = (function(obj) {
+					return function() {
+						checkModel(obj);
+					}
+				})(inputTag);
+				tdTag.appendChild(inputTag);
+				trTag.appendChild(tdTag);
+	
+				/** S/N */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(i+1));
+				trTag.appendChild(tdTag);
+	
+				/** PRODUCT */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].CIC_PRD));
+				trTag.appendChild(tdTag);
+	
+				/** MODEL */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].MODEL));
+				trTag.appendChild(tdTag);
+	
+				/** SERIAL NO */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].SERIAL_NO));
+				trTag.appendChild(tdTag);
+	
+				/** IMEI */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				//IMEI PROJECT
+				tdTag.appendChild(document.createTextNode(markIMEI(jsonObj.productlists[i].IMEI)));
+				trTag.appendChild(tdTag);
+				
+				
+	
+				/** PURCHASE DATE */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].PURCHASE_DATE));
+				trTag.appendChild(tdTag);
+	
+				/** LABOR TERM */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].LABOR_TERM));
+				trTag.appendChild(tdTag);
+	
+				/** PART TERM */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].PARTS_TERM));
+				trTag.appendChild(tdTag);
+				
+				/** ONLINE REGISTERED */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(jsonObj.productlists[i].PRC_ONLINE));
+				trTag.appendChild(tdTag);
+	
+	
+				tbodyObj.appendChild(trTag);
+			}
+			
+
+			try{
+				/**
+				 * 데이터가 존재하지 않을 경우 나 데이트가 제한 갯수를 초과 했을 경우 화면에 메세지를
+				 * 표시한다.
+				 */
+			
+				if (length == 0) {
+					if(jsonObj.retcode_product == 1){
+						appendGridNoObjectDisplay('detailContentTableBody', '10',
+								jsonObj.retmsg_product);
+					}
+					appendGridNoObjectDisplay('detailContentTableBody', '10',
+							'No Data Found.');
+				}
+	
+				/**
+				 * 그리드 데이터 로딩완료 함수호출.
+				 */
+			
+				loadingComplete(searchPageNo, searchBlckNo, totRow, 'gridDetailDraw', 'SAP');
+			 }catch(e){} 
+
+		}
+	
+		updateSelectedBP($('D_CONSUMER').value, $('D_NAME_FIRST').value + " " + $('D_NAME_LAST').value);
+	}
+		
+	function filterServiceOrderList(jsonDetailObj){		
+		var filteredDataLists = [];
+		
+		var length = jsonDetailObj.et_so_info.length;
+		for(var i = 0; i < length ; i++){
+			var obj = jsonDetailObj.et_so_info[i];
+			if("0006423261" == obj.ASC_ACCTNO){
+				filteredDataLists.push(obj);
+			}else{
+				continue;
+			}
+		}
+		return filteredDataLists; 
+	}		
+
+	function getBOSList(seq) {
+		$('searchForm').Sequence.value = seq;
+		$('searchForm').cmd.value = "AttachFileBOSReadCmd";
+		AjaxRequest(urlPattern, "searchForm", setBOSList);
+	}
+	function setBOSList(response) {
+		try {
+			var jsonObj_bos = response.responseText.evalJSON();
+
+			if (jsonObj_bos != null && jsonObj_bos.filesize > 0 ) {
+				
+				/** TBody  객체 ID */
+				var tbodyObj = $('bosAttContentTableBody');
+
+				/** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+				clearGridJsonObject(tbodyObj);	
+
+				var tdTag = null;
+				var obj = jsonObj_bos;
+
+				var trTag = document.createElement("tr");
+
+				/** File Name */
+				tdTag = new Element("td",{'class':'td_ac'});
+				tdTag.update("<a href=\"javascript:downloadBosAtt()\">" + obj.filename + "</a>");
+				trTag.appendChild(tdTag);
+
+				/** Size */
+				tdTag = new Element("td",{'class':'td_ac'});
+				tdTag.update(obj.filesize);
+				trTag.appendChild(tdTag);
+
+				tbodyObj.appendChild(trTag);
+
+				$("tb_bos").show();
+			} 
+		} catch (e) {}
+	}
+	function downloadBosAtt(seq){
+	    var obj = $('searchForm');
+	    obj.Sequence.value = seq;
+	    obj.cmd.value = 'AttachFileDownloadBosCmd';
+	    obj.action = urlPattern;
+	    obj.method = 'post';
+	    obj.target = 'ifr_attach';
+	    obj.submit();
+	}
+
+	function goToSOCreate(jsonObj){
+		var checks = $j("#serviceReqeustlistBody").find("input[type=checkbox]:checked");
+		if(checks.length > 1){
+			alert("Please Check Only One!!");		
+			return;
+		}
+		
+ 		clearForm("frm");
+ 		insertValue("frm", "preBookingFlag", "Y");
+		
+		$j.each(checks, function(key, obj){
+			var tr = $j(obj).parent().parent();
+			var tds = $j(tr).find("td");
+
+			if(isChinaRegion) {
+				insertValue("frm", "firstName_f", $j(tds[2]).html());
+		 		insertValue("frm", "lastName_f", $j(tds[3]).html());
+		 		insertValue("frm", "consumer", $j(tds[4]).html());
+		 		insertValue("frm", "mobile_f", $j(tds[5]).html());
+				insertValue("frm", "email_f", $j(tds[6]).html());
+				insertValue("frm", "SERIAL_NO_F", $j(tds[7]).html());
+				insertValue("frm", "MODEL_F", $j(tds[7]).attr("model"));
+				insertValue("frm", "IMEI_F", $j(tds[7]).attr("imei"));
+				insertValue("frm", "symptom1", $j(tds[8]).attr("symptom1"));
+				insertValue("frm", "symptom2", $j(tds[9]).attr("symptom2"));
+				insertValue("frm", "symptom3", $j(tds[10]).attr("symptom3"));
+	 			insertValue("frm", "address1_f", $j(tds[2]).attr("STREET"));
+	 			insertValue("frm", "address2_f", $j(tds[2]).attr("STREET2"));
+	 			insertValue("frm", "address3_f", $j(tds[2]).attr("STREET3"));
+		 		insertValue("frm", "post_code_f", $j(tds[2]).attr("POST_CODE"));
+		 		insertValue("frm", "sr_no", $j(tds[11]).attr("sr_no"));
+		 		insertValue("frm", "purchasing_dt", $j(tds[11]).html());
+		 		insertValue("frm", "service_type", $j(tds[11]).attr("service_type"));
+		 		insertValue("frm", "carrier", $j(tds[11]).attr("carrier"));
+		 		insertValue("frm", "district", $j(tds[11]).attr("district"));
+		 		insertValue("frm", "city", $j(tds[11]).attr("city"));
+		 		insertValue("frm", "homephon_number", $j(tds[11]).attr("homephon_number"));
+		 		insertValue("frm", "officephon_num", $j(tds[11]).attr("officephon_num"));
+		 		insertValue("frm", "cc_app_dt", $j(tds[11]).attr("cc_app_dt"));
+		 		insertValue("frm", "cc_app_tm", $j(tds[11]).attr("cc_app_tm"));
+			} else {
+		 		insertValue("frm", "cc_app_dt", $j(tds[3]).attr("cc_app_dt"));
+		 		insertValue("frm", "cc_app_tm", $j(tds[4]).attr("cc_app_tm"));
+				insertValue("frm", "firstName_f", $j(tds[6]).html());
+		 		insertValue("frm", "lastName_f", $j(tds[7]).html());
+		 		insertValue("frm", "consumer", $j(tds[8]).html());
+		 		insertValue("frm", "mobile_f", $j(tds[10]).html());
+				insertValue("frm", "SERIAL_NO_F", $j(tds[11]).html());
+				insertValue("frm", "MODEL_F", $j(tds[11]).attr("model"));
+				insertValue("frm", "IMEI_F", $j(tds[11]).attr("imei"));
+				insertValue("frm", "symptom1", $j(tds[12]).attr("symptom1"));
+				insertValue("frm", "symptom2", $j(tds[13]).attr("symptom2"));
+				insertValue("frm", "symptom3", $j(tds[14]).attr("symptom3"));
+	 			insertValue("frm", "address1_f", $j(tds[6]).attr("street"));
+	 			insertValue("frm", "address2_f", $j(tds[6]).attr("street2"));
+	 			insertValue("frm", "address3_f", $j(tds[6]).attr("street3"));
+		 		insertValue("frm", "post_code_f", $j(tds[6]).attr("post_code"));
+		 		insertValue("frm", "sr_no", $j(tds[15]).attr("sr_no"));
+		 		insertValue("frm", "purchasing_dt", $j(tds[15]).html());
+		 		insertValue("frm", "service_type", $j(tds[15]).attr("service_type"));
+		 		insertValue("frm", "carrier", $j(tds[15]).attr("carrier"));
+		 		insertValue("frm", "district", $j(tds[15]).attr("district"));
+		 		insertValue("frm", "city", $j(tds[15]).attr("city"));
+		 		insertValue("frm", "homephon_number", $j(tds[15]).attr("homephon_number"));
+		 		insertValue("frm", "officephon_num", $j(tds[15]).attr("officephon_num"));
+		 		insertValue("frm", "email_f", $j(tds[15]).attr("email"));
+		 		insertValue("frm", "ASC_CODE", opener.$j('[name=detailForm] [name=ASC_CODE]').val());
+			}
+		});
+		var obj = $('frm');
+		
+			//obj.action = '/svctracking/svcorder/ServiceOrderCreateEHN.jsp';
+			obj.action = '/svctracking/svcorder/ServiceOrderCreateEHNHHP.jsp';
+	
+		obj.method = 'post';
+		obj.target ='rightContents';
+		obj.submit();
+	}
+
+	function convertStatus(status) {
+		var ret = "";
+		if(status == "E0001") {
+			ret = "Pending";
+		} else if(status == "E0003") {
+			ret = "Cancelled";
+		} else if(status == "E0004"){
+			ret = "Closed";
+		}
+		return ret;
+	}
+
+	function toDisplayScreenDate(dbdate, gubun, scrFormat) {
+		var RetDay = "";
+		
+		if(scrFormat.indexOf(".") > 0){
+			gubun = ".";
+		}
+		else if(scrFormat.indexOf("/") > 0){
+			gubun = "/";
+		}
+		else if(scrFormat.indexOf("-") > 0){
+			gubun = "-";
+		}
+		
+		var userFormat = removeChar(scrFormat.toUpperCase(),".");
+		userFormat = removeChar(userFormat.toUpperCase(),"/");
+		userFormat = removeChar(userFormat.toUpperCase(),"-");
+
+	   	if( removeChar(dbdate, gubun).length != 8) return;
+
+		Year = removeChar(dbdate,gubun).substring(0,4);
+		MM = removeChar(dbdate,gubun).substring(4,6);
+		DD  = removeChar(dbdate,gubun).substring(6,8);
+
+		if( userFormat == "YYYYMMDD" ){
+			RetDay = Year+gubun+MM+gubun+DD ;
+		}else if( userFormat == "MMDDYYYY" ){
+			RetDay = MM+gubun+DD+gubun+Year ;
+		}else if( userFormat == "DDMMYYYY" ){
+			RetDay = DD+gubun+MM+gubun+Year ;
+		}
+
+		return RetDay ;
+	}
+	
+	function toDisplayScreenTime(time){
+		if(time.length != 6){ 
+			return time;
+		}
+		
+		var returnTime = time.substring(0,2);
+		returnTime += ":";
+		returnTime += time.substring(2,4);
+		returnTime += ":";
+		returnTime += time.substring(4,6);
+		return returnTime;
+	}
+	
+	function insertValue(form, name, value){
+		var html = "<input type='hidden' id='"+name+"' name='"+name+"' value='"+value+"'/>";
+		$j("#"+form).append(html);
+	}
+
+	function clearForm(form){
+		$j("#"+form).html("");
+	}
+
+	function gridSvcRequestDraw(currPage, currBlock) {
+		if(jsonObj != null){
+			var tbodyObj = $('serviceReqeustlistBody');
+		
+			clearGridJsonObject(tbodyObj);
+			
+			searchPageNo = currPage;
+			searchBlckNo = currBlock;
+			
+			var length = jsonObj.et_sr_info.length;
+			totRow = length;
+			
+			setDisplayRow();
+			
+			for(var i=displayBeginRow; i < length; i++){
+				if ( i >= displayFinishRow){
+					break;
+				}
+				
+				var obj = '';
+				if(isChinaRegion) {
+					var obj = jsonObj.et_sr_info[i];
+				} else {
+					obj = jsonObj.et_sr_info[i];
+				}
+				
+				var html ="";
+				if(!isChinaRegion && "E0003|E0004".indexOf(obj.STATUS) > -1) { //status == Cancelled/Close
+					html = "<tr style='filter: alpha(opacity=50);Opacity:0.5;'>";
+				} else {
+					html = "<tr>";
+				}
+					html += "	  <td class='td_ac'>";
+				if(!isChinaRegion && "E0003|E0004".indexOf(obj.STATUS) > -1) { //status == Cancelled/Close
+					html += "	    <input type='checkbox' disabled='true'/>";
+				} else {
+					html += "	    <input type='checkbox'/>";
+				}
+				html += "	  </td>";
+				html += "	  <td class='td_ac'>"+obj.OBJECT_ID+"</td>";
+				if(!isChinaRegion) {
+					html += "	  <td class='td_ac' posting_date='"+obj.POSTING_DATE+"'>"+toDisplayScreenDate(obj.POSTING_DATE, ".", 'dd.MM.yyyy')+"</td>";
+					html += "	  <td class='td_ac' cc_app_dt='"+obj.CC_APP_DT+"'>"+toDisplayScreenDate(obj.CC_APP_DT, ".", 'dd.MM.yyyy')+"</td>";
+					html += "	  <td class='td_ac' cc_app_tm='"+obj.CC_APP_TM+"'>"+toDisplayScreenTime(obj.CC_APP_TM)+"</td>";
+					html += "	  <td class='td_ac'>"+obj.MODEL+"</td>";					
+				}
+				html += "	  <td class='td_ac' STREET='"+obj.STREET+"' STREET2='"+obj.STREET2+"' STREET3='"+obj.STREET3+"' POST_CODE='"+obj.POST_CODE+"'>"+obj.NAME_FIRST+"</td>";
+				html += "	  <td class='td_ac'>"+obj.NAME_LAST+"</td>";
+				html += "	  <td class='td_ac'>"+obj.CONSUMER+"</td>";
+
+				if(!isChinaRegion) {
+				html += "	  <td class='td_ac'>"+convertStatus(obj.STATUS)+"</td>";	
+				}
+
+				
+				
+				html += "	  <td class='td_ac'>"+obj.MOBILE_NUMBER+"</td>";
+				if(isChinaRegion) {
+					html += "	  <td class='td_ac'>"+obj.EMAIL+"</td>";					
+				}
+				html += "	  <td class='td_ac' model='"+obj.MODEL+"' imei='"+obj.IMEI+"'>"+obj.SERIAL_NO+"</td>";
+				html += "	  <td class='td_ac' symptom1='"+obj.SYMPTOM_CAT1+"'>"+obj.SYMPTOM_TXT1+"</td>";
+				html += "	  <td class='td_ac' symptom2='"+obj.SYMPTOM_CAT2+"'>"+obj.SYMPTOM_TXT2+"</td>";
+				html += "	  <td class='td_ac' symptom3='"+obj.SYMPTOM_CAT3+"'>"+obj.SYMPTOM_TXT3+"</td>";
+				html += "	  <td class='td_ac' sr_no='"+obj.OBJECT_ID+"'";
+				html += "						service_type='"+obj.SERVICE_TYPE+"'";
+				html += "						carrier='"+obj.CARRIER+"'";
+				html += "						district='"+obj.DISTRICT+"'";
+				html += "						city='"+obj.CITY+"'";
+				html += "						homephon_number='"+obj.HOMEPHON_NUMBER+"'";
+				if(isChinaRegion) {
+					html += "						officephon_num='"+obj.OFFICEPHON_NUM+"'";
+					html += "						cc_app_dt='"+obj.CC_APP_DT+"'";
+					html += "						cc_app_tm='"+obj.CC_APP_TM+"'>"+toDisplayScreenDate(obj.PURCHASING_DT, ".", 'dd.MM.yyyy')+"";
+				} else {
+					html += "						email='"+obj.EMAIL+"'";
+					html += "						officephon_num='"+obj.OFFICEPHON_NUM+"'>"+toDisplayScreenDate(obj.PURCHASING_DT, ".", 'dd.MM.yyyy')+"";
+					html += "	  <td class='td_ac'><a href='javascript:viewComment(\"" + obj.OBJECT_ID + "\")'>View</a></td>";	
+					html += "	  <td class='td_ac'>"+obj.CHANNEL_TEXT+"</td>";
+				}
+
+				html += "	  </td>";
+				html += "	</tr>";
+				
+				$j("#serviceReqeustlistBody").append(html);
+			}
+
+			if (length == 0) {
+				appendGridNoObjectDisplay('serviceReqeustlistBody', '18', 'No Data Found.', 'pagingProcess');
+			}
+			
+			loadingComplete(searchPageNo, searchBlckNo, totRow, '', 'SAP');
+		}
+	}
+
+	function gridSvcOrderDraw(currPage, currBlock) {
+
+		var tbodyObj = $('svcOrderTableBody');
+		/** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+		clearGridJsonObject(tbodyObj);
+		
+		
+
+		searchPageNo = currPage;
+		searchBlckNo = currBlock;
+		/** SAP 데이터를 그리드에 페이징 처리를 위한 시작 데이터와 마지막 데이터의 처리함수호출. */
+		setDisplayRow();
+
+		var tdTag = null;
+		var length = jsonObj.et_so_info.length;
+		totRow = length;
+		//china version intergration 2016/08/01 js1.baek
+		
+		for (var i = displayBeginRow; i < length; i++) {
+			/** 마지막 출력 데이터 여부 */
+			if (i >= displayFinishRow) {
+				break;
+			}
+
+			var obj = jsonObj.et_so_info[i];
+			var trTag = document.createElement("tr");
+
+			/** NO */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(i+1));
+			trTag.appendChild(tdTag);
+
+			/** Service Order No */
+			tdTag = new Element("td", {"class":"td_ac"});
+			var service_order_no = obj.OBJECT_ID;			
+			tdTag.insert("<a href=\"javascript:svcOrderLink('"+service_order_no+"', 'ServiceOrderDetailLiteCmd')\">" + service_order_no + "</a>&nbsp;&nbsp;");
+			if("0006423261" == obj.ASC_ACCTNO){
+				tdTag.insert("<a href=\"javascript:svcOrderLink('"+service_order_no+"','ZifGspnSvcMainLDCmd')\">Edit</a>");
+			}
+			trTag.appendChild(tdTag);
+			
+
+			/** asc_job_no */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. ASC_JOB_NO));
+			trTag.appendChild(tdTag);
+
+			/** Model */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. MODEL));
+			trTag.appendChild(tdTag);
+
+			/** Serial No */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. SERIAL_NO));
+			trTag.appendChild(tdTag);
+			
+			/**  BOS_FILE_YN */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. BOS_FILE_YN));
+			trTag.appendChild(tdTag);
+			
+
+			/** Service Type */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. SERVICE_TYPE_DESC));
+			trTag.appendChild(tdTag);
+
+			/** App Date */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. ASC_APP2_DT));
+			trTag.appendChild(tdTag);
+
+			/** Wty */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. WTY_TYPE_DESC));
+			trTag.appendChild(tdTag);
+
+			/** B2B */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. b2b_flag));
+			trTag.appendChild(tdTag);
+			
+			/** STATUS */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. STATUS_DESC));
+			trTag.appendChild(tdTag);
+			
+			
+
+			tbodyObj.appendChild(trTag);
+		}
+
+		/** 데이터가 존재하지 않을 경우 화면에 데이터가 없다는 출력을 표시한다. */
+		if (length == 0) {
+			appendGridNoObjectDisplay('svcOrderTableBody', '10','No Data Found.', 'pagingSvcOrder');
+		}
+		/** 그리드 데이터 로딩완료 함수호출.*/
+		loadingComplete(searchPageNo, searchBlckNo, totRow, 'gridSvcOrderDraw', '','pagingSvcOrder');
+
+	}
+
+	function svcOrderLink(orderNo, cmd) {
+		orderPop= window.open("", "orderPop","");
+		orderPop.focus();
+
+		var formObj=$('searchOrderForm');
+		formObj.cmd.value = cmd;//'ServiceOrderDetailCmd';
+		formObj.objectID.value = orderNo;
+
+		formObj.action='/gspn/operate.do';
+		formObj.target='orderPop';
+		formObj.submit();
+	}
+
+    var chkIdx=-1;
+    var chkArr=document.getElementsByName('chkObj');
+
+    function checkModel(chkObj){
+        if(chkObj.checked==false)chkIdx=-1;
+        else chkIdx=chkObj.value;
+        for (var i=0; i<chkArr.length; i++){
+            if(i!=chkIdx && chkArr[i].checked==true) chkArr[i].checked=false;
+        }
+    }
+
+    function doConfirm(){
+        if(jsonObj.dataLists[0]==null){
+            alert('No Customer Info'); return;
+        }
+        //china version intergration 2016/08/01 js1.baek
+        
+        	var checks = $j("#serviceReqeustlistBody").find("input[type=checkbox]");
+        	var ischecked = $j("#serviceReqeustlistBody").find("input[type=checkbox]:checked").length;
+        	
+        	if((checks.length > 0) && (ischecked == 0)) {
+        		if(!confirm("There is a prebooking below. Do you want continue?")) {
+        			return;
+				} 
+        	}
+        	
+        	if($j("#serviceReqeustlistBody").find("input[type=checkbox]").is(":checked")) {
+        		goToSOCreate();
+	        } else {
+	        	if($('changeForm').BP_TYPE.value == "C002") {
+		        	alert('VIP Customer');
+		        }
+	        	
+		        		opener.$j("#SAQR").val("");
+		        		opener.$j("#SAQR").attr('readOnly',false).attr('class','inputF');
+		        	
+		        opener.setCustomerInfo(jsonObj,chkIdx);
+	        }
+        
+        
+
+        AjaxSyncRequest(
+            '/gspn/operate.do',
+            'timeForm', 
+            function (data) {
+                try {
+                    var jsonObj = data.responseText.evalJSON();
+                    opener.$j("#CUST_CONFIRM_DT").val(jsonObj.curDate);
+                    opener.$j("#CUST_CONFIRM_TM").val(jsonObj.curTime);
+                    self.close();
+                } catch (e) {
+                    $j.post('/svctracking/svcorder/currentDateTime.gspn', $j("#createForm").serialize(), function(data){    
+                        opener.$j("#CUST_CONFIRM_DT").val(data.cur_date);
+                        opener.$j("#CUST_CONFIRM_TM").val(data.cur_time);
+                        self.close();   
+                    } , 'json');
+                }
+            }
+        );
+
+	}
+
+	function createNew(currPage, currBlock){
+		
+		doChangeFlag = false;
+		$("divcustomerlist").hide();
+		$("divcustomerdetail").hide();
+		updateSelectedBP('','');
+		$("divcustomerchange").hide();
+		$("divcustomercreate").show();
+		$("divbuttonsave").show();
+		$("divbuttonchange").hide();
+		$("divcustomerproduct").hide();
+		$("divbuttonchangesave").hide();
+		//china version intergration 2016/08/01 js1.baek
+		
+			$('createForm').NAME_FIRST.value = $('searchForm').firstName.value;
+			$('createForm').NAME_LAST.value = $('searchForm').lastName.value;
+		
+	}
+
+	function doChange(currPage, currBlock){
+
+		doChangeFlag = true;
+		$("divcustomerdetail").hide();
+		updateSelectedBP('','');
+		$("divcustomerchange").show();
+		$("divcustomerproduct").hide();
+		$("divbuttonchange").hide();
+		$("divbuttonsave").hide();
+		$("divbuttonchangesave").show();
+		$("divcustomercreate").hide();
+
+		
+
+		//china version intergration 2016/08/01 js1.baek
+		
+			//changeform
+			setComboValue($('changeForm').COUNTRY,$('D_COUNTRY').value);
+			setCodeListRegion2('REGION');
+			setComboValue($('changeForm').BP_TYPE,$('BP_TYPE').value);
+			//setComboValue(document.getElementsByName("TITLE")[0],$('changeForm').TITLE.value);
+			//alert($('changeForm').TITLE.value);
+			//setTitle2('BP_TITLE');
+		
+		
+
+		if(isCreatedSAUser) {
+			$j("#divcustomerchange").find(".input").attr('readonly',true).attr('class','inputRO');
+			$j("#divcustomerchange").find(".inputIDS").attr('readonly',true).attr('class','inputRO');
+			$j("#divcustomerchange").find(".selectSN").attr('readonly',true).attr('class','inputRO').attr('disabled',true);
+			$j("#divcustomerchange").find("input#STREET1").attr('readonly',false).attr('class','input');
+			$j("#divcustomerchange").find("input#STREET2").attr('readonly',false).attr('class','input');
+			$j("#divcustomerchange").find("input#STREET3").attr('readonly',false).attr('class','input');
+			$j("#divcustomerchange").find("input#DISTRICT").attr('readonly',false).attr('class','input');
+			$j("#divcustomerchange").find("input#CITY").attr('readonly',false).attr('class','input');
+			$j("#divcustomerchange").find("input#CITY_CODE").attr('readonly',false).attr('class','input');
+			$j("#divcustomerchange").find("#CONTACT_FLAG").attr('readonly',false).attr('class','selectSN').attr('disabled',false);
+			$j("#divcustomerchange").find("#REGION_CODE").attr('readonly',false).attr('class','selectSN').attr('disabled',false);
+			$j("#divcustomerchange").find("#COUNTRY").attr('readonly',false).attr('class','selectSN').attr('disabled',false);
+			$j("#divcustomerchange").find("input#POST_CODE").attr('readonly',false).attr('class','input');
+		}
+	}
+
+	function doSave(currPage, currBlock){
+
+		
+
+		if (!isValidSave()) return;
+		
+	/**	if ($('NAME_FIRST').value == '') {
+			alert("First name is mandatory");
+			return;
+		}
+
+		if ($('NAME_LAST').value == '') {
+			alert("Last name is mandatory");
+			return;
+		}
+
+		if (($('HOME_PHONE').value == '')||($('MOBILE_PHONE').value == '')) {
+			alert("Home phone or Mobile phone is mandatory");
+			return;
+		}
+		**/
+
+    		searchPageNo = currPage;
+    		searchBlckNo = currBlock;
+
+    		/**
+    		 * 프로그래바를 진행시킨다.
+    		 */
+    		$('pagingProcess').startWaiting();
+    		$('createForm').action = urlPattern;
+    		$('createForm').cmd.value = 'SVCPopCustomerCreateCmd';
+    		$('createForm').currPage.value = currPage;
+    		$('createForm').numPerPage.value = numPerPage;
+	      AjaxRequest(urlPattern, "createForm", setGridjsonCreateObject);
+	}
+	
+	//신규 저장일 경우 체크
+	function isValidSave() {
+		
+		
+			// BP 생성시 Mobile check 2015.10.05 jiw
+			
+				if ($('createForm').MOBILE_PHONE.value == '') {
+					alert("Cannot save as Mobile number is mandatory when creating	new customer");
+					$('createForm').MOBILE_PHONE.focus();	
+					return false;
+				}
+				if ($('createForm').MOBILE_PHONE.value.length != 10 || Number($('createForm').MOBILE_PHONE.value.charAt(0)) < 5) {
+					alert("Please enter a valid 10 digit Mobile number");
+					$('createForm').MOBILE_PHONE.focus();	
+					return false;
+				}
+			
+		
+			if ($('createForm').TITLE.value == '') {
+				alert('Title is mandatory field.');
+				$('createForm').TITLE.focus();	
+				return false;
+			}
+			
+			if ($('createForm').NAME_FIRST.value == '') {
+				alert('First Name is mandatory field.');
+				$('createForm').NAME_FIRST.focus();	
+				return false;
+			}
+			
+			if ($('createForm').NAME_LAST.value == '') {
+				alert('Last Name is mandatory field.');
+				$('createForm').NAME_LAST.focus();	
+				return false;
+			}
+			
+			if ($('createForm').GENDER.value == '') {
+				alert('gender is mandatory field.');
+				$('createForm').GENDER.focus();	
+				return false;
+			}
+			
+			if ($('createForm').HOME_PHONE.value == '') {
+				alert('Home Phone No. is mandatory field.');
+				$('createForm').HOME_PHONE.focus();	
+				return false;
+			}
+			
+			//=================================================================================//
+			//제  목 : 인도 Demand OTP link with GSPN
+			//수정일 : 2015.09.24
+			//수정자 : 채보람 (로젠 솔루션)
+			//내  용 : 1) 인도 법인 양윤정 과장 요청으로 Home Phone 10 자리 필수 조건 삭제.
+			//		   2) Mobile Phone 입력은 10자리로 필수 조건 추가.
+			//요청내용 : Home number는 7~11개 자릿수까지도 가능하기 때문에 체크로직 제거 요청.
+			//			 Mobile number는 반드시 10자릿수임.
+// 			if ($('createForm').HOME_PHONE.value.length != 10) {
+// 				alert('Home Phone should be only 10 digits.');
+// 				$('createForm').HOME_PHONE.focus();	
+// 				return false;
+// 			}
+			
+			if ($('createForm').MOBILE_PHONE.value == '') {
+				alert("Mobile Phone is Mandatory.");
+				$('createForm').MOBILE_PHONE.focus();	
+				return false;
+			}
+			
+			if ($('createForm').MOBILE_PHONE.value.length != 10) {
+				alert('Mobile Phone should be only 10 digits.');
+				$('createForm').MOBILE_PHONE.focus();	
+				return false;
+			}
+			//=================================================================================//
+			
+			if ($('createForm').STREET1.value == '') {
+				alert('Street1 is mandatory field.');
+				$('createForm').STREET1.focus();	
+				return false;
+			}
+			
+			if ($('createForm').CITY.value == '') {
+				alert('City is mandatory field.');
+				$('createForm').CITY.focus();	
+				return false;
+			}
+			
+			if ($('createForm').REGION_CODE.value == '') {
+				alert('State is mandatory field.');
+				$('createForm').REGION_CODE.focus();	
+				return false;
+			}
+			
+			if ($('createForm').LANGU.value == '') {
+				alert("Please select Customer's Preferred Language");
+				$('createForm').LANGU.focus();	
+				return false;
+			}
+
+		
+
+		//china version intergration 2016/08/01 js1.baek
+		
+				if($("createForm").COUNTRY.value != "IN"){
+					alert('Customer country should be the same as Service Center country');
+					$('createForm').COUNTRY.focus();
+					return false;
+				}
+			
+		
+		return true;
+	}
+	
+	function isValidChangeSave() {
+		
+			//인도일 때 체크
+		
+			if ($('changeForm').TITLE.value == '') {
+				alert('Title is mandatory field.');
+				$('changeForm').TITLE.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').NAME_FIRST.value == '') {
+				alert('First Name is mandatory field.');
+				$('changeForm').NAME_FIRST.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').NAME_LAST.value == '') {
+				alert('Last Name is mandatory field.');
+				$('changeForm').NAME_LAST.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').GENDER.value == '') {
+				alert('gender is mandatory field.');
+				$('changeForm').GENDER.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').HOME_PHONE.value == '') {
+				alert('Home Phone No. is mandatory field.');
+				$('changeForm').HOME_PHONE.focus();	
+				return false;
+			}
+			
+			//=================================================================================//
+			//제  목 : 인도 Demand OTP link with GSPN
+			//수정일 : 2015.09.24
+			//수정자 : 채보람 (로젠 솔루션)
+			//내  용 : 1) 인도 법인 양윤정 과장 요청으로 Home Phone 10 자리 필수 조건 삭제.
+			//		   2) Mobile Phone 입력은 10자리로 필수 조건 추가.
+			//요청내용 : Home number는 7~11개 자릿수까지도 가능하기 때문에 체크로직 제거 요청.
+			//			 Mobile number는 반드시 10자릿수임.
+// 			if ($('changeForm').HOME_PHONE.value.length != 10) {
+// 				alert('Home Phone should be only 10 digits.');
+// 				$('changeForm').HOME_PHONE.focus();	
+// 				return false;
+// 			}
+			
+			if ($('changeForm').MOBILE_PHONE.value == '') {
+				alert("Mobile Phone is Mandatory.");
+				$('changeForm').MOBILE_PHONE.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').MOBILE_PHONE.value.length != 10) {
+				alert('Mobile Phone should be only 10 digits.');
+				$('changeForm').MOBILE_PHONE.focus();	
+				return false;
+			}
+			//=================================================================================//
+			
+			if ($('changeForm').STREET1.value == '') {
+				alert('Street1 is mandatory field.');
+				$('changeForm').STREET1.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').CITY.value == '') {
+				alert('City is mandatory field.');
+				$('changeForm').CITY.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').REGION_CODE.value == '') {
+				alert('State is mandatory field.');
+				$('changeForm').REGION_CODE.focus();	
+				return false;
+			}
+			
+			if ($('changeForm').LANGU.value == '') {
+				alert("Please select Customer's Preferred Language");
+				$('changeForm').LANGU.focus();	
+				return false;
+			}
+			
+		
+
+		//china version intergration 2016/08/01 js1.baek
+		
+			if($("changeForm").COUNTRY.value != "IN"){
+				alert('Customer country should be the same as Service Center country');
+				$('changeForm').COUNTRY.focus();
+				return false;
+			}
+		
+		
+		return true;
+	}
+	
+	function doChangeSave(currPage, currBlock){
+
+		if (!isValidChangeSave()) return;
+		
+			searchPageNo = currPage;
+			searchBlckNo = currBlock;
+			
+			
+			
+			/**
+			 * 프로그래바를 진행시킨다.
+			 */
+			$('pagingProcess').startWaiting();
+			$('changeForm').action = urlPattern;
+			$('changeForm').cmd.value = 'SVCPopCustomerCreateCmd';
+			$('changeForm').currPage.value = currPage;
+			$('changeForm').numPerPage.value = numPerPage;
+		    AjaxRequest(urlPattern, "changeForm", setGridjsonCreateObject);
+	}
+
+	function setGridjsonCreateObject(response) {
+		try {
+			$('pagingProcess').stopWaiting();
+			jsonObj = eval('('+response.responseText+')');
+		
+			if (jsonObj.success) {
+				$("divcustomerchange").hide();
+    			alert(jsonObj.retmsg);
+				//alert("BP"+jsonObj.BP_NO);
+								
+					selectCustomer(jsonObj.BP_NO);
+				
+    			//return;
+			} else {
+				if (jsonObj.error) {
+					cfExceptionPop(jsonObj);
+				} else if (jsonObj.invalid) {
+					alert(jsonObj.warnings);
+				} else {
+					alert(jsonObj.retmsg);
+					appendGridNoObjectDisplay('detailContentTableBody', '3', 'No Data Found.', 'pagingProcess');				
+				}
+			}
+		} catch (e) {}
+	}
+
+	function addrSearch(currPage, currBlock){
+
+		var url = "/svctracking/common/SVCPopAddrSearch.jsp";
+		w=window.open(url,"part_popup",'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=700,height=530');
+	    w.focus();
+	    
+	    if(doChangeFlag) {
+	    	var formObj=$('changeForm');
+	    } else {
+	    	var formObj=$('createForm');
+	    }	    
+	    formObj.action='/svctracking/common/SVCPopAddrSearch.jsp';
+	    formObj.target='part_popup';
+	    formObj.submit();
+	    
+	}
+
+
+  function setAddr(jsonObj){
+
+			$('changeForm').CITY.value = jsonObj.CITY_DESC;
+			$('createForm').CITY.value = jsonObj.CITY_DESC;
+			$('changeForm').REGION_CODE.value = jsonObj.REGION;
+			$('createForm').REGION_CODE.value = jsonObj.REGION;
+			$('changeForm').REGION.value = jsonObj.REGION_DESC;
+			$('createForm').REGION.value = jsonObj.REGION_DESC;
+			$('changeForm').COUNTRY.value = jsonObj.COUNTRY;
+			$('createForm').COUNTRY.value = jsonObj.COUNTRY;
+			$('changeForm').POST_CODE.value = jsonObj.POSTAL;
+			$('createForm').POST_CODE.value = jsonObj.POSTAL;
+			$('changeForm').STREET1.value = jsonObj.STREET_DESC;
+			$('createForm').STREET1.value = jsonObj.STREET_DESC;
+			$('changeForm').CITY_CODE.value = jsonObj.CITY;
+			$('createForm').CITY_CODE.value = jsonObj.CITY;
+			$('changeForm').STREET2.value = jsonObj.STREET2;
+			$('createForm').STREET2.value = jsonObj.STREET2;
+			$('changeForm').STREET3.value = jsonObj.STREET3;
+			$('createForm').STREET3.value = jsonObj.STREET3;
+			
+			// 11.10.31 add. kimduchwan.
+			$('changeForm').DISTRICT.value = jsonObj.DISTRICT_DESC;
+			$('createForm').DISTRICT.value = jsonObj.DISTRICT_DESC;
+
+  }
+
+  	function onlyNumeric(e)
+	{
+			var characterCode;
+			if(e && e.which) 				//if which property of event object is supported (NN4)
+			{
+				e = e;
+				characterCode = e.which; 	//character code is contained in NN4's which property
+			}
+			else	{
+				e = event;
+				characterCode = e.keyCode; 	//character code is contained in IE's keyCode property
+			}
+			if(characterCode != 8 && ((characterCode<48)||(characterCode>57)) )	//exclude all characters except numeric, firebox backspace 키 == 8 제외
+			{
+				alert("Only Numeric");
+				return false;
+			 }
+			else{
+				return true;
+			}
+	}
+
+	function goBack(){
+		  $("divcustomerdetail").hide();
+		  updateSelectedBP('','');
+	      $("divcustomerchange").hide();
+	      $("divcustomerproduct").hide();
+	      $("divbuttonchange").hide();
+	      $("divbuttonsave").hide();
+	      $("divbuttonchangesave").hide();
+	      $("divcustomercreate").hide();
+		  $("divcustomerlist").show();
+	}
+
+	function setCodeList(val){
+			$('codeForm').action = urlPattern;
+			$('codeForm').cmd.value = 'CICCodeSearchCmd';
+			$('CODE_GROUP').value = val;
+			AjaxRequest(urlPattern, "codeForm", getCodeList);
+	}
+
+	function getCodeList(response){
+		try {
+			var COUNTRY1=$('changeForm').COUNTRY;//changeform
+			var COUNTRY2=$('createForm').COUNTRY;
+			var jsonCodeObj = eval('('+response.responseText+')');
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.EtCodeInfo.length;
+
+				COUNTRY1.length = 0;
+				COUNTRY2.length = 0;
+				
+					for (var i = 0; i < length; i++) {
+						var objOption = document.createElement('option');
+						objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+						objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+						COUNTRY1.appendChild(objOption);
+					}
+
+					COUNTRY2.length = 0;
+					for (var i = 0; i < length; i++) {
+						//CP유저인 경우에만 콤보박스 첫번째 인덱스에 blank를 추가한다.(국가코드가 없는 경우 blank를 보여줌)
+						if(i==0){
+							
+						}
+						var objOption = document.createElement('option');
+						objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+						objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+						COUNTRY2.appendChild(objOption);
+					}
+				
+				
+				//createform
+				
+						setComboValue(COUNTRY2, 'IN');
+					
+				setCodeListRegion('REGION');
+
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+
+	/**Create시 region code*/
+	function setCodeListRegion(val){
+			$('codeForm').action = urlPattern;
+			$('codeForm').cmd.value = 'CICCodeSearchCmd';
+			$('CODE_GROUP').value = val;
+			$('UPPER_GROUP').value = 'COUNTRY';
+			$('UPPER_VALUE').value = $("createForm").COUNTRY.value;
+			AjaxRequest(urlPattern, "codeForm", getCodeListRegion);
+	}
+
+	/**Change시 REGION*/
+	function setCodeListRegion2(val){
+		$('codeForm').action = urlPattern;
+		$('codeForm').cmd.value = 'CICCodeSearchCmd';
+		$('CODE_GROUP').value = val;
+		$('UPPER_GROUP').value = 'COUNTRY';
+		//alert($('D_COUNTRY').value);
+		$('UPPER_VALUE').value =$('D_COUNTRY').value;
+		AjaxRequest(urlPattern, "codeForm", getCodeListRegion2);
+	}
+	
+	function getCodeListRegion2(response){
+		try {
+			var REGION1=$('changeForm').REGION_CODE;//changeform
+			var jsonCodeObj = eval('('+response.responseText+')');
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.EtCodeInfo.length;
+				REGION1.length = 0;
+				
+				
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode("--------"));
+					objOption.setAttribute("value", "");
+					REGION1.appendChild(objOption);
+				
+				
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+					objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+					REGION1.appendChild(objOption);
+				}
+             setComboValue($('changeForm').REGION_CODE,$('D_REGION_CODE').value);
+             $('changeForm').REGION.value = $('changeForm').REGION_CODE.options[$('changeForm').REGION_CODE.selectedIndex].text;
+             
+
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+
+	/**change select box에서 타country선택시 REGION change*/
+	function setCodeListRegion3(val, COUNTRY){
+		
+			if($("changeForm").COUNTRY.value == "IN"){
+				$('codeForm').action = urlPattern;
+				$('codeForm').cmd.value = 'CICCodeSearchCmd';
+				$('CODE_GROUP').value = val;
+				$('UPPER_GROUP').value = 'COUNTRY';
+				$('UPPER_VALUE').value = $("changeForm").COUNTRY.value;
+				AjaxRequest(urlPattern, "codeForm", getCodeListRegion2);
+			}else{
+				alert('Customer country should be the same as Service Center country');
+				return;
+			}
+		
+	}
+	
+	/*
+	function getCodeListRegion2(response){
+		try {
+			var REGION1=document.getElementsByName("REGION_CODE")[0];//changeform
+			//var REGION2=document.getElementsByName("REGION")[1];//createform
+			var jsonCodeObj = eval('('+response.responseText+')');
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.EtCodeInfo.length;
+				REGION1.length = 0;
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+					objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+					REGION1.appendChild(objOption);
+				}
+             setComboValue(document.getElementsByName("REGION_CODE")[0],$('D_REGION_CODE').value);
+
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+	*/
+	
+
+	/**Create시 select box에서 country change시 region code*/
+	function setCodeListRegion4(val){
+		
+				if($("createForm").COUNTRY.value == "IN"){
+					$('codeForm').action = urlPattern;
+					$('codeForm').cmd.value = 'CICCodeSearchCmd';
+					$('CODE_GROUP').value = val;
+					$('UPPER_GROUP').value ='COUNTRY';
+					$('UPPER_VALUE').value =  $("createForm").COUNTRY.value;
+					AjaxRequest(urlPattern, "codeForm", getCodeListRegion);
+				}else{
+					alert('Customer country should be the same as Service Center country');
+					return;
+				}
+			
+		
+		
+	}
+	
+	/*
+	function getCodeListRegion(response){
+		try {
+			//var REGION1=document.getElementsByName("REGION")[0];//changeform
+			var REGION2=document.getElementsByName("REGION_CODE")[1];//createform
+			var jsonCodeObj = eval('('+response.responseText+')');
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.EtCodeInfo.length;
+				REGION2.length = 0;
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+					objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+					REGION2.appendChild(objOption);
+				}
+				setComboValue(document.getElementsByName("TITLE"),$('TITLE').value);
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+	
+	*/
+	
+	
+	function getCodeListRegion(response){
+		try {
+			//var REGION1=document.getElementsByName("REGION")[0];//changeform
+			//var REGION2=document.getElementsByName("REGION_CODE")[1];//createform
+			var REGION2=$('createForm').REGION_CODE;
+			var jsonCodeObj = eval('('+response.responseText+')');
+			
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.EtCodeInfo.length;
+				REGION2.length = 0;
+				
+				
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode("--------"));
+					objOption.setAttribute("value", "");
+					REGION2.appendChild(objOption);
+				
+				
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+					objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+					REGION2.appendChild(objOption);
+				}
+				setComboValue(document.getElementsByName("TITLE"),$('TITLE').value);
+				setComboValue($('createForm').REGION_CODE,$('REGION_CODE').value);
+				$('createForm').REGION.value = $('createForm').REGION_CODE.options[$('createForm').REGION_CODE.selectedIndex].text;
+				
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+	
+	function setCodeListRegionForCity(idx){
+		$('pagingProcess').startWaiting();
+		$('codeForm').action = urlPattern;
+		$('codeForm').cmd.value = 'CommonRegionPostalSearchCmd';
+		$('codeForm').company.value = 'C550';
+		if(idx == '0'){
+			$('codeForm').country.value = $("createForm").COUNTRY.value;
+			$('codeForm').regionCode.value = $("createForm").REGION_CODE.value;
+			AjaxRequest(urlPattern, "codeForm", getCodeListCityForCreate);
+		}else if(idx == '1'){
+			$('codeForm').country.value = $("changeForm").COUNTRY.value;
+			$('codeForm').regionCode.value = $("changeForm").REGION_CODE.value;
+			AjaxRequest(urlPattern, "codeForm", getCodeListCityForChange);
+		}else{
+			$('codeForm').country.value = $("createForm").COUNTRY.value;
+			$('codeForm').regionCode.value = $("createForm").REGION_CODE.value;
+			AjaxRequest(urlPattern, "codeForm", getCodeListCityForCreate);
+		}
+	}
+	
+	function getCodeListCityForChange(response){
+		try {
+			var CITY_CODE1=$('changeForm').SEL_CITY_CODE;
+			var jsonCodeObj = eval('('+response.responseText+')');
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.list.length;
+				CITY_CODE1.length = 0;
+				
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.list[i].cityName));
+					objOption.setAttribute("value", jsonCodeObj.list[i].city);
+					CITY_CODE1.appendChild(objOption);
+				}
+				setComboValue($('changeForm').SEL_CITY_CODE,$('D_CITY_CODE').value);
+				$('changeForm').CITY.value = $('changeForm').SEL_CITY_CODE.options[$('changeForm').SEL_CITY_CODE.selectedIndex].text;
+				$('changeForm').CITY_CODE.value = $('changeForm').SEL_CITY_CODE.value;
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+		
+		ajaxArray[3] = true;
+	}
+	
+	function getCodeListCityForCreate(response){
+		try {
+			var CITY_CODE2=$('createForm').SEL_CITY_CODE;
+			var jsonCodeObj = eval('('+response.responseText+')');
+			if (jsonCodeObj.success) {
+				//alert(jsonCodeObj.success)
+				var length = jsonCodeObj.list.length;
+				CITY_CODE2.length = 0;
+				
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.list[i].cityName));
+					objOption.setAttribute("value", jsonCodeObj.list[i].city);
+					CITY_CODE2.appendChild(objOption);
+				}
+				//setComboValue(document.getElementsByName("SEL_CITY_CODE")[1],$('createForm').SEL_CITY_CODE.value);
+				$('createForm').CITY.value = $('createForm').SEL_CITY_CODE[0].text;
+				$('createForm').CITY_CODE.value = $('createForm').SEL_CITY_CODE.value;
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+		
+		ajaxArray[3] = true;
+	}
+	
+	function setCodeListCity(idx){
+		$('createForm').CITY.value = $('createForm').SEL_CITY_CODE[idx].text;
+		$('createForm').CITY_CODE.value = $('createForm').SEL_CITY_CODE.value;
+	}
+	
+	function setCodeListCityForChange(idx){
+		$('changeForm').CITY.value = $('changeForm').SEL_CITY_CODE[idx].text;
+		$('changeForm').CITY_CODE.value = $('changeForm').SEL_CITY_CODE.value;
+	}
+
+	function setComboValue(selectObj,def){
+		for (var i=0; i<selectObj.length; i++){
+			if(def==selectObj[i].value){
+				selectObj[i].selected=true;
+				break;
+			}
+		}
+	}
+
+	function setREGION_DESC(idx){
+    	$('changeForm').REGION.value = document.changeForm.REGION_CODE[idx].text;
+    	
+	}
+
+	function setREGION_DESC2(idx){
+    	$('createForm').REGION.value = document.createForm.REGION_CODE[idx].text;
+    	
+	}
+
+	/**Create시 title code display*/
+	function setTitle(val){
+		$('codeForm').action = urlPattern;
+		$('codeForm').cmd.value = 'CICCodeSearchCmd';
+		$('CODE_GROUP').value = val;
+		//$('UPPER_GROUP').value = 'BP_TITLE';
+		$('UPPER_VALUE').value = "IN";
+		AjaxRequest(urlPattern, "codeForm", getTitle);
+	}
+
+	function getTitle(response){
+		try {
+			var TITLE = document.getElementsByName("TITLE")[1]; //createForm
+			var jsonCodeObj = eval('('+response.responseText+')');
+
+			if (jsonCodeObj.success) {
+				var length = jsonCodeObj.EtCodeInfo.length;
+				TITLE.length = 0;
+				
+				
+
+
+				
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+					objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+					TITLE.appendChild(objOption);
+				}
+				getTitle2(response);
+
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+
+	/**Change시 title code display*/
+	function setTitle2(val){
+		$('codeForm').action = urlPattern;
+		$('codeForm').cmd.value = 'CICCodeSearchCmd';
+		$('CODE_GROUP').value = val;
+		//$('UPPER_GROUP').value = 'BP_TITLE';
+		$('UPPER_VALUE').value = "IN";
+		AjaxRequest(urlPattern, "codeForm", getTitle2);
+	}
+
+	function getTitle2(response){
+		try {
+			var TITLE = document.getElementsByName("TITLE")[0]; //changeForm
+			var jsonCodeObj = eval('('+response.responseText+')');
+
+			if (jsonCodeObj.success) {
+
+				var length = jsonCodeObj.EtCodeInfo.length;
+				TITLE.length = 0;
+				
+
+
+				for (var i = 0; i < length; i++) {
+					var objOption = document.createElement('option');
+					objOption.appendChild(document.createTextNode(jsonCodeObj.EtCodeInfo[i].CODE_TEXT));
+					objOption.setAttribute("value", jsonCodeObj.EtCodeInfo[i].CODE_VALUE);
+					TITLE.appendChild(objOption);
+				}
+
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+
+	function setTitle3(val){
+		$('codeForm').action = urlPattern;
+		$('codeForm').cmd.value = 'CICCodeSearchCmd';
+		$('CODE_GROUP').value = val;
+		//$('UPPER_GROUP').value = 'BP_TITLE';
+		$('UPPER_VALUE').value = "IN";
+		AjaxRequest(urlPattern, "codeForm", getTitle3);
+	}
+
+	/** display시 title을 넣기 위해 함수호출 */
+	function getTitle3(response){
+		try {
+			var D_TITLE = document.getElementsByName("D_TITLE"); //displayForm
+			var jsonCodeObj = eval('('+response.responseText+')');
+
+			if (jsonCodeObj.success) {
+				var length = jsonCodeObj.EtCodeInfo.length;
+
+				for (var i = 0; i < length; i++) {
+					if (jsonObj.dataLists[0].TITLE == jsonCodeObj.EtCodeInfo[i].CODE_VALUE)
+					{
+						$('D_TITLE').value = jsonCodeObj.EtCodeInfo[i].CODE_TEXT;
+					}
+				}
+
+			} else {
+				//alert("Message : "+jsonCodeObj.message);
+
+			    if (jsonCodeObj.error) {
+			        cfExceptionPop(jsonCodeObj);
+			    }
+			}
+			$('progressloading').stopWaiting();
+		} catch (e) {}
+	}
+
+	/** TITLE에 따라서 Gender change (0001,0002,0004로 리턴되는 경우에만 적용)*/
+	function changeGender(TITIL){
+
+		var val = TITIL;
+		if(TITIL.length == 4){
+			val = TITIL.substring(2,4);
+		}
+
+		if(TITIL.substring(0,2) == '00'){
+			var target = document.createForm.GENDER;
+			//china version intergration 2016/08/01 js1.baek
+			
+				switch(val)
+				{
+					case '02': //Mr
+						target.selectedIndex = 1;
+						break
+					case '01':	//Ms
+						target.selectedIndex = 0;
+						break
+					case '04':
+						target.selectedIndex = 0;
+						break
+					default:
+						target.selectedIndex = 0;
+						break
+				}
+			
+		}
+	}
+	//china version intergration 2016/08/01 js1.baek
+	function gridB2bContactDraw(currPage, currBlock) {
+				
+		var tbodyObj = $('b2bContactTableBody');
+		/** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+		clearGridJsonObject(tbodyObj);
+
+		searchPageNo = currPage;
+		searchBlckNo = currBlock;
+		/** SAP 데이터를 그리드에 페이징 처리를 위한 시작 데이터와 마지막 데이터의 처리함수호출. */
+		setDisplayRow();
+
+		var tdTag = null;
+		var length = jsonObj.ET_CP_LIST.length;
+				
+		totRow = length;
+		for (var i = displayBeginRow; i < length; i++) {
+			/** 마지막 출력 데이터 여부 */
+			if (i >= displayFinishRow) {
+				break;
+			}
+
+			var trTag = document.createElement("tr");
+
+			/** S/N */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(i+1));
+			trTag.appendChild(tdTag);
+
+			/** NAME */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			aTag = document.createElement("a");
+			aTag.href='javascript:selectCustomer("'+jsonObj.ET_CP_LIST[i].CONTACT_PERSON+'")';
+			aTag.appendChild(document.createTextNode(jsonObj.ET_CP_LIST[i].NAME_FIRST));
+			aTag.appendChild(document.createTextNode(" "));
+			tdTag.appendChild(aTag);
+			trTag.appendChild(tdTag);
+
+			/** OFFICE_PHONE */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(jsonObj.ET_CP_LIST[i].OFFICE_PHONE));
+			trTag.appendChild(tdTag);
+
+			/** MOBILE_PHONE */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(jsonObj.ET_CP_LIST[i].MOBILE_PHONE));
+			trTag.appendChild(tdTag);
+
+			/** E-mail*/
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(jsonObj.ET_CP_LIST[i].EMAIL));
+			trTag.appendChild(tdTag);
+
+			tbodyObj.appendChild(trTag);
+		}
+
+		/** 데이터가 존재하지 않을 경우 화면에 데이터가 없다는 출력을 표시한다. */
+		if (length == 0) {
+			appendGridNoObjectDisplay('b2bContactTableBody', '9','No Data Found.', 'pagingB2bContact');
+		}
+		/** 그리드 데이터 로딩완료 함수호출.*/
+		loadingComplete(searchPageNo, searchBlckNo, totRow, 'gridB2bContactDraw', '','pagingB2bContact');
+
+	}
+	function newB2BContact(){
+		createNew();
+		$j("#td_createNew").hide();
+		
+		b2bContactCreate = true;
+		$j('[name="createForm"] [name="NAME_FIRST"]').val("");
+		$j('[name="createForm"] [name="RELATED_BP"]').val($j('[name="changeForm"] [name="CONSUMER"]').val());
+		$j('[name="createForm"] [name="BP_TYPE"]').attr('disabled',true);
+		$j('[name="createForm"] [name="HOME_PHONE"]').attr('readonly',true).attr('class','inputRO');
+	}
+	function goDetailView(){
+		
+		$j("#divcustomerchange").hide();
+		
+		$j("#divcustomerdetail").show();
+		$j("#divcustomerproduct").show();
+		$j("#divcustomerlist").hide();
+		
+		$j("#divbuttonchange").show();
+		$j("#divcustomercreate").hide();
+		$j("#divbuttonsave").hide();
+		$j("#divbuttonchangesave").hide();
+	}	
+	function C6V0_checkPhoneNo(formId){
+		var chkPhone = true;
+		$j('#'+formId+' [name="MOBILE_PHONE"],#'+formId+' [name="HOME_PHONE"],#'+formId+' [name="OFFICE_PHONE"]').each(function() {
+			if(!chkPhone) return;
+			if(this.name =='MOBILE_PHONE'){
+				if($j(this).val().length>0 && $j(this).val().length != 11 && $j(this).val().length != 12){
+					alert('Mobile Phone digit should be 11.');
+					$j(this).focus();
+					chkPhone = false;
+				}
+			}
+		});
+		return chkPhone;
+	}
+
+	function C6V0_createValidCheck(){
+		var b2bcust = ($j('[name="createForm"] [name="BP_TYPE"]').val()=='B003' || $j('[name="createForm"] [name="BP_TYPE"]').val()==''
+			|| $j('[name="createForm"] [name="BP_TYPE"]')[0].disabled==true );
+		var generalCust = ($j('[name="createForm"] [name="BP_TYPE"]').val()=='C001'
+			&& $j('[name="createForm"] [name="BP_TYPE"]')[0].disabled==false);
+		
+		if(generalCust){
+			var obj = $j('[name=createForm] [name="MOBILE_PHONE"]');
+			if(obj.val()==''){
+				alert("Please Input the Mobile Phone");
+				return false;
+			}		
+		}
+		return true;
+	}
+
+	function setZifGspnComAreaSearch(jsonCodeObj,selectObj,jobType, defValue){
+		selectObj = $j(selectObj);//jquery obj 로 변환..
+		
+		var length = jsonCodeObj.ET_AREA_INFO.length;
+		var codeKey = fieldKeyZifGspnComAreaSearch(jobType,'code');
+		var textKey = fieldKeyZifGspnComAreaSearch(jobType,'text');
+		for (var i = 0; i < length; i++) {
+			var obj = jsonCodeObj.ET_AREA_INFO[i];
+			var CODE_VALUE = obj[codeKey];
+			var CODE_TEXT = obj[textKey];
+			
+			var objOption = 
+				$j('<option value="'+CODE_VALUE+'" title="'+CODE_VALUE+'" '+(CODE_VALUE == defValue?'selected':'')+'>'+CODE_TEXT+'</option>');
+			selectObj.append(objOption);
+		}
+	}
+	function fieldKeyZifGspnComAreaSearch(jobType, gubun){
+		var codeKey="";
+		var textKey="";
+		if(jobType == 'S'){codeKey='STATE';textKey='STATE_NAME';}
+		if(jobType == 'C'){codeKey='CITY';textKey='CITY';}
+		if(jobType == 'D'){codeKey='COLONY';textKey='COLONY';}
+		
+		if(gubun=='code')return codeKey;
+		else return textKey;
+	}
+
+	var createRegionObj;
+	var changeRegionObj;
+	var createCityObj;
+	var changeCityObj;
+	var createDISTRICTObj;
+	var changeDISTRICTObj;
+	function initSVCPopEvent(){
+		createRegionObj = $j('form[name="createForm"] [name="REGION_CODE"]');
+		createRegionObj.change(function() {
+			setSVCPopCreateCITY($j(this));
+	    });
+		
+		changeRegionObj = $j('form[name="changeForm"] [name="REGION_CODE"]');
+		changeRegionObj.change(function() {
+			setSVCPopChangeCITY($j(this));
+	    });
+		
+		createCityObj = $j('form[name="createForm"] [name="CITY"]');
+		createCityObj.change(function() {
+			setSVCPopCreateDISTRICT(createRegionObj,$j(this));
+	    });
+		
+		changeCityObj = $j('form[name="changeForm"] [name="CITY"]');
+		changeCityObj.change(function() {
+			setSVCPopChangeDISTRICT(changeRegionObj,$j(this));
+	    });
+
+		createDISTRICTObj = $j('form[name="createForm"] [name="DISTRICT"]');
+		
+		changeDISTRICTObj = $j('form[name="changeForm"] [name="DISTRICT"]');
+		
+		createDISTRICTObj.change(function(){
+			var obj = districtObjSVCPopCreate[$j(this).val()];
+			if(obj){
+				$j('form[name="createForm"] [name="POST_CODE"]').val(obj.ZIPCODE);
+				$j('form[name="createForm"] [name="AREA_CODE"]').val(obj.AREA_CODE);
+			}else{
+				$j('form[name="createForm"] [name="POST_CODE"]').val("");
+				$j('form[name="createForm"] [name="AREA_CODE"]').val("");
+			}
+	    });
+		
+		changeDISTRICTObj.change(function(){
+			var obj = districtObjSVCPopChange[$j(this).val()];
+			if(obj){
+				$j('form[name="changeForm"] [name="POST_CODE"]').val(obj.ZIPCODE);
+				$j('form[name="changeForm"] [name="AREA_CODE"]').val(obj.AREA_CODE);
+			}else{
+				$j('form[name="changeForm"] [name="POST_CODE"]').val("");
+				$j('form[name="changeForm"] [name="AREA_CODE"]').val("");
+			}
+	    });
+		
+		$j('form[name="changeForm"] [name="POST_CODE"]').change(function(){
+			setSVCPopPOST_CODE($j(this),'change');
+	    });
+		$j('form[name="createForm"] [name="POST_CODE"]').change(function(){
+			setSVCPopPOST_CODE($j(this),'create');
+	    });
+	}
+
+	function initSVCPopRegion(){
+		initSVCPopEvent();
+		
+		var formId = 'codeForm';
+		var formObj=$(formId);
+		formObj.cmd.value = 'ZifGspnComAreaSearchCmd';
+		AjaxSyncRequest(urlPattern+'?IV_JOB_TYPE=S', formId, getSVCPopRegionList);
+	}
+	function getSVCPopRegionList(response){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		jsonSVCPopRegion = jsonCodeObj;
+		
+		var selectObj = $j('form[name="createForm"] [name="REGION_CODE"]');
+		setSVCPopRegion(jsonCodeObj, selectObj);
+//		var selectObj = $j('form[name="changeForm"] [name="REGION_CODE"]');
+//		setSVCPopRegion(jsonCodeObj, selectObj);
+	}
+	function setSVCPopRegion(jsonCodeObj,selectObj){
+		selectObj = $j(selectObj);//jquery obj 로 변환..
+		selectObj[0].length = 1;
+		setZifGspnComAreaSearch(jsonCodeObj,selectObj,'S');
+	}
+	function setSVCPopCreateCITY(selectObj){
+		var formId = 'codeForm';
+		var formObj=$(formId);
+		formObj.cmd.value = 'ZifGspnComAreaSearchCmd';
+		AjaxRequest(urlPattern+'?IV_JOB_TYPE=C&IV_STATE='+selectObj.val(), formId, setSVCPopCreateCITYCombo);
+	}
+	function setSVCPopCreateCITYCombo(response){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		var selectObj = $j('form[name="createForm"] [name="CITY"]');
+		selectObj[0].length = 1;
+		setZifGspnComAreaSearch(jsonCodeObj,selectObj,'C');
+	}
+
+	function setSVCPopChangeCITY(selectObj){
+		var formId = 'codeForm';
+		var formObj=$(formId);
+		formObj.cmd.value = 'ZifGspnComAreaSearchCmd';
+		AjaxRequest(urlPattern+'?IV_JOB_TYPE=C&IV_STATE='+selectObj.val(), formId, setSVCPopChangeCITYCombo);
+	}
+	function setSVCPopChangeCITYCombo(response){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		var selectObj = $j('form[name="changeForm"] [name="CITY"]');
+		selectObj[0].length = 1;
+		
+		var selectVal = jsonDetailObj.dataLists[0].CITY;
+		setZifGspnComAreaSearch(jsonCodeObj,selectObj,'C', selectVal);
+		
+		setSVCPopChangeDISTRICT(changeRegionObj, changeCityObj);
+	}
+	function setSVCPopChangeDISTRICT(regionObj,cityObj){
+		var selectObj = $j('form[name="changeForm"] [name="DISTRICT"]');
+		selectObj[0].length = 1;
+		selectObj.trigger('change');
+		if(cityObj.val()=="") return;
+		
+		var formId = 'codeForm';
+		var formObj=$(formId);
+		formObj.cmd.value = 'ZifGspnComAreaSearchCmd';
+		AjaxRequest(urlPattern+'?IV_JOB_TYPE=D&IV_STATE='+regionObj.val()+'&IV_CITY='+encodeURIComponent(cityObj.val()), formId, setSVCPopChangeDISTRICTCombo);
+	}
+	var districtObjSVCPopChange = {};
+	function setSVCPopChangeDISTRICTCombo(response){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		
+		var selectObj = $j('form[name="changeForm"] [name="DISTRICT"]');
+		var selectVal = jsonDetailObj.dataLists[0].DISTRICT;
+		setZifGspnComAreaSearch(jsonCodeObj,selectObj,'D', selectVal);
+		
+		var length = jsonCodeObj.ET_AREA_INFO.length;
+		var codeKey = fieldKeyZifGspnComAreaSearch('D','code');//COLONY
+		for (var i = 0; i < length; i++) {
+			var obj = jsonCodeObj.ET_AREA_INFO[i];
+			var CODE_VALUE = obj[codeKey];
+			districtObjSVCPopChange[CODE_VALUE] = obj;
+		}
+		selectObj.trigger('change');
+	}
+
+
+	function setSVCPopCreateDISTRICT(regionObj,cityObj){
+		var selectObj = $j('form[name="createForm"] [name="DISTRICT"]');
+		selectObj[0].length = 1;
+		selectObj.trigger('change');
+		if(cityObj.val()=="") return;
+		
+		var formId = 'codeForm';
+		var formObj=$(formId);
+		formObj.cmd.value = 'ZifGspnComAreaSearchCmd';
+		AjaxRequest(urlPattern+'?IV_JOB_TYPE=D&IV_STATE='+regionObj.val()+'&IV_CITY='+encodeURIComponent(cityObj.val()), formId, setSVCPopCreateDISTRICTCombo);
+	}
+	var districtObjSVCPopCreate = {};
+	function setSVCPopCreateDISTRICTCombo(response){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		
+		var selectObj = $j('form[name="createForm"] [name="DISTRICT"]');
+		setZifGspnComAreaSearch(jsonCodeObj,selectObj,'D');
+		
+		var length = jsonCodeObj.ET_AREA_INFO.length;
+		var codeKey = fieldKeyZifGspnComAreaSearch('D','code');//COLONY
+		for (var i = 0; i < length; i++) {
+			var obj = jsonCodeObj.ET_AREA_INFO[i];
+			var CODE_VALUE = obj[codeKey];
+			districtObjSVCPopCreate[CODE_VALUE] = obj;
+		}
+		selectObj.trigger('change');
+	}
+
+	function setSVCPopPOST_CODE(postCodeObj,jobType){
+		var formId = 'codeForm';
+		var formObj=$(formId);
+		formObj.cmd.value = 'ZifGspnComAreaSearchCmd';
+		if(jobType=='change')
+			AjaxRequest(urlPattern+'?IV_JOB_TYPE=P&IV_POST_CODE='+postCodeObj.val(), formId, setSVCPopChangePOST_CODEAddress);
+		else
+			AjaxRequest(urlPattern+'?IV_JOB_TYPE=P&IV_POST_CODE='+postCodeObj.val(), formId, setSVCPopCreatePOST_CODEAddress);
+	}
+	function setSVCPopChangePOST_CODEAddress(response){
+		setSVCPopPOST_CODEAddress(response,'change');
+	}
+	function setSVCPopCreatePOST_CODEAddress(response){
+		setSVCPopPOST_CODEAddress(response,'create');
+	}
+	function setSVCPopPOST_CODEAddress(response,jobType){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		
+		var obj = jsonCodeObj.ET_AREA_INFO;
+		if(obj.length <=0 ){
+			alert('invalid post code.');
+			return;
+		}
+		
+		var STATE = obj[0].STATE;
+		var CITY = obj[0].CITY;
+		var COLONY = obj[0].COLONY;
+		var AREA_CODE = obj[0].AREA_CODE;
+		
+		var areaCodeObj;
+		var regionObj;
+		var cityObj;
+		var districtObj;
+		
+		if(jobType=='change'){
+			areaCodeObj = $j('form[name="changeForm"] [name="AREA_CODE"]');
+			regionObj = changeRegionObj;
+			cityObj = changeCityObj;
+			districtObj = changeDISTRICTObj;
+		}else{
+			areaCodeObj = $j('form[name="createForm"] [name="AREA_CODE"]');
+			regionObj = createRegionObj;
+			cityObj   = createCityObj;
+			districtObj = createDISTRICTObj;
+		}
+		
+		areaCodeObj.val(AREA_CODE);
+		regionObj.val(STATE);
+		cityObj[0].length = 1;
+		cityObj.append($j('<option value="'+CITY+'" title="'+CITY+'" selected>'+CITY+'</option>'));
+		districtObj[0].length = 1;
+		districtObj.append($j('<option value="'+COLONY+'" title="'+COLONY+'" selected>'+COLONY+'</option>'));
+	}
+
+	function createB2bContact(){
+		if (!isValidSave()) return;
+		
+		$('pagingProcess').startWaiting();
+		
+		var formId = 'b2bContactForm';
+		$j("#"+formId).remove();
+		var $frm = $j('<form id="'+formId+'" method=post />');
+		$frm.append('<input type="hidden" name="cmd" value="ContactManageRegPersonCmd"/>');
+		
+		$frm.append('<input type="hidden" name="PartnerNum" value="'+$j('[name=createForm] [name=RELATED_BP]').val()+'" />');
+		$frm.append('<input type="hidden" name="FirstNm" value="'+$j('[name=createForm] [name=NAME_FIRST]').val()+'" />');
+		$frm.append('<input type="hidden" name="Telephone" value="'+$j('[name=createForm] [name=OFFICE_PHONE]').val()+'" />');//IV_OFFICEPHON_NUM
+		$frm.append('<input type="hidden" name="Mobile" value="'+$j('[name=createForm] [name=MOBILE_PHONE]').val()+'" />');
+		$frm.append('<input type="hidden" name="Email" value="'+$j('[name=createForm] [name=EMAIL]').val()+'" />');
+		$frm.append('<input type="hidden" name="CountryKey" value="'+$j('[name=createForm] [name=COUNTRY]').val()+'" />');
+		$frm.append('<input type="hidden" name="PostCode" value="'+$j('[name=createForm] [name=POST_CODE]').val()+'" />');
+		$frm.append('<input type="hidden" name="Region" value="'+$j('[name=createForm] [name=REGION_CODE]').val()+'" />');
+		$frm.append('<input type="hidden" name="City" value="'+$j('[name=createForm] [name=CITY]').val()+'" />');
+		$frm.append('<input type="hidden" name="IV_DISTRICT" value="'+$j('[name=createForm] [name=DISTRICT]').val()+'" />');
+		$frm.append('<input type="hidden" name="Street" value="'+$j('[name=createForm] [name=STREET1]').val()+'" />');
+		$frm.append('<input type="hidden" name="IV_TITLE" value="'+$j('[name=createForm] [name=TITLE]').val()+'" />');
+		$frm.append('<input type="hidden" name="IV_OFFICE_PHONE_EXT" value="'+$j('[name=createForm] [name=OFFICE_PHONE_EXT]').val()+'" />');
+		$frm.append('<input type="hidden" name="IV_HOUSE_NO" value="'+$j('[name=createForm] [name=AREA_CODE]').val()+'" />');
+		$frm.append('<input type="hidden" name="Flag" value="W" />');
+		$frm.append('<input type="hidden" name="IV_DATA_ORIGIN" value="ASCT" />');
+		
+		$j('body').append($frm);
+		AjaxRequest(urlPattern,formId, afterCreateB2bContact);
+	}
+
+	function afterCreateB2bContact(response){
+		$('pagingProcess').stopWaiting();
+		var jsonObj = eval('('+response.responseText+')');
+		if (jsonObj.error) {
+			cfExceptionPop(jsonObj);
+		}
+		if (jsonObj.success) {
+			if(jsonObj.returnMessage != ""){
+				alert(jsonObj.returnMessage);
+			}
+			if(jsonObj.returnBpCode != ""){
+				alert('success');
+				selectCustomer(jsonObj.returnBpCode);
+			}
+		}else{
+			alert('error');
+		}
+	}
+	function setCOUNTRY(){
+		$('codeForm').action = urlPattern;
+		$('codeForm').cmd.value = 'CICCodeSearchCmd';
+		$('CODE_GROUP').value = 'COUNTRY';
+		AjaxSyncRequest(urlPattern, "codeForm", getCOUNTRY);
+	}
+
+	var jsonCountryObj = null;
+	function getCOUNTRY(response){
+		var jsonCodeObj = eval('('+response.responseText+')');
+		jsonCountryObj = jsonCodeObj;
+		
+		var CountryObj = $('createForm').COUNTRY;
+		setCOUNTRYObj(jsonCountryObj, CountryObj);
+		$j(CountryObj).val('IN');
+
+	    if (jsonCodeObj.error) {
+	        cfExceptionPop(jsonCodeObj);
+	    }
+	}
+	
+	function setCOUNTRYObj(jsonCodeObj, COUNTRYObj){
+		COUNTRYObj.length = 0;//init 
+		var length = jsonCodeObj.EtCodeInfo.length;
+		for (var i = 0; i < length; i++) {
+			var objOption = 
+				$j('<option value="'+jsonCodeObj.EtCodeInfo[i].CODE_VALUE+'">'+jsonCodeObj.EtCodeInfo[i].CODE_TEXT+'</option>');
+			$j(COUNTRYObj).append(objOption);
+		}
+	}
+	function baiduAddrCheck(formId){
+		var digit = /[^0-9]/g;
+		/* 성/시/구/상세주소 바이두IF시 주소값이 올바르지 않으면 성/시/구 대표좌표로 리턴됨. 
+		*  성/시/구 3자리 주소값과 성/시/구/상세주소 4자리 주소값을 동시에 IF하여 리턴되는 값을 비교
+		*  리턴되는좌표가 다르면 올바른 주소로 간주 / 좌표가 같으면 틀린주소로 판단
+		*  주소검증3회 이후로는 검증하지 않고 PASS처리
+		*/
+		if(formId == "createForm"){
+			if ($('createForm').NAME_FIRST.value.length > 0  && !digit.test($('createForm').NAME_FIRST.value.substr(0,1))) {
+				alert('Please fill in the name of customer correctly');
+				return;
+			}
+			if ($('createForm').REGION_CODE.value == '') {
+				alert('State is mandatory field.');
+				$('createForm').REGION_CODE.focus();	
+				return;
+			}
+			if ($('createForm').CITY.value == '') {
+				alert('City is mandatory field.');
+				$('createForm').CITY.focus();	
+				return;
+			}
+			if ($('createForm').DISTRICT.value == '') {
+				alert('District is mandatory field.');
+				$('createForm').DISTRICT.focus();	
+				return;
+			}
+			if ($('createForm').STREET1.value == '') {
+				alert('Street1 is mandatory field.');
+				$('createForm').STREET1.focus();	
+				return;
+			}
+			if(hasSpecialCode($('createForm').STREET1.value)){
+				alert("Special characters can not be entered in the address.");
+				$('createForm').STREET1.focus();
+				return;
+			}	
+		}else{
+			if ($('changeForm').NAME_FIRST.value.length > 0  && !digit.test($('changeForm').NAME_FIRST.value.substr(0,1))) {
+				alert('Please fill in the name of customer correctly');
+				return;
+			}
+			if ($('changeForm').STREET1.value == '') {
+				alert('Street1 is mandatory field.');
+				$('changeForm').STREET1.focus();	
+				
+				return;
+			}
+			if(hasSpecialCode($('changeForm').STREET1.value)){
+				alert("Special characters can not be entered in the address.");
+				$('changeForm').STREET1.focus();
+				
+				return;
+			}			
+		}//if(formId == "createForm"){
+		
+		if(formId == "createForm"){
+            doSave(0,0);
+        }else{
+            doChangeSave(0,0);
+        }
+		
+	}
+	function hasSpecialCode(value){
+		//- 외 특수문자는 제외	
+		var filter = /[\{\}\[\]\/?.,;:|\)*~`!^\_+<>@\#$%&\\\=\(\'\"]/gi;
+		if(filter.test(value)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+</script>
+
+
+
+
+<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
+
+  <tbody><tr>
+    <td valign="top">
+	<!-- Popup title 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+      	
+        	<td class="pop_title">Customer Search </td>
+        
+		<td class="popT_bg"></td>
+      </tr>
+      <tr>
+        <td nowrap="" class="popT_sd"><img src="./PopCustomerSearch.jsp_files/popT_sd_01.gif" width="231" height="9"></td>
+		<td nowrap="" class="popT_sd"></td>
+      </tr>
+    </tbody></table>
+	<!-- Popup title 시작 -->	</td>
+  </tr>
+  <tr>
+    <td height="100%" class="pop_pad">
+	  <!-- 본문영역 삽입부분 -->
+	<form name="codeForm" id="codeForm" method="post" action="https://biz2.samsungcsportal.com/gspn/operate.do">
+	<input type="hidden" name="cmd" id="cmd" value="CICCodeSearchCmd">
+	<input type="hidden" name="CODE_GROUP" id="CODE_GROUP" value="REGION">
+	<input type="hidden" name="UPPER_GROUP" id="UPPER_GROUP" value="COUNTRY">
+	<input type="hidden" name="UPPER_VALUE" id="UPPER_VALUE" value="IN">
+	<input type="hidden" name="company" id="company" value="C550">
+	<input type="hidden" name="country" id="country" value="IN">
+	<input type="hidden" name="regionCode" id="regionCode" value="AS">
+	<input type="hidden" id="cityFlag" name="cityFlag" value="N">
+	<input type="hidden" id="postalFlag" name="postalFlag" value="N">
+	</form>
+
+	<form name="timeForm" id="timeForm" method="post">
+	   <input type="hidden" name="cmd" id="cmd" value="CurrentDateTimeFromGcicCmd">
+	   <input type="hidden" name="IV_ASC_CODE" id="IV_ASC_CODE" value="0006423261">
+	</form>
+    <form name="searchForm" id="searchForm" method="post" action="https://biz2.samsungcsportal.com/gspn/operate.do">
+    <input type="hidden" id="cmd" name="cmd" value="SVCPopCustomerDetailCmd">
+    <input type="hidden" id="numPerPage" name="numPerPage" value="">
+    <input type="hidden" id="currPage" name="currPage" value="">
+    <input type="hidden" id="SVCRequestNo" name="SVCRequestNo" value="false">
+    <input type="hidden" id="BP_NO" name="BP_NO" value="6884683658">
+    <input type="hidden" id="MODEL" name="MODEL" value="AR60H19D13WNNA">
+    <input type="hidden" id="SERIAL_NO" name="SERIAL_NO" value="05Y4PPCL104160R">
+    <input type="hidden" id="IMEI" name="IMEI" value="">
+    <input type="hidden" id="bpKind" name="bpKind" value="">
+    <input type="hidden" id="IV_C_CHANNEL" name="IV_C_CHANNEL" value="">
+    <input type="hidden" id="IV_DIVISION" name="IV_DIVISION" value="">
+    
+    	<input type="hidden" name="country" id="country" value="IN">
+    
+    <input type="hidden" name="IV_ASC_CODE" id="IV_ASC_CODE" value="0006423261">
+    <input type="hidden" id="Sequence" name="Sequence" value="">
+
+	  
+	  <!-- 버튼 테이블 시작 -->
+	    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tbody><tr>
+                <td width="100%"> </td>
+				
+                 <td class="btn_pad2">
+				                
+                    <!-- 버튼 1 시작 -->
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody><tr>
+                            <td nowrap="" class="btn_left">&nbsp; </td>
+                            <td nowrap="" class="btn"><a href="javascript:createNew(0,0);">New</a></td>
+                            <td nowrap="" class="btn_right">&nbsp; </td>
+                        </tr>
+                    </tbody></table>
+                    <!-- 버튼 1 끝 -->
+                </td>
+            </tr>
+        </tbody></table>
+	    <!-- 버튼 테이블 끝 -->
+	    
+
+	  <!-- search table 시작 -->
+	  <table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr" id="divSearchCondition">
+	  		  
+              <tbody><tr>
+                  <td class="ser_ti">Customer Name
+                  </td>
+                  <td colspan="3" class="ser_td">
+	                   
+	                       <input name="firstName" id="firstName" type="text" class="input" value="" onkeydown="if(event.keyCode == 13){displaySearch(0,0);}" title="First Name">
+		                   <input name="lastName" id="lastName" type="text" class="input" value="" onkeydown="if(event.keyCode == 13){displaySearch(0,0);}" title="Last Name">
+                       
+	              </td>
+	              <td rowspan="0" class="serB_bg">
+                  	
+                        <!-- 검색버튼 시작 -->
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody><tr>
+                                <td nowrap="" class="ser_btn_left">&nbsp;</td>
+                                <td nowrap="" class="ser_btn"><a href="javascript:void(0);" onclick="javascript:displaySearch(0,0);">Search</a></td>
+                                <td nowrap="" class="ser_btn_right">&nbsp;</td>
+                            </tr>
+                          </tbody></table>
+                          <br>
+                         <table width="100%" border="0" cellspacing="0" cellpadding="0" id="btnSearchBySA" style="display:none">
+                            <tbody><tr>
+                                <td nowrap="" class="ser_btn_left">&nbsp;</td>
+                                <td nowrap="" class="ser_btn"><a href="javascript:void(0);" onclick="javascript:displaySearchfromSA();">Search by SA</a></td>
+                                <td nowrap="" class="ser_btn_right">&nbsp;</td>
+                            </tr>
+                          </tbody></table>
+                        <!-- 검색버튼 끝 -->
+                    
+                  </td>
+              </tr>
+              <tr>
+				  <td width="100" class="ser_ti">Tel No </td>
+				  <td colspan="3" class="ser_td"><input name="phone" id="phone" type="text" class="input" value="" onkeydown="if(event.keyCode == 13){displaySearch(0,0);}"></td>
+              </tr>
+	          <tr>
+		          <td width="100" class="ser_ti">Unique ID </td>
+		          <td colspan="3" class="ser_td"><input name="uniqueID" id="uniqueID" type="text" class="input" onkeydown="if(event.keyCode == 13){displaySearch(0,0);}"></td>
+	          </tr>
+	          <tr>
+	              <td width="100" class="ser_ti">Customer No </td>
+	              <td colspan="3" class="ser_td"><input name="bpno" id="bpno" value="6884683658" type="text" class="input" onkeydown="if(event.keyCode == 13){displaySearch(0,0);}">
+	              	<span id="spanDealerDiv" style="">
+            			<input type="checkbox" id="chkDealer" name="chkDealer"> Dealer 
+            		</span>
+	              </td>
+              </tr>
+            
+              <tr>
+	              <td width="100" class="ser_ti">E-Mail </td>
+		          <td colspan="3" class="ser_td"><input name="IV_EMAIL" id="IV_EMAIL" type="text" class="input"></td>
+              </tr>
+              <!-- 
+              <tr>
+	              <td width="100" class="ser_ti">Samsung Account </td>
+		          <td colspan="3" class="ser_td"><input name="IV_ACCOUNT_ID" id="IV_ACCOUNT_ID"type="text" class="input" ></td>
+              </tr>
+              -->
+			
+      </tbody></table>
+	  <!-- search table 끝 -->
+
+	  <!-- 고객생성시 Save버튼 테이블 시작 -->
+	  <div id="divbuttonsave" style="">
+	    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+	    	<tbody><tr>
+                <td width="100%" class="subtitle">Customer Information  </td>
+                <td class="btn_pad">
+
+					<!-- 버튼 1 시작 -->
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody><tr>
+                            <td nowrap="" class="btn_left">&nbsp; </td>
+                            <td nowrap="" class="btn">
+                            
+                            	<a href="javascript:doSave(0,0);">Save</a>
+                            
+                            </td>
+                            <td nowrap="" class="btn_right">&nbsp; </td>
+                        </tr>
+                    </tbody></table>
+                    <!-- 버튼 1 끝 -->
+                </td>
+			
+            </tr>
+        </tbody></table>
+      </div>
+	    <!-- 고객생성시 Save버튼 테이블 끝 -->
+	    <!-- 고객수정시 Save버튼 시작 -->
+    <div id="divbuttonchangesave" style="display:none;">
+    	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+           <tbody><tr>
+               <td width="100%" class="subtitle">Customer Information  </td>
+               <td class="btn_pad">
+                   <!-- 버튼 1 시작 -->
+                   <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                       <tbody><tr>
+                           <td nowrap="" class="btn_left">&nbsp; </td>
+                           <td nowrap="" class="btn">
+                            
+	                           <a href="javascript:doChangeSave(0,0);">Save</a>
+                            
+                           </td>
+                           <td nowrap="" class="btn_right">&nbsp; </td>
+                       </tr>
+                   </tbody></table>
+                   <!-- 버튼 1 끝 -->
+               </td>
+
+            </tr>
+        </tbody></table>
+      </div>
+	    <!-- 고객수정시 Save버튼 테이블 끝 -->
+
+   <!-- 고객상세정보change버튼 테이블 시작 -->
+   <div id="divbuttonchange" style="display: none;">
+	   <!-- 여백 테이블 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	      <tbody><tr>
+	        <td class="td_pad"></td>
+	      </tr>
+	    </tbody></table>
+		<!-- 여백테이블 끝 -->
+	    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tbody><tr>
+                <td width="100%"> </td>
+                
+                <td class="btn_pad">
+                    <!-- 버튼 1 시작 -->
+                    
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody><tr>
+                            <td nowrap="" class="btn_left">&nbsp; </td>
+                            <td nowrap="" class="btn"><a href="javascript:doConfirm();">Confirm</a></td>
+                            <td nowrap="" class="btn_right">&nbsp; </td>
+                        </tr>
+                    </tbody></table>
+                    
+                    <!-- 버튼 1 끝 -->
+                </td>
+				<td id="btnChangePad" name="btnChangePad" class="btn_pad">
+                    <!-- 버튼 2 시작 -->
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody><tr>
+                            <td nowrap="" class="btn_left">&nbsp; </td>
+                            <td nowrap="" class="btn"><a href="javascript:doChange(0,0);">Change</a></td>
+                            <td nowrap="" class="btn_right">&nbsp; </td>
+                        </tr>
+                    </tbody></table>
+                    <!-- 버튼 2 끝 -->
+                </td>
+				<td class="btn_pad">
+					
+                    <!-- 버튼 3 시작 -->
+                    
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+					
+                        <tbody><tr>
+                            <td nowrap="" class="btn_left">&nbsp; </td>
+                            <td nowrap="" class="btn"><a href="javascript:goBack();">Back</a></td>
+                            <td nowrap="" class="btn_right">&nbsp; </td>
+                        </tr>
+                    </tbody></table>
+                    <!-- 버튼 3 끝 -->
+                    
+                </td>
+            </tr>
+        </tbody></table>
+		<!-- 여백 테이블 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	      <tbody><tr>
+	        <td height="4px"></td>
+	      </tr>
+	    </tbody></table>
+		<!-- 여백테이블 끝 -->
+      </div>
+      <!-- 고객상세정보change버튼 테이블 끝 -->
+
+
+
+	  <!-- list table 시작 -->
+	<div id="divcustomerlist" style="display: none;">
+		<!-- 여백 테이블 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	      <tbody><tr>
+	        <td class="td_pad"></td>
+	      </tr>
+	    </tbody></table>
+		<!-- 여백테이블 끝 -->
+		<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr">
+	      <tbody><tr>
+	        <td width="40" class="tb_ti">No</td>
+	        <td width="120" class="tb_ti">Customer Name </td>
+	        
+	        <td class="tb_ti">Address</td>
+	        <td width="80" class="tb_ti">Zip Code </td>
+	        
+	        <td width="80" class="tb_ti">Country(Region) </td>
+	        
+	        
+	        <td width="100" class="tb_ti">Tel No </td>
+	        <td width="100" class="tb_ti">Mobile No</td>
+	        
+	        <td width="120" class="tb_ti">Unique ID </td>
+			
+	        </tr>
+			</tbody><tbody id="searchContentTableBody"></tbody>
+		</table>
+	
+		<!-- page viewer 시작 -->
+		<div id="pagingProcess" class="paging"><a href="javascript:gridDetailDraw(0,0);" class="btn_first_arrow" title="First Page"><span>&nbsp;</span></a><a href="javascript:gridDetailDraw(0,0);" class="btn_prev_arrow"><span>&nbsp;</span></a><a href="javascript:gridDetailDraw(0,0);" class="prev">Prev.</a><a href="javascript:gridDetailDraw(0,0);" class="page_num cur">1</a><a href="javascript:gridDetailDraw(0,0);" class="next">Next</a><a href="javascript:gridDetailDraw(0,0);" class="btn_next_arrow"><span>&nbsp;</span></a><a href="javascript:gridDetailDraw(0,0);" class="btn_last_arrow" title="Last Page"><span></span></a></div><table width="100%" border="0" cellspacing="0" cellpadding="0">
+	      <tbody><tr>
+	        <td width="20%">&nbsp;</td>
+	            <!-- paging (Start) -->
+				
+				<!-- paging (End) -->
+	         <td width="20%" class="btn_padD">
+			 </td>
+	      </tr>
+	    </tbody></table>
+		<!-- page viewer 끝 -->
+    </div>
+		<!-- list table 끝 -->
+
+
+	<!-- detail information 시작 -->
+	<div id="divcustomerdetail" style="display: none;">
+	<table width="100%" border="0" cellspacing="1" cellpadding="0" class="sertb_brdr">
+        <tbody><tr>
+            <td width="120" class="viewB_ti">
+			Customer
+            </td>
+            <td class="ser_td">
+            
+                <input name="D_TITLE" id="D_TITLE" type="text" class="inputRO" readonly="">
+                
+	                <input name="D_NAME_FIRST" id="D_NAME_FIRST" type="text" class="inputRO" readonly="">
+                	<input name="D_NAME_LAST" id="D_NAME_LAST" type="text" class="inputRO" readonly="">
+                
+                <input name="D_CONSUMER" id="D_CONSUMER" type="text" class="inputRO" readonly="">
+                <br>
+                <input name="D_SAMSUNG_ACCOUNT" id="D_SAMSUNG_ACCOUNT" type="text" class="inputRO" readonly="">
+			
+			</td>
+        </tr>
+        <tr>
+        	<!-- Lang combobox 추가 jiw 2015.01.15 -->
+            <td class="viewB_ti">gender/ID/Prefer/Lang</td>
+            <td class="ser_td">
+                <input name="D_GENDER" id="D_GENDER" type="text" class="inputRO" readonly="">
+                <input name="D_UNIQUE_ID" id="D_UNIQUE_ID" type="text" class="inputRO" readonly="">
+                <input name="D_PREFERENCE_CHANNEL" id="D_PREFERENCE_CHANNEL" type="text" class="inputRO" readonly="">
+                <input name="D_LANGU" id="D_LANGU" type="text" class="inputRO" readonly=""></td>
+        
+        </tr>
+        <tr>
+            <td class="viewB_ti">TEL (Home/Office/Ext.)</td>
+            <td class="ser_td"><input name="D_HOME_PHONE" id="D_HOME_PHONE" type="text" class="inputRO" style="width:220" readonly="">
+                <input name="D_OFFICE_PHONE" id="D_OFFICE_PHONE" type="text" class="inputRO" readonly="">
+                <input name="D_OFFICE_PHONE_EXT" id="D_OFFICE_PHONE_EXT" type="text" class="inputRO" style="width:80" readonly=""></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">TEL (Mobile/Fax)</td>
+            <td class="ser_td"><input name="D_MOBILE_PHONE" id="D_MOBILE_PHONE" type="text" class="inputRO" style="width:223" readonly="">
+                <input name="D_FAX" id="D_FAX" type="text" class="inputRO" style="width:230" readonly=""></td>
+        </tr>
+        
+        <tr>
+            <td class="viewB_ti">E-Mail<!-- /--> / Contact Permission</td>
+            <td class="ser_td"><input name="D_EMAIL" id="D_EMAIL" type="text" class="inputRO" style="width:300" readonly=""><!--  -->
+            <input name="D_CONTACT_FLAG" id="D_CONTACT_FLAG" type="text" class="inputRO" readonly=""></td>
+        </tr>
+        
+        <tr>
+            <td class="viewB_ti">Street 1,2,3</td>
+            <td class="ser_td"><input name="D_STREET1" id="D_STREET1" type="text" class="inputRO" style="width:500" readonly="">
+                <input name="D_STREET2" id="D_STREET2" type="text" class="inputRO" style="width:250" readonly="">
+                <input name="D_STREET3" id="D_STREET3" type="text" class="inputRO" style="width:250" readonly=""></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">District/City</td>
+            <td class="ser_td"><input name="D_DISTRICT" id="D_DISTRICT" type="text" class="inputRO" style="width:200" readonly="">
+                <input name="D_CITY" id="D_CITY" type="text" class="inputRO" style="width:200" readonly="">
+				<input name="D_CITY_CODE" id="D_CITY_CODE" type="text" class="inputRO" style="width:200" readonly=""></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">State/
+            Country(Region)/Zip Code </td>
+            <td class="ser_td"><input name="D_REGION_CODE" id="D_REGION_CODE" type="hidden" class="inputRO" style="width:125" readonly="" value="">
+                <input name="D_REGION" id="D_REGION" type="text" class="inputRO" style="width:100" readonly="">
+                <input name="D_COUNTRY" id="D_COUNTRY" type="text" class="inputRO" style="width:100" readonly="">
+                <input name="D_POST_CODE" id="D_POST_CODE" type="text" class="inputRO" style="width:110" readonly=""></td>
+        </tr>
+		
+    </tbody></table>
+    </div>
+   <!-- detail information end -->
+    </form>
+
+    <form name="changeForm" id="changeForm" method="post">
+    <input type="hidden" id="cmd" name="cmd" value="">
+    <input type="hidden" id="numPerPage" name="numPerPage" value="">
+    <input type="hidden" id="currPage" name="currPage" value="">
+	<input type="hidden" id="ascCode" name="ascCode" value="0006423261">
+
+
+  <!-- detail information change시작 -->
+	<div id="divcustomerchange" style="display:none;">
+	
+	<table width="100%" border="0" cellspacing="1" cellpadding="0" class="sertb_brdr">
+        <tbody><tr>
+            <td width="120" class="viewB_ti">Customer</td>
+            <td class="ser_td">
+				 <select id="BP_TYPE" name="BP_TYPE" class="selectSN"><option value="C001">General Customer</option><option value="D001">Dealer</option></select>
+                <!--%=resource.getCodeComboBoxRender("BP_TITIL", "TITLE", "", "class='selectSN'") %-->
+				<select id="TITLE" name="TITLE" class="selectSN"> <option value="IN03">Company</option><option value="IN04">Dr.</option><option value="IN01">Mr.</option><option value="IN02">Ms.</option></select>
+                
+	                <input name="NAME_FIRST" id="NAME_FIRST" type="text" class="inputIDS">
+                	<input name="NAME_LAST" id="NAME_LAST" type="text" class="inputIDS">
+                
+                <input name="CONSUMER" id="CONSUMER" type="text" class="input" readonly="">
+                <input name="SAMSUNG_ACCOUNT" id="SAMSUNG_ACCOUNT" type="text" class="input" readonly="">
+			</td>
+        </tr>
+        <tr>
+        	<!-- Lang combobox 추가 jiw 2015.01.15 -->
+            <td class="viewB_ti">gender/ID/Prefer/Lang</td>
+            <td class="ser_td">
+                <select id="GENDER" name="GENDER" class="selectSN"><option value="F">Female</option><option value="M">Male</option></select>
+                <input name="UNIQUE_ID" id="UNIQUE_ID" type="text" class="input">
+                 <select id="PREFERENCE_CHANNEL" name="PREFERENCE_CHANNEL" class="selectSN"><option value="H">Home Phone</option><option value="M">Mobile</option><option value="O">Office Phone</option></select><select id="LANGU" name="LANGU" class="selectSN"><option value="">----- select -----</option><option value="6B">Bengali_IN</option><option value="EN">English</option><option value="GU">Gujarati</option><option value="HI">Hindi</option><option value="KN">Kannada</option><option value="ML">Malayalam</option><option value="OR">Oriya</option><option value="SI">Sinhalese</option><option value="TA">Tamil</option><option value="TE">Telugu</option></select>
+            </td>
+        
+        </tr>
+        <tr>
+            <td class="viewB_ti">TEL (Home/Office/Ext.)</td>
+            <td class="ser_td"><input name="HOME_PHONE" id="HOME_PHONE" type="text" class="input" style="width:220" onkeypress="return onlyNumeric(event);">
+                <input name="OFFICE_PHONE" id="OFFICE_PHONE" type="text" class="input" onkeypress="return onlyNumeric(event);">
+                <input name="OFFICE_PHONE_EXT" id="OFFICE_PHONE_EXT" type="text" class="input" style="width:80" onkeypress="return onlyNumeric(event);"></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">TEL (Mobile/Fax)</td>
+            <td class="ser_td"><input name="MOBILE_PHONE" id="MOBILE_PHONE" type="text" class="input" style="width:223" onkeypress="return onlyNumeric(event);">
+                <input name="FAX" id="FAX" type="text" class="input" style="width:230" onkeypress="return onlyNumeric(event);"></td>
+        </tr>
+        
+        
+        <tr>
+            <td class="viewB_ti">E-Mail<!-- /-->
+             / Contact Permission
+            </td>
+            <td class="ser_td">
+            	<input name="EMAIL" id="EMAIL" type="text" class="input" style="width:300">
+            		<!-- -->
+		            
+					  <input type="hidden" id="CONTACT_FLAG" name="CONTACT_FLAG" value="3">
+					
+        </td></tr>
+        <tr>
+            <td class="viewB_ti">Street 1,2,3</td>
+            <td class="ser_td"><input name="STREET1" id="STREET1" type="text" class="input style=" width:500"="">
+                <input name="STREET2" id="STREET2" type="text" class="input" style="width:250">
+
+                <input name="STREET3" id="STREET3" type="text" class="input" style="width:250"></td>
+
+        </tr>
+        <tr>
+            <td class="viewB_ti">District/City</td>
+            <td class="ser_td">
+
+            <input name="DISTRICT" id="DISTRICT" type="text" class="input" style="width:200">
+            <input name="CITY" id="CITY" type="text" class="input" style="width:100">
+
+			<input name="CITY_CODE" id="CITY_CODE" type="text" class="inputRO" style="width:200" readonly=""></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">State/
+            Country(Region)/Zip Code</td>
+            <td class="ser_td"><input name="REGION" id="REGION" type="hidden" class="inputRO" value="">
+			 <select id="REGION_CODE" name="REGION_CODE" class="selectSN" onchange="setREGION_DESC(this.selectedIndex);">
+				    </select>
+                <!--input name="REGION" id="REGION" type="text" class="input" style="width:50" -->
+                <select id="COUNTRY" name="COUNTRY" class="selectSN" onchange="setCodeListRegion3(&#39;REGION&#39;);">
+				    <option value="BD">Bangladesh</option><option value="BT">Bhutan</option><option value="IN">INDIA</option><option value="MV">Maldives</option><option value="NP">Nepal</option><option value="LK">Sri Lanka</option></select>
+				<!--input name="COUNTRY" id="COUNTRY" type="text" class="inputRO" style="width:100" -->
+                 <input name="POST_CODE" id="POST_CODE" type="text" class="input" style="width:110;background-color:#efefef" readonly="" "="">
+                </td>
+        </tr>
+    </tbody></table>
+	
+    </div>
+   <!-- detail information change end -->
+
+    </form>
+
+    <form name="createForm" id="createForm" method="post">
+    <input type="hidden" id="cmd" name="cmd" value="">
+    <input type="hidden" id="numPerPage" name="numPerPage" value="">
+    <input type="hidden" id="currPage" name="currPage" value="">
+
+   <!-- create information start -->
+  <div id="divcustomercreate" style="">
+	  
+	<table width="100%" border="0" cellspacing="1" cellpadding="0" class="sertb_brdr">
+        <tbody><tr>
+            <td width="120" class="viewB_ti">Customer</td>
+            <td class="ser_td">
+				<select id="BP_TYPE" name="BP_TYPE" class="selectSN"><option value="C001">General Customer</option><option value="D001">Dealer</option></select>
+				<select id="TITLE" name="TITLE" class="selectSN" onchange="javascript:changeGender(this.value);"> <option value="IN03">Company</option><option value="IN04">Dr.</option><option value="IN01">Mr.</option><option value="IN02">Ms.</option></select>
+                <!--%=resource.getCodeComboBoxRender("BP_TITIL", "TITLE", "", "class='selectSN'") %-->
+               	
+	                <input name="NAME_FIRST" id="NAME_FIRST" type="text" class="inputIDS">
+                <input name="NAME_LAST" id="NAME_LAST" type="text" class="inputIDS">
+                
+        </td></tr>
+        <tr>
+        	<!-- Lang combobox 추가 jiw 2015.01.15 -->
+            <td class="viewB_ti">gender/ID/Prefer/Lang</td>
+            <td class="ser_td">
+                <select id="GENDER" name="GENDER" class="selectSN"><option value="F" selected="">Female</option><option value="M">Male</option></select>
+                <input name="UNIQUE_ID" id="UNIQUE_ID" type="text" class="input">
+                 <select id="PREFERENCE_CHANNEL" name="PREFERENCE_CHANNEL" class="selectSN"><option value="H">Home Phone</option><option value="M">Mobile</option><option value="O">Office Phone</option></select><select id="LANGU" name="LANGU" class="selectSN"><option value="">----- select -----</option><option value="6B">Bengali_IN</option><option value="EN">English</option><option value="GU">Gujarati</option><option value="HI">Hindi</option><option value="KN">Kannada</option><option value="ML">Malayalam</option><option value="OR">Oriya</option><option value="SI">Sinhalese</option><option value="TA">Tamil</option><option value="TE">Telugu</option></select>
+            </td>
+        
+        </tr>
+        <tr>
+            <td class="viewB_ti">TEL (Home/Office/Ext.)</td>
+            <td class="ser_td"><input name="HOME_PHONE" id="HOME_PHONE" type="text" class="input" style="width:220" onkeypress="return onlyNumeric(event);">
+                <input name="OFFICE_PHONE" id="OFFICE_PHONE" type="text" class="input" onkeypress="return onlyNumeric(event);">
+                <input name="OFFICE_PHONE_EXT" id="OFFICE_PHONE_EXT" type="text" class="input" style="width:80" onkeypress="return onlyNumeric(event);"></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">TEL (Mobile/Fax)</td>
+            <td class="ser_td"><input name="MOBILE_PHONE" id="MOBILE_PHONE" type="text" class="input" style="width:223" onkeypress="return onlyNumeric(event);">
+                <input name="FAX" id="FAX" type="text" class="input" style="width:230" onkeypress="return onlyNumeric(event);"></td>
+        </tr>
+        
+        <tr>
+            <td class="viewB_ti">E-Mail<!-- /--> / Contact Permission</td>
+            <td class="ser_td"><input name="EMAIL" id="EMAIL" type="text" class="input" width="300"><!-- -->
+<select id="CONTACT_FLAG" name="CONTACT_FLAG" class="selectSN" disabled=""><option value="1">Allowed</option><option value="2">Disallowed</option><option value="3" selected="">Check Permission</option></select>
+        </td></tr>
+        <tr>
+            <td class="viewB_ti">Street 1,2,3</td>
+            <td class="ser_td">
+            	<input name="STREET1" id="STREET1" type="text" class="input" style="width:500">
+                <input name="STREET2" id="STREET2" type="text" class="input" style="width:250">
+
+                <input name="STREET3" id="STREET3" type="text" class="input" style="width:250"></td>
+
+      </tr>
+        <tr>
+            <td class="viewB_ti">District/City</td>
+            <td class="ser_td">
+
+			<input name="DISTRICT" id="DISTRICT" type="text" class="input" style="width:200">
+            <input name="CITY" id="CITY" type="text" class="input" style="width:100">
+
+			<input name="CITY_CODE" id="CITY_CODE" type="text" class="inputRO" style="width:200" readonly=""></td>
+        </tr>
+        <tr>
+            <td class="viewB_ti">State/
+				Country(Region)/Zip Code</td>
+            <td class="ser_td"><input name="REGION" id="REGION" type="hidden" class="input" style="width:125" value="--------">
+				<select id="REGION_CODE" name="REGION_CODE" class="selectSN" onchange="setREGION_DESC2(this.selectedIndex);"> <option value="">--------</option><option value="09">01-Jammu &amp; Kashmir</option><option value="08">02-Himachal Pradesh</option><option value="19">03-Punjab</option><option value="27">04-Chandigarh</option><option value="34">05-Uttarakhand</option><option value="07">06-Haryana</option><option value="30">07-Delhi</option><option value="20">08-Rajasthan</option><option value="24">09-Uttar Pradesh</option><option value="04">10-Bihar</option><option value="21">11-Sikkim</option><option value="02">12-Arunachal Pradesh</option><option value="17">13-Nagaland</option><option value="14">14-Manipur</option><option value="16">15-Mizoram</option><option value="23">16-Tripura</option><option value="15">17-Meghalaya</option><option value="03">18-Assam</option><option value="25">19-West Bengal</option><option value="33">20-Jharkhand</option><option value="18">21-Odisha</option><option value="35">22-Chattisgarh</option><option value="12">23-Madhya Pradesh</option><option value="06">24-Gujarat</option><option value="29">25-Daman &amp; Diu</option><option value="28">26-Dadra &amp; Nagar Hav</option><option value="13">27-Maharashtra</option><option value="10">29-Karnataka</option><option value="05">30-Goa</option><option value="31">31-Lakshadweep In.</option><option value="11">32-Kerala</option><option value="22">33-Tamil Nadu</option><option value="32">34-Pondicherry</option><option value="26">35-Andaman &amp; Nico.In</option><option value="36">36-Telangana</option><option value="01">37-Andhra Pradesh</option><option value="37">38-Ladakh</option><option value="B1">Bangladesh</option><option value="A1">Dummy1</option><option value="A2">Dummy2</option><option value="A3">Dummy3</option><option value="A4">Dummy4</option><option value="A5">HO Gurugram</option><option value="99">India (General)</option><option value="A7">Region East</option><option value="A6">Region North</option><option value="A9">Region South</option><option value="A8">Region West</option><option value="B2">SriLanka</option></select>
+                <!--input name="REGION" id="REGION" type="hidden" class="inputRO" style="width:50" readonly -->
+				<select id="COUNTRY" name="COUNTRY" class="selectSN" onchange="setCodeListRegion4(&#39;REGION&#39;);"> <option value="BD">Bangladesh</option><option value="BT">Bhutan</option><option value="IN">INDIA</option><option value="MV">Maldives</option><option value="NP">Nepal</option><option value="LK">Sri Lanka</option></select>
+                <!--input name="COUNTRY" id="COUNRTY" type="text" class="input" style="width:100"-->
+                <input name="POST_CODE" id="POST_CODE" type="text" class="input" style="width:110" onkeypress="javascript:if(event.keyCode == 13){ addrSearch(0,0); return false;}">
+                <a href="javascript:addrSearch(0,0);"><img src="./PopCustomerSearch.jsp_files/btn_quick_address.gif" width="102" height="15" align="absmiddle"> <img src="./PopCustomerSearch.jsp_files/ico_quick_address.gif" width="21" height="14" align="absmiddle"></a></td>
+        </tr>
+        
+        
+		
+    </tbody></table>
+    
+    </div>
+    <!-- create information end -->
+ </form>
+ 
+ <div id="divcustomerproduct" style="display: none;">
+ 	
+
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody><tr>
+			<td class="td_pad"></td>
+		</tr>
+	</tbody></table>
+	
+
+	
+	
+	<form id="searchOrderForm" name="searchOrderForm" method="post">
+		<input type="hidden" name="cmd" value="">
+		<input type="hidden" name="objectID" value="">
+		<input type="hidden" name="ASCCODE" value="">	
+		<input type="hidden" name="jspName" value="/svctracking/common/SVCPopCustomerSearch.jsp">
+	</form>
+ 	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+        <td class="subtitle">Service Order No </td>
+      </tr>
+    </tbody></table>
+	<!-- 여백테이블 끝 -->
+	<!-- list table 시작-->
+	<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr">
+      <tbody><tr>
+		<td class="tb_ti" width="20">No</td>
+		<td class="tb_ti">Service Order No. </td>
+		<td class="tb_ti">ASC Job No </td>
+		<td class="tb_ti">Model</td>
+		<td class="tb_ti">Serial</td>
+		<td class="tb_ti">POP</td>
+		<td class="tb_ti">Service Type </td>
+		<td class="tb_ti">App Date </td>
+		<td class="tb_ti">Wty Status</td>
+		<td class="tb_ti">B2B</td>
+		<td class="tb_ti">Status</td>
+		
+      </tr>
+      </tbody><tbody id="svcOrderTableBody"><tr><td class="td_ac">1</td><td class="td_ac"><a href="javascript:svcOrderLink(&#39;4434367838&#39;, &#39;ServiceOrderDetailLiteCmd&#39;)">4434367838</a>&nbsp;&nbsp;<a href="javascript:svcOrderLink(&#39;4434367838&#39;,&#39;ZifGspnSvcMainLDCmd&#39;)">Edit</a></td><td class="td_ac">4434367838</td><td class="td_ac">AR60H19D13WNNA</td><td class="td_ac">05Y4PPCL104160R</td><td class="td_ac">N</td><td class="td_ac">Initial Installation</td><td class="td_ac">01.05.2026</td><td class="td_ac">Out of Warranty</td><td class="td_ac">N</td><td class="td_ac">Repair Completed</td></tr></tbody>
+    </table>
+	<!-- page viewer 시작 -->
+	<div id="pagingSvcOrder" class="paging"><a href="javascript:gridSvcOrderDraw(0,0);" class="btn_first_arrow" title="First Page"><span>&nbsp;</span></a><a href="javascript:gridSvcOrderDraw(0,0);" class="btn_prev_arrow"><span>&nbsp;</span></a><a href="javascript:gridSvcOrderDraw(0,0);" class="prev">Prev.</a><a href="javascript:gridSvcOrderDraw(0,0);" class="page_num cur">1</a><a href="javascript:gridSvcOrderDraw(0,0);" class="next">Next</a><a href="javascript:gridSvcOrderDraw(0,0);" class="btn_next_arrow"><span>&nbsp;</span></a><a href="javascript:gridSvcOrderDraw(0,0);" class="btn_last_arrow" title="Last Page"><span></span></a></div><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+        <td width="20%">&nbsp;</td>
+            <!-- paging (Start) -->
+			
+			<!-- paging (End) -->
+         <td width="20%" class="btn_padD">
+		 </td>
+      </tr>
+    </tbody></table>
+	<!-- page viewer 끝 -->
+	
+   <form name="detailProductForm" id="detailProductForm" method="post">
+    <input type="hidden" id="PRODUCT" name="PRODUCT" value="">
+    <input type="hidden" id="BP_NO" name="BP_NO" value="">
+    <input type="hidden" id="cmd" name="cmd" value="">
+
+
+	<!-- 상세 디스플레이 테이블 시작 -->
+	<!-- 여백 테이블 시작 -->
+	
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+        <td class="subtitle">Clients Product </td>
+      </tr>
+    </tbody></table>
+	<!-- 여백테이블 끝 -->
+	
+	  <!-- search table 시작 -->
+	  <table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+              <tbody><tr>
+                  <td class="ser_ti">Model</td>
+                  <td class="ser_td">
+                  	<input name="MODEL" id="MODEL" type="text" class="input" onkeydown="if(event.keyCode == 13){displayProductDetail(0,0,&#39;product&#39;);}">
+                  </td>
+
+                  <td class="ser_ti">Serial No</td>
+                  <td class="ser_td">
+                    <input name="SERIAL_NO" id="SERIAL_NO" type="text" class="input" onkeydown="if(event.keyCode == 13){displayProductDetail(0,0,&#39;product&#39;);}"></td>
+                  <td class="serB_bg">
+                        <!-- 검색버튼 시작 -->
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody><tr>
+                                <td nowrap="" class="ser_btn_left">&nbsp;</td>
+                                <td nowrap="" class="ser_btn"><a href="javascript:void(0);" onclick="javascript:displayProductDetail(0,0,&#39;product&#39;);">
+                                Search</a></td>
+                                <td nowrap="" class="ser_btn_right">&nbsp;</td>
+                            </tr>
+                          </tbody></table>
+                        <!-- 검색버튼 끝 -->
+                                </td>
+              </tr>              
+      </tbody></table>
+	  <!-- search table 끝 -->
+
+
+
+	<!-- 여백 테이블 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+        <td class="td_pad"></td>
+      </tr>
+    </tbody></table>
+	<!-- 여백테이블 끝 -->
+
+	
+	<!-- list table 시작 -->
+	<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr">
+      <tbody><tr>
+        <td width="20" class="tb_ti">&nbsp;</td>
+        <td width="30" class="tb_ti">&nbsp;</td>
+        <td class="tb_ti">Product</td>
+        <td width="80" class="tb_ti">Model</td>
+        <td width="80" class="tb_ti">Serial No </td>
+        <td width="80" class="tb_ti">IMEI No</td>
+        
+        <td width="100" class="tb_ti">Purchase Date </td>
+        <td width="100" class="tb_ti">Term(L)</td>
+        <td width="120" class="tb_ti">Term(P)</td>
+        <td width="100" class="tb_ti">Online Registered </td>
+      </tr>
+      </tbody><tbody id="detailContentTableBody"><tr><td class="td_ac"><input type="checkbox" name="chkObj" value="0"></td><td class="td_al">1</td><td class="td_al">ACN</td><td class="td_al">AR60H19D13WNNA</td><td class="td_al">05Y4PPCL104160R</td><td class="td_al"></td><td class="td_al">26.04.2026</td><td class="td_al">12</td><td class="td_al">12</td><td class="td_al">No</td></tr></tbody>
+
+    </table>
+	<!-- page viewer 끝 -->
+	
+</form>
+
+	
+	</div>
+	<!-- detail information 끝 -->
+	</td>
+  </tr>
+	<tr>
+		<td height="0">
+
+		</td>
+	</tr>
+
+  <tr>
+    <td class="tbR_pad">
+  <!-- copyright 시작 -->
+  
+		<!-- copyright 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tbody><tr>
+				<td colspan="2" class="btn_top"><font color="white">businessSvr2_03</font> <a href="https://biz2.samsungcsportal.com/svctracking/common/SVCPopCustomerSearch.jsp#top"> Top </a></td>
+			</tr>
+			<tr>
+				<td class="footer_bg"><img src="./PopCustomerSearch.jsp_files/footer_copyright.gif" width="373" height="36"></td>
+				<td width="80"><a href="https://biz2.samsungcsportal.com/svctracking/common/SVCPopCustomerSearch.jsp#"><img src="./PopCustomerSearch.jsp_files/verisign.gif" onclick="cfOpenBrWindow(&#39;https://sealinfo.thawte.com/thawtesplash?form_file=fdf/thawtesplash.fdf&amp;dn=*.SAMSUNGCSPORTAL.COM&amp;lang=en&#39;,&#39;VeriSignSecurelSeal&#39;,&#39;scrollbars=no,resizable=yes,width=500,height=665&#39;)"></a></td>
+			</tr>
+		</tbody></table>
+		<!-- copyright 끝 -->
+
+  <!-- copyright 끝 -->
+	</td>
+  </tr>
+</tbody></table>
+
+<script language="javascript" type="text/javascript">
+	initialize();
+</script>
+</body></html>

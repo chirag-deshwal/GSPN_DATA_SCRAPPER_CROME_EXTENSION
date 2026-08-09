@@ -1,0 +1,160 @@
+	/**
+	 * Prototype.js 와 jQuery 와의 충돌을 방지 (jQuery를 사용하는 변수에는 $ 대신 $j 를  사용)
+	 */
+	var $j = jQuery.noConflict();
+
+	
+	/**
+	 * IE and Opera
+	 */
+	if (window.attachEvent) {
+		window.attachEvent("onload", neviDir);
+		window.attachEvent("onunload", neviDir);
+	} else {
+		window.addEventListener("DOMContentLoaded", neviDir, false);
+		window.addEventListener("unload", neviDir, false);
+	}
+
+	
+	function neviDir() {
+		if (eval("parent.rightContents") == undefined) {
+			return;
+		}
+
+		if (parent.$('leftMenuForm') != null) {
+			var navigation = "";
+			var title = "";
+			var menuUrl = "";
+			if (parent.$('leftMenuForm').naviDir != null) {
+				navigation = parent.$('leftMenuForm').naviDir.value;
+			}
+			if (parent.$('leftMenuForm').titleDir != null) {
+				title = parent.$('leftMenuForm').titleDir.value;
+			}
+			var naviDir = "<img src='/img/locater_arrow.gif' width='9' height='9' align='absmiddle'> " + navigation;
+			if (parent.$('leftMenuForm').menuUrl != null) {
+				menuUrl = parent.$('leftMenuForm').menuUrl.value;
+			}
+
+			if (document.getElementById('naviDiv') != null) {
+				document.getElementById('naviDiv').innerHTML = naviDir;
+			}
+			if (document.getElementById('titleDiv') != null) {
+				document.getElementById('titleDiv').innerHTML = title;
+			}
+
+			
+            /*
+             * 미주 통합
+             - RH-002
+             - 화면상단 Support Link 제공                                 
+             - 2015-10-26
+          */  
+			if(isFEWIS){
+				addSupportLink();
+			}
+			
+			
+			if (menuUrl != "") {
+				authButton(menuUrl);
+			}
+		}
+	}
+
+	/**
+	 * Display command-registred buttons.
+	 */
+	function authButton(menuUrl) {
+		$('authForm').action = urlPattern;
+		$('authForm').cmd.value = 'AuthCommandListCmd';
+		$('authForm').menuUrl.value = menuUrl;
+		AjaxRequest(urlPattern, "authForm", setJsonObject);
+	}
+
+	function setJsonObject(response) {
+		var jsonObjBtn = eval('('+response.responseText+')');
+
+		if (jsonObjBtn.success) {
+			var length = jsonObjBtn.cmdLists.length;
+			for (var i=0; i < length; i++) {
+				if (document.getElementById(jsonObjBtn.cmdLists[i].commandId) != null) {
+					document.getElementById(jsonObjBtn.cmdLists[i].commandId).style.display = "block";
+				}
+			}
+		}
+	}
+
+	/**
+	 * Timezone 날짜 함수
+	 */
+	function calcTzDate(offset) {
+	    // create Date object for current location
+		var d = new Date();
+
+		// convert to msec
+		// add local time zone offset 
+		// get UTC time in msec
+		var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+		// create new Date object for different city
+		// using supplied offset
+		var nd = new Date(utc + (3600000*offset));
+
+		var tmpyy  = nd.getFullYear();
+		var ls_yy  = (tmpyy > 99)  ? tmpyy : 1900 + tmpyy;
+
+		var tmpmon = nd.getMonth();
+		var ls_mon = (tmpmon < 9)  ? "0" + (tmpmon + 1) : tmpmon + 1 ;
+
+		var tmpday = nd.getDate();
+		var ls_day = (tmpday < 10) ? "0" + tmpday : tmpday ;
+
+		var tmphh = nd.getHours();
+		var ls_hh = (tmphh < 10) ? "0" + tmphh : tmphh;
+
+		var tmpmm = nd.getMinutes();
+		var ls_mm = (tmpmm < 10) ? "0" + tmpmm : tmpmm;
+
+		// return time as a string
+	    return ls_yy.toString() + ls_mon.toString() + ls_day.toString();
+	}
+
+	/**
+	 * Timezone 시간 함수
+	 */
+	function calcTzTime(offset) {
+		// create Date object for current location
+		var d = new Date();
+
+		// convert to msec
+		// add local time zone offset 
+		// get UTC time in msec
+	    var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+	    // create new Date object for different city
+	    // using supplied offset
+	    var nd = new Date(utc + (3600000*offset));
+
+		var tmphh = nd.getHours();
+		var ls_hh = (tmphh < 10) ? "0" + tmphh : tmphh;
+
+		var tmpmm = nd.getMinutes();
+		var ls_mm = (tmpmm < 10) ? "0" + tmpmm : tmpmm;
+
+		// return time as a string
+	    return ls_hh.toString() + ls_mm.toString();
+	}
+
+	/**
+	 * 새로고침(F5), Ctrl+R, Ctrl+N 방지
+	 */
+	function preventRefreshEvent() {
+		if (event.keyCode == 116) {
+			event.keyCode = 2;
+			return false;
+		} else if (event.ctrlKey && (event.keyCode == 78 || event.keyCode == 82)) {
+			return false;
+		}
+	}
+
+	document.onkeydown = preventRefreshEvent;

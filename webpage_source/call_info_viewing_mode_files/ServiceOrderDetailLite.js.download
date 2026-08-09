@@ -1,0 +1,2992 @@
+
+	/*
+	* mainDivCnt : all information division number
+	* if you add new information division then increase mainDivCnt var +1
+	*/
+	var mainDivCnt = 28;
+	
+	function openAllDiv(){
+		for(var i=1;i<mainDivCnt+1;i++){
+			moreOpenid(i);
+		}
+		$j('#btnShowHideAll').html("<input type=\"button\"  value=\"" + _l.r.c.HIDEALL + "\" onclick=\"closeAllDiv()\">");
+	}
+	function closeAllDiv(){
+		for(var i=1;i<mainDivCnt+1;i++){
+			moreCloseid(i);
+		}
+		$j('#btnShowHideAll').html("<input type=\"button\"  value=\"" + _l.r.c.SHOWALL + "\" onclick=\"openAllDiv()\">");
+	}
+	function moreOpenid(val){
+		if($('moretailid'+val) != null){
+			$('btnheadid'+val).hide();  // ^ button id
+			$('btntailid'+val ).show();   // V button id
+			$('moretailid'+val).show();  // content id 
+		}
+	}
+
+	function moreCloseid(val){
+		if($('moretailid'+val) != null){
+			$('btnheadid'+val).show();  // ^ button id
+			$('btntailid'+val).hide();   // V button id
+			$('moretailid'+val).hide();  // content id
+		}
+	}
+	
+//china version intergration 2016/08/08 js1.baek
+//<%--화면 로딩시, Gas Charge, Labor체크항목을 json으로 받아놓음--%>
+var jsonGasCharge = null;
+var jsonLaborCheckList = null; 
+var jsonFreight = null;
+var jsonOther = null;
+var aryProdGroupII = null;
+//<%-- B2C/B2B별로거리가Indicator가  다르게 나와야 하는 부분세팅  --%>
+var gB2B_B2C = 'B2C';
+//<%-- SI/SR인 경우, R15 추가(2013.07.10) --%>
+var gDealerOption = "<option value='R15' title='R15'>"+_l.r.c.LBL06268+"</option>";
+//doa dap
+var newModelHhpExch = "";
+var newModelHhpExchAccessory = "";
+var newPro_Comp = "";
+var modelRbCompany = "";
+var doaReqModel = "";
+
+function initialize(){
+	
+	
+}
+//$j(document).ready(function(){
+
+//window.onload
+$j(function(){
+	var _l = window._l;
+
+	if ((_l.u.c == 'C310' || _l.u.c == 'C370') && _l.SVC_LEVEL == "BUILD") { // Builder 
+		alert(_l.u.WEB_MSG_PREFIX + _l.r.m.EXT_0589);
+	}
+	
+	function setStatusDisplay(){return;
+			var currStatus = _l.CurrStatus;
+			if(currStatus == "ST015"){ //ack
+					moreOpenid(1); moreOpenid(3); moreOpenid(4); moreOpenid(5);
+			}else if(currStatus == "ST025"){ //assign
+					moreOpenid(3); moreOpenid(4);
+			}else if(currStatus == "ST030"){ //pending
+					moreOpenid(4); moreOpenid(5);
+			}else if("ST033;ST050;ST051;ST052;ST070;ST040".indexOf(currStatus) >= 0){ //decline, cancel, trans other%>
+					moreOpenid(4); moreOpenid(5);
+			}else if(currStatus == "ST035"){ //completed
+					if(_l.isWtyClaimed){ 
+						moreOpenid(4);
+					}else{ 
+						moreOpenid(4); moreOpenid(7);
+	
+						if(isEaUser){ 
+							$("freeDeliveryTable").show();
+						}
+						if(_l.billingFlag){
+							moreOpenid(14);
+				  		}
+					}
+			}else if(currStatus == "ST040"){ //delivered
+					moreOpenid(4); moreOpenid(7); moreOpenid(14);
+			}
+	
+			if(_l.partslength > 0) {
+					moreOpenid(10);
+			}
+			if(_l.isBillingSaved){ 
+					moreOpenid(14);
+			}
+	
+			if(_l.sawlength > 0) {
+					moreOpenid(13);
+			}
+			if(_l.filelength > 0) {
+				moreOpenid(8); 
+			}
+	
+			var serviceType = _l.SERVICE_TYPE;
+			if(serviceType == "PS")
+				moreOpenid(6);
+	
+			if(_l.displayRepairScenario){
+					moreOpenid(16);
+			}
+	
+			if(_l.displayRepairHistory){
+					moreOpenid(15);
+			}
+
+			
+	}
+	openAllDiv();
+	//setStatusDisplay();
+	
+	
+	 //collection point in general information
+	function getCPList(){
+		var ccCode = $j("#CC_CODE").text();
+		if(ccCode == "" || ccCode.length != 10) return;
+		var url = urlPatternGZIP+"?";
+		url += 'cmd=CollectPntListCmd&IV_F4_FLAG=X&assignedFlag=X&shopCode='+ccCode;
+		
+		$j.get(url, function(jsonObj){
+			if (jsonObj.success && jsonObj.etCCInfoList.length > 0) {			
+				var cp = jsonObj.etCCInfoList[0];
+				$j('span #CC_CODE_NAME').text(cp.SHOP_NAME)
+			}				
+		}, 'json');
+	}//function getCPList(){
+	//china version intergration 2016/08/03 js1.baek
+	if(!isChinaRegion) getCPList();	
+	
+	 //state/region only for C310
+	function getCodeListRegion(){
+		var CountryCd = _l.u.CountryCd;				
+		if(CountryCd == "" || CountryCd.length != 2) return;
+		
+		var regionCode = $j("#REGION_CODE").text();
+		if(regionCode == "" || regionCode.lenth < 2 ) return;
+		
+		var url = urlPatternGZIP+"?";
+		url += 'cmd=CICCodeSearchCmd&CODE_GROUP=REGION&UPPER_GROUP=COUNTRY&UPPER_VALUE='+CountryCd;
+		url += '&CODE_VALUE=' + regionCode;
+		
+		$j.get(url, function(jsonObj){
+	
+			if (jsonObj.success) {
+				$j("#REGION_NAME").text(jsonObj.CODE_TEXT);				
+			}//if (jsonObj.success) {			
+			
+		}, 'json');
+	}//function getCPList(){
+	getCodeListRegion();
+	
+	//managed svc 정보 import 2016.02.22 jiw
+	function getManagedSvc(){
+	 	if(_l.SERIAL_NO == ""){
+			//alert("Please input the Serial no for getting managed svc info.");
+			return;
+		}
+		if(_l.MODEL == ""){
+			//alert("Please input the Model code for getting managed svc info.");
+			return;
+		}
+		var url = urlPatternGZIP+"?";
+		url += 'cmd=ZifGspnSvcGetManagedSvcCmd&SERIAL_NO='+ _l.SERIAL_NO +'&MODEL='+_l.MODEL;
+		$j.get(url, function(jsonObj){
+			if(jsonObj.success){
+				$("MANAGED_SVC_CODE").value = jsonObj.topCode;
+				var managedSvcDesc = "";
+				for(var i=0; i<jsonObj.etSlaDataList.length; i++){
+					if(i==0){
+						managedSvcDesc = jsonObj.etSlaDataList[i].CONTRACT_DESC;
+					}else{
+						managedSvcDesc = managedSvcDesc + ", " + jsonObj.etSlaDataList[i].CONTRACT_DESC;
+					}
+				}
+				$("MANAGED_SVC_DESC").value = managedSvcDesc;
+			}else{
+				//alert(jsonObj.returnMessage);
+				$("MANAGED_SVC_CODE").value = "";
+				$("MANAGED_SVC_DESC").value = "";
+			}			
+		}, 'json');
+	}
+	//china version intergration 2016/08/03 js1.baek
+	if(!isChinaRegion) getManagedSvc();	
+	
+	function initializePurchaseDate(obj) {
+		if (_l.purchaseDateReadOnly) {
+			setDateReadOnly(obj, true); // date.js
+		} else {
+			setDatepicker(obj); // date.js
+		}
+	}//function initializePurchaseDate(obj) {
+	initializePurchaseDate('#PURCHASE_DATE');
+	
+	
+	function initializeBOS() {
+		//china version intergration 2016/08/12 js1.baek - 중국은 displayBosAtt조건없이 호출
+		if(_l.u.isChinaRegion){
+			$('tdBOS').show();				
+			displayBosAtt(); // bosAttachment.js
+		}else{
+			if (_l.u.c == 'C310' || _l.u.c == 'C370') {
+				if(_l.u.c == 'C310'){
+					if (_l.BosBusiness_collects) {
+						$('tdBOS').show();
+						displayBosAtt(); // bosAttachment.js
+					}			
+				}else if(_l.u.c == 'C370'){
+					if (_l.BosBusiness_wisCollects) {
+						$('tdBOS').show();
+						displayBosAtt(); // bosAttachment.js
+					}
+				}
+			}else{
+				if ("Y" == _l.BOS_FLAG) {
+					
+					$('tdBOS').show();
+					
+					displayBosAtt(); // bosAttachment.js
+				}
+			}
+			
+		}//if(_l.u.isChinaRegion){		
+	}//function initializeBOS() {
+	initializeBOS(); // bos.jspf
+	
+	
+	$j("#btnMobileInterface").click(function(){
+		window.open('hhtp://gspn2.samsungcsportal.com/basis/notice/notice.do?method=detailView&noticeSeq=19227', 'mobileIFDown', 'toolbar=no,location=no,directories=no,status=no,menubar=no,resizable=yes,copyhistory=no,scrollbars=no,top=150,left=200,width=800,height=670');
+	});
+
+	
+	$j("#btnPartInfo").click(function(){
+		var url = '/master/part/PartHistory.jsp?serial=' + _l.SERIAL_NO;
+		var pop = window.open(url, 'part_info', 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=500');
+		pop.focus();				
+	});//$j("#btnPartInfo").click(function(){
+	
+	
+	$j("#btnSwapHistoryBtn").click(function(){
+		var url = "/wty/wtyclaim/SwapHistory.jsp";
+		url += "?i_model=" + _l.MODEL;
+		url += "&i_serno=" + _l.SERIAL_NO;
+		url += "&i_imei=" + _l.IMEI;
+		url += "&fldModel=MODEL";
+		url += "&fldSerno=SERIAL_NO";
+		url += "&fldImei=IMEI";
+		url += "&fldPurdt=PURCHASE_DATE";
+		url += "&form=detailForm";
+		url += "&asc_code="+_l.ASC_CODE;
+		w = window.open(url, "serial_popup", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');
+	});//$j("#btnSwapHistoryBtn").click(function(){
+		
+	
+	$j("#imgPRCExt").click(function(){				
+		if(_l.MODEL == '') {
+			alert(_l.r.m.MAND_XVALUE_00457);
+			return;
+		}
+		if (_l.SERIAL_NO == '') {
+			alert(_l.r.m.MAND_XVALUE_00748);
+		}
+		
+		var url = urlPatternGZIP+"?";
+		url += "cmd=SVCPopCustomerProductCmd";
+		url += "&CONSUMER=" + _l.CONSUMER;
+		url += "&MODEL=" + _l.MODEL;
+		url += "&SERIAL_NO=" + _l.SERIAL_NO;
+		
+		$j.get(url, function(jsonObj){
+	
+			if (jsonObj.success) {
+				$j('#spanRPCCheck').text('Yes');
+			}else{
+				$j('#spanRPCCheck').text('No');
+			}
+		}, 'json');//$j.get(url, function(jsonObj){
+		
+	});//$j("#imgPRCExt").click(function(){
+	
+	
+	$j("#btnRepairTroubleshooting").click(function(){
+		var url = "https://support-us.samsung.com/partner/dt/main.jsp" ;
+		url = url + "?account=" + _l.rtAccount;
+		url = url + "&modelcode=" + _l.rtModelCode;
+		url = url + "&company=" + _l.rtCompany;
+		url = url + "&serialno=" + _l.rtSerialNo;
+		url = url + "&symptom1=" + _l.rtSymptom1;
+		url = url + "&symptom2=" + _l.rtSymptom2;
+		url = url + "&symptom3=" + _l.rtSymptom3;
+		url = url + "&symptom4=" + _l.rtSymptom4;
+	
+		w = window.open(url, "repair_popup", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=1100,height=550');				
+	});//$j("#btnRepairTroubleshooting").click(function(){
+	
+	
+	$j("#aFirmware").click(function(e){
+		e.preventDefault();								
+		cfKnowledgeDocumentPopup(_l.MODEL, 'FM');						
+	});			
+	
+	
+	$j("#aProductInfo").click(function(e){
+		e.preventDefault();
+		
+		var url = 'http://www.samsung.com/search/search.asp?qt=' + _l.MODEL + '&la=' + _l.u.Locale +'&col=wu+ws+download&tabpage=1&radio=1&select=0';
+		w = window.open(url,'open_productInfo','toolbar=yes,location=yes,directories=yes,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes,top=0,left=0,width=800,height=600');
+		w.focus();
+		
+	});
+	
+	
+	$j("#aServiceManual").click(function(e){
+		e.preventDefault();								
+		cfKnowledgeDocumentPopup(_l.MODEL, 'SM');						
+	});
+	
+	
+	$j("#aServiceBulletin").click(function(e){
+		e.preventDefault();								
+		cfKnowledgeDocumentPopup(_l.MODEL, 'SB');						
+	});
+	
+	
+	$j("#aQuickPartsList").click(function(e){
+		e.preventDefault();
+		cfSearchPopModel2(_l.MODEL, _l.MODEL);
+	});
+	
+	
+	$j("#aRepairAssistance").click(function(e){
+		e.preventDefault();
+		
+		var url = 'http://support-us.samsung.com/partner/tr/ps.jsp?';
+		url += 'acct='+ _l.u.UserId;
+		url += '&prd_mdl_cd='+_l.MODEL;
+		url += '&sym_code1='+_l.SYMPTOM1_CODE;
+		url += '&sym_code2='+_l.SYMPTOM2_CODE;
+		url += '&sym_code3='+_l.SYMPTOM3_CODE;
+		if(_l.u.c == "C310"){
+			url += '&sym_code4='+_l.SYMPTOM4_CODE;
+		}
+		
+		w = window.open(url,'open_repairAssistance','toolbar=yes,location=yes,directories=yes,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes,top=0,left=0,width=800,height=600');
+		w.focus();
+		
+	});
+	
+		
+	$j("#divB2BLink").click(function(e){
+		
+		var url = "";				
+		if(e.target.name == "B2BContract"){
+			url = "/gsb2b/popup/ContractDetailPopForAsc.jsp?";
+		}else if(e.target.name == "B2BAsset"){
+			url = "/gsb2b/popup/AssetDetailPopForAsc.jsp?";
+		}else if(e.target.name == "B2BSite"){
+			url = "/gsb2b/popup/AssetSiteDetailPopForAsc.jsp?";
+		}else{
+			return;
+		}
+		
+		url += "model=" + _l.MODEL;
+		url += "&serialNo=" + _l.SERIAL_NO;
+		w = window.open(url, "", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');			
+		
+	});
+	
+
+	
+	//repair history
+	$j("#moretailid15 a").click(function(){
+		var url = urlPatternGZIP + "?";
+		url += "cmd=ServiceOrderDetailCmd&screen_type=READ&objectID=" + this.text(); 
+		w = window.open(url, "popupSOForRead", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=600');
+		w.focus();		
+	});
+	
+	
+	
+	$j("#btnSymptomMovie").click(function(){
+		window.open('http://www.samsungsupport.com/cyber/popup/pop_movieviewer.jsp?movieid=' + _l.SymptomMovieID ,'','');
+	});
+
+	
+	function serviceTypeReasonSearch(){
+		if(_l.SERVICE_TYPE != "SR"){ return ;}
+		var svcTypeReason = _l.ServiceTypeReason;
+		if(svcTypeReason == ""){ return ;}
+		
+		var url=urlPatternGZIP+"?";
+		url += "cmd=CICCodeSearchCmd";
+		url += "&CODE_GROUP=STOCK_REPAIR_REASON";
+		url += "&model=" + _l.MODEL;
+		url += "&svc_type=SR";
+		url += "&CODE_VALUE=" + svcTypeReason;
+		
+		$j.get(url, function(json){
+			if(json.success){
+				$j("#ServiceTypeReasonDesc").text(json.CODE_TEXT);				
+			}//if(json.success){
+		}, 'json');//$j.get(url, function(json){
+	}
+	serviceTypeReasonSearch();
+	
+	function getStatusReasonCodeDesc(){
+		var reason = _l.CurrReason;
+		if(reason == ""){ return ;}
+		var status = _l.CurrStatus;
+		if(status == ""){ return ;}
+		
+		var url=urlPatternGZIP+"?";
+		url += "cmd=CICCodeSearchCmd";
+		url += "&CODE_GROUP=&UPPER_GROUP=TRSTATUS";
+		url += "&UPPER_VALUE=" + status;
+		url += "&CODE_VALUE=" + reason;
+		
+		$j.get(url, function(json){
+			if(json.success){
+				$j("#statusReasonDesc").text(json.CODE_TEXT);				
+			}//if(json.success){
+		}, 'json');//$j.get(url, function(json){
+	}
+	getStatusReasonCodeDesc();
+	
+	
+	//product repair
+	
+	$j("#btnViewClaim").click(function(){
+		//if(!isWtyBlockAuth()){return;	}
+
+		var url=urlPatternGZIP+"?popupReason=viewClaim&cmd=WtyClaimDetailCmd";
+		url += "&claimno=" + _l.WTY_BILL_NO;		
+		w = window.open(url, "wty_popup", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=900,height=750');
+		w.focus();
+	});//$j("#btnCustomerInvoice").click(function(){	
+	
+	
+	
+	function setIRISInfo(){
+
+		var url = urlPatternGZIP+"?cmd=GetIRISGroupCmd";
+		$j.get(url, function(jsonObj){
+	
+			if (jsonObj.success) {
+				var codeGroup = "";
+				var codeValue = "";
+				var length = jsonObj.codeGroup.length;
+				//IRIS-C,IRIS-S,IRIS-D,IRIS-R
+				//EIA-D,EIA-R
+				//NSAM-C,NSAM-S,NSAM-D,NSAM-R
+				for (var i = 0; i < length; i++) {
+					var tmp = jsonObj.codeGroup[i].code_group;
+					if (tmp.indexOf("-C") > 0 && _l.IRIS_CONDI != ""){
+						codeGroup += "," + tmp;
+						codeValue += "," + _l.IRIS_CONDI;
+					}else if(tmp.indexOf("-D") > 0 && _l.IRIS_DEFEC != ""){
+						codeGroup += "," + tmp;
+						codeValue += "," + _l.IRIS_DEFEC;
+					}else if(tmp.indexOf("-R") > 0 && _l.IRIS_REPAI != ""){
+						codeGroup += "," + tmp;
+						codeValue += "," + _l.IRIS_REPAI;
+					}else if(tmp.indexOf("-S") > 0 && _l.IRIS_SYMPT != ""){
+						codeGroup += "," + tmp;
+						codeValue += "," + _l.IRIS_SYMPT;
+					}
+				}
+				
+				if("C310" == _l.u.c){//does not use defect block, condition, symptom
+				}else{
+					if(_l.DEF_BLK != ""){
+					codeGroup += ",DEFECT_BLOCK";
+					codeValue += "," + _l.DEF_BLK;
+					}
+					if(_l.SVC_INDICATOR != ""){
+						codeGroup += ",SVC_IND";
+						codeValue += "," + _l.SVC_INDICATOR;
+					}
+				}
+				
+				if(codeGroup.length < 2){return;}
+				codeGroup = codeGroup.substr(1);
+				if(codeValue.length < 2){return;}
+				codeValue = codeValue.substr(1);
+
+		
+				//isIrisFiltering
+				var url = urlPatternGZIP+"?cmd=GetIRISInfoCmd";
+				url += "&model=" + _l.MODEL;
+				url += "&ctype=" + codeGroup;
+				url += "&code=" + codeValue;
+				
+				$j.get(url, function(jsonObj){
+					if (jsonObj.success) {
+						var length = jsonObj.dataLists.length;
+						for (var i = 0; i < length; i++) {
+							var obj = jsonObj.dataLists[i];
+							var ctype = obj.ctype;							
+							if ( ctype.indexOf('-C') > 0 ) {
+								if(obj.code == _l.IRIS_CONDI){
+									$j("#IRIS_CONDI_DESC").text(obj.codetx);
+								}
+							} else if ( ctype.indexOf('-D') > 0 ) {
+								if(obj.code == _l.IRIS_DEFEC){
+									$j("#IRIS_DEFECT_DESC").text(obj.codetx);
+									if(_l.isUseGcicIris && ctype == 'EIA-D'){
+										$j("#IRIS_DEFECT_QCODE_DESC").text("("+obj.qcode+"-"+obj.qcodetx+") ");
+									}
+								}
+							} else if ( ctype.indexOf('-S') > 0 ) {
+								if(obj.code == _l.IRIS_SYMPT){
+									$j("#IRIS_SYMPT_DESC").text(obj.codetx);
+									if(_l.isUseGcicIris){
+										$j("#IRIS_SYMPT_QCODE_DESC").text("("+obj.qcode+"-"+obj.qcodetx+") ");
+									}
+								}
+							} else if ( ctype.indexOf('-R') > 0 ) {
+								if(obj.code == _l.IRIS_REPAI){
+									$j("#IRIS_REPAIR_DESC").text(obj.codetx);
+									if(_l.isUseGcicIris){
+										$j("#IRIS_REPAIR_QCODE_DESC").text("("+obj.qcode+"-"+obj.qcodetx+") ");
+									}
+								}
+							} else if ( ctype == 'DEFECT_BLOCK' || ctype.indexOf('-B') > 0) {
+								if(obj.code == _l.DEF_BLK){
+									$j("#DEF_BLK_DESC").text(obj.codetx);
+								}
+							} else {
+								$j("#SVC_INDICATOR_DESC").text(obj.codetx);
+							}							
+						}//for (var i = 0; i < length; i++) {						
+					}//if (jsonObj.success) {					
+				}, 'json');//$j.get(url, function(jsonObj){
+				
+			}//if (jsonObj.success) {					
+		}, 'json');//$j.get(url, function(jsonObj){		
+	}
+	setIRISInfo();
+	
+	//billing
+	$j("#btnCustomerInvoice").click(function(){
+		if(paper_free_flag){
+			openSendDocumentInvPop();
+		}else{
+			openCustomerInvoiceDetailPop();
+		}
+
+	});//$j("#btnCustomerInvoice").click(function(){
+		
+	function openSendDocumentInvPop(){
+		var url = "";
+		w = window
+				.open(
+						url,
+						"rrr_popup",
+						'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=250,left=300,width=650,height=280');
+		w.focus();
+		var formObj = $('detailForm');
+		formObj.action =  urlPatternGZIP+'?pageType=DetailInvPage';
+		formObj.cmd.value = 'ServiceOrderSendDocumentCmd';
+		formObj.target = 'rrr_popup';
+		formObj.submit();
+		
+	}
+	
+	function openCustomerInvoiceDetailPop(){
+		var url = urlPatternGZIP+"?";
+		url += "&cmd=TaxInvoicePrintCmd";
+		url += "&objectID=" + _l.ObjectId;
+		if(_l.u.c == "C570"){
+			url += "&forward_page=TaxInvoicePrint_sein.jsp";//SEIN
+		}else if(loginUserCorpCode == "C720" || loginUserCorpCode == "C701"){
+			url += "&forward_page=TaxInvoicePrint_SSA.jsp";
+		}
+		
+		w = window.open(url,"CustomerInvoicePop",'width=800,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+		w.focus();
+	}
+	
+	//repair part information
+	$j("#btnPartList,#btnPartList2").click(function(){
+		var url = '/master/part/PartListByModelVersion.jsp?model=' + _l.MODEL;
+		
+		var pop = window.open(url, 'part_list', 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=500');
+		pop.focus();		
+	});
+	
+	$j("#btnInstallInfo").click(function(){
+		var url = "/svctracking/common/SVCPopMedisonInstallInfo.jsp?model_p=" + _l.MODEL + "&ASC_CODE_p=" + _l.ASC_CODE + "&serialNo_p=" + _l.SERIAL_NO;
+		if(_l.SERIAL_NO==''){
+			alert('SERIAL_NO needs!'); return;
+		}
+		w = window.open(url,"model_popup",
+		'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');
+		w.focus();
+
+	});
+	
+	
+	
+	$j("#btnCreatePO").click(function(){
+		var parts = _l.parts;
+		var partLen = parts.length;
+		var serviceDate = _l.LAST_APP_DATE;
+		var objectId = _l.ObjectId;		
+		var partQuery = addPartInfoForPO(false, parts, objectId, serviceDate);			
+		
+		
+		if(partQuery == "") {			
+			if(	partLen == 0){
+					alert("Please enter the part at first!"); 
+					return;
+			}else{				
+					if(_l.u.c == "C310"){
+							if(  !confirm("There is parts already ordered. Make sure that it is DOA parts.\n\nDo you want to order it anyway?")   ){
+								return;
+							}else{
+								partQuery = addPartInfoForPO(true, parts, objectId, serviceDate);
+							}
+					}else{
+							alert(_l.r.m.EXT_0039); 
+							return;	
+					}//if(loginUserCorpCode == "C310"){
+			}//if(	partLen == 0){
+		}
+		
+		var url = '/order/po/POVerify.jsp';			
+		if (isDistyASC()){
+			url = '/disty/purchase/purchaseOrderCreate.jsp'
+		}		
+		url += "?referer=SO";
+		url += partQuery;
+		
+		var w = window.open(url, "po_popup","toolbar=no,location=no,directories=no,status=no,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=0,left=200,width=1000,height=700");
+		w.focus();
+		
+		
+		function addPartInfoForPO(skipSoNo, parts, objectId, serviceDate){
+			var partQuery = "";
+			
+			for(var i=0; i<partLen; i++){
+				var obj = parts[i];
+				var valid = (obj.SEQ_NO != "" && obj.PARTS_CODE != "");
+				if(!skipSoNo){
+					valid = (valid && obj.SO_NO == "");
+				}
+				
+				if(valid){
+					partQuery += "&poRefNo=" + objectId;
+					partQuery += "&poSvcPartSeqNo=" + obj.SEQ_NO;
+					partQuery += "&poPart=" + obj.PARTS_CODE;
+					partQuery += "&poQty=" + obj.PARTS_QTY;
+					partQuery += "&poSvcDate=" + serviceDate;
+					partQuery += "&poPartWty=" + obj.IN_OUT_WTY;	//for europe medison distributor
+				}
+			}//for(var i=0; i<partLen; i++){
+			return partQuery;
+		}//function addPartInfoForPO(skipSoNo, obj){
+		function isDistyASC() {
+			var belongsToDisty = ("C810,C850".indexOf(_l.u.c) != -1);
+			var belongsToCOSMOS = _l.u.COSMOSUser;
+			return belongsToDisty && belongsToCOSMOS;
+		}//function isDistyASC() {
+		
+	});//$j("#btnCreatePO").click(function(){
+	
+	if(isChinaRegion){
+		
+		loadAscProfile();
+		
+		if ( _l.ASC_JOB_NO.substring(0,1) == "B" ) {
+			gB2B_B2C = "B2B";
+		}
+		
+		if(isRepairOrder == false){
+			$j('#trRepairPartInfo').hide();
+			$j('#trProdRepInfo').hide();
+			$j('#trBillingInfo').hide();
+		}
+					
+		$j('[type=text],[type=checkbox],select,textarea ').each(function(index){
+			$j(this).attr('title',this.name == ''?this.id:this.name);
+		});
+		$j('select option').each(function(index){
+			this.title = this.value;
+		});
+		$j("input[type=text]").attr("readonly","readonly");
+		$j("input[type=text][readonly]").keydown(function(e){
+			if(e.which == 8){//back space뒤로 가기방지
+				return false;
+			}
+		});
+		
+		//Customer info
+		if($j('#BP_TYPE_CD').val()==""){//b2b contact person 
+			$j('#div_related_bp').show();
+			search_related_bp();
+		}
+
+		if($j('#END_CUSTOMER').val()!="" || ($j('#BP_TYPE_CD').val()=="B003" || $j('#BP_TYPE_CD').val()=="") ){
+			$j('#i_cust_tbl').show();
+		}
+		
+		if($j('#BP_TYPE_CD').val()=="B003" || $j('#BP_TYPE_CD').val()==""){
+			$j('#spanCheckSameB2b').show();
+			if("ST035;ST040".indexOf(_l.CurrStatus) > -1 && $j('#END_CUSTOMER').val()==''){
+				$j('#checkSameB2b').attr('checked','checked');
+				$j('#i_cust_tbl').hide();
+			}
+		}
+			
+		if($j('#DEALER').val()!=""){
+			$j('#dealerDtlBtn').show();	
+			searchDealerStorage($j('#DEALER').val());
+			searchDealerDetail($j('#DEALER').val());
+		}	
+		
+		//product info
+		viewAIR_INOUT_TYPE();
+		if(isNewChina){
+			C6V0_fieldView();
+	    }
+		
+		//job info
+		if(isRepairOrder == false ){
+			$j('#trSvcType').hide();
+		}
+		
+		//Product Repair Info
+		if(isNewChina){
+			$j('#tdIrisDef1').hide();
+			$j('#tdIrisDef2').hide();
+		}
+		$j("#spanSamsungDist").hide();
+		
+		getGasChargeInfo();//WtyCostCheckCmd
+		
+		//VIP
+		if($j('#STATUS').val() >= 'ST035'){
+			$j('#img_vipCardSearch').hide();
+		}
+		//교환환불
+		if(exchVisible) exchTabControl();//initExchData
+		
+		//doa dap
+		if(doaVisible || accVisible) doaTabControl();//initDoaData		
+		
+	}//if(isChinaRegion){
+	
+	function setModuleId(){
+		var ppidPrdCodeList = _l.r.c.PPID_PRD_CODE_LIST.evalJSON();
+		var isPPIDList = false;
+		var hqSvcProd = $('HQ_SVC_PRCD').value;
+		for(var i=0; i<ppidPrdCodeList.length; i++){
+			if(hqSvcProd == ppidPrdCodeList[i].codeId){
+				isPPIDList = true;
+				break;
+			}
+		}
+		
+		if(isPPIDList){
+			$("divModuleId").style.display='';
+		}
+	}
+	setModuleId();
+	
+});//$j(document).ready(function(){
+
+
+
+/**
+* only for C310, add part from recommended part list
+**/
+function addPartsFromRecommended(part){
+	var frm = document.detailForm;
+	var arrParts = cfArray(frm.PARTS_CODE);
+	var arrQty = cfArray(frm.PARTS_QTY);
+	var partLen = arrParts.length;
+	for(var i = 0; i < partLen; i++){
+		if(part.strip() == arrParts[i].value.strip()){
+			alert("Selected Parts No.  " + part + " has already added or ordered on the Repair Part Information tab, please first check Parts No.  " + part + " Quantity ");
+			return;
+		}
+	}
+	
+	var ptype = "";
+	if(_l.InventoryFlag){
+		ptype = "I";
+	}else if(_l.FSC){
+		ptype = "F";
+	}else{
+		ptype = "N";
+	}
+		
+	addParts(ptype);
+	
+	var arrParts = cfArray(frm.PARTS_CODE);
+	var arrQty = cfArray(frm.PARTS_QTY);
+	var partLen = arrParts.length;
+	
+	arrParts[partLen-1].value = part;
+	arrQty[partLen-1].value = "1";
+	
+	alert(part + " added!")
+}
+
+function downFile(FILEOBJKEY,fileName,fileSize) {
+    var frm = $j("#frmFileDown");
+    if(frm.length == 0){
+    	var url = urlPattern + "?cmd=AttachFileDownloadSvcCmd";
+    	url += "&fileSize=" + fileSize;
+    	frm = $j("<form id=frmFileDown method=post action=" + url + " target=ifr_attach><input type=hidden name=IV_OBJKEY /><input type=hidden name=objectID value=" + _l.ObjectId + " /><input type=hidden name=file_name /></form>");
+    	$j('body').append(frm);
+    }
+    else
+    {
+    	var url = urlPattern + "?cmd=AttachFileDownloadSvcCmd";
+    	url += "&fileSize=" + fileSize;
+    	frm[0].action = url;
+    }
+    
+    if($j("#ifr_attach").length == 0){
+    	$j('body').append("<IFRAME name='ifr_attach' id='ifr_attach' frameborder=0 height=0 width=0 scrolling=yes />");
+    }
+    frm.find("[name='IV_OBJKEY']").val(FILEOBJKEY);
+    frm.find("[name='file_name']").val(encodeURIComponent(fileName));
+    frm.submit();
+}
+
+
+///svctracking/svcorder/SVCPopSawDetail.jsp
+function openSAWDetailPop(idx){
+	var url = urlPatternGZIP + "?cmd=ServiceOrderSawDetailCmd";
+	url += "&isawNo=" + idx;
+	url += "&MODEL=" + _l.MODEL;
+	url += "&LAST_APP_DATE=" + _l.LAST_APP_DATE;
+	url += "&objectID=" + _l.ObjectId;
+	url += "&ascCode=" + _l.ASC_CODE;
+	
+	
+	var w = window.open(url, "saw_popup", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=600,height=700');
+	w.focus();
+}
+
+
+
+
+/**
+ * button onclick
+ */
+function goList(){
+	try{parent.setBackForward();}catch(e){}//jsonTemp
+
+	if(_l.jspName=="/report/kpi/QualityOfService.jsp"){
+		var formObj=$('tempForm');
+		formObj.action='/report/kpi/QualityOfService.jsp?frYear =' + _l.FrYear + '&frMonth=' +_l.FrMonth + '&toYear=' + _l.ToYear + '&toMonth=' + _l.ToMonth;
+		formObj.target='_self';
+		formObj.submit();
+	}else if(_l.jspName=="/svctracking/svcorder/ServiceOrderListBatch.jsp"){
+			var formObj=$('tempForm');
+			formObj.action='/svctracking/svcorder/ServiceOrderListBatch.jsp';
+			formObj.target='_self';
+			formObj.submit();
+	}else if(_l.jspName=="/saw/SawStatus.jsp"){
+		var formObj=$('tempForm');
+		formObj.action='/saw/SawStatus.jsp';
+		formObj.target='_self';
+		formObj.submit();
+	// prebooking list 20181107 sena0605.cho Start
+	}else if(_l.jspName=="/svctracking/svcorder/PreBookingListCN.jsp"){ //Prebooking List(CN)
+		var formObj=$('tempForm');
+		formObj.action='/svctracking/svcorder/PreBookingListCN.jsp';
+		formObj.target='_self';
+		formObj.submit();
+	// prebooking list 20181107 sena0605.cho End
+	// 온라인 서비스 Post Office IF 20181107 sena0605.cho Start
+	}else if(_l.jspName=="/svctracking/postofficeif/PostOfficeIFListCN.jsp"){ // Post Office IF List
+		var formObj=$('tempForm');
+		formObj.action='/svctracking/postofficeif/PostOfficeIFListCN.jsp';
+		formObj.target='_self';
+		formObj.submit();
+	//bh1130.park 태국 - Post Office IF List
+	}else if(_l.jspName=="/svctracking/postofficeif/PostOfficeIFListTSE.jsp"){ 
+		var formObj=$('tempForm');
+		formObj.action='/svctracking/postofficeif/PostOfficeIFListTSE.jsp';
+		formObj.target='_self';
+		formObj.submit();
+	// 온라인 서비스 Post Office IF 20181107 sena0605.cho End
+	}else {
+		var formObj=$('tempForm');
+		formObj.action='/svctracking/lite/ServiceOrderListLite.jsp';
+		formObj.target='_self';
+		formObj.submit();
+	}
+	
+}
+
+function openSvcRequestPrintPopForSRSC(){
+
+	var url = "";
+	w = window.open(url,"SvcRequestPrintPop",'width=670,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	var formObj=$('tempForm');
+	formObj.action=urlPatternGZIP+'?forward_page=SvcRequestPrintPopForSRSC.jsp&cmd=ServiceRequestPrintCmd';
+	formObj.target='SvcRequestPrintPop';
+	formObj.submit();
+}
+
+
+function openWtyPrintPopForSRSC(){
+
+	var url = "";
+	w = window.open(url,"WtyPrintPopForSRSC",'width=670,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	var formObj=$('tempForm');
+	formObj.action=urlPatternGZIP+'?forward_page=WtyPrintPopForSRSC.jsp&cmd=WtyPrintCISCmd&type=s&ticketNoStr='+_l.ObjectId;
+	formObj.target='WtyPrintPopForSRSC';
+	formObj.submit();
+}
+
+function openDOAPrintPop(){
+	var url = "";
+	w = window.open(url,"SvcDoaPrintPop",'width=800,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	var formObj=$('tempForm');
+	formObj.action=urlPatternGZIP+'?forward_page=print_DOA_CERT.jsp&cmd=ServiceRequestPrintCmd';
+	formObj.target='SvcDoaPrintPop';
+	formObj.submit();
+}
+
+function openSedaFscPrintPop(){
+	var url = "";
+	w = window.open(url,"SvcDoaPrintPop",
+'width=800,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	var formObj=$('tempForm');
+	formObj.action=urlPatternGZIP+'?forward_page=svcreq_PNT_SEDA_FSC.jsp&cmd=ServiceRequestPrintCmd';
+	formObj.target='SvcDoaPrintPop';
+	formObj.submit();
+}
+function openSvcRequestPrintPop(){
+	var url = "";
+	w = window.open(url,"SvcRequestPrintPop",
+'width=800,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	var formObj=$('tempForm');
+	formObj.action=urlPatternGZIP + '?cmd=ServiceRequestPrintCmd';
+	formObj.target='SvcRequestPrintPop';
+	formObj.submit();
+}
+
+function openSvcRequestSienPrintPop(){
+	var url = "";
+	w = window.open(url,"SvcRequestPrintPop",
+'width=800,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	var formObj=$('tempForm');
+	formObj.action=urlPatternGZIP+'?forward_page=ServiceRequestPrint_NewSIEN.jsp&cmd=ServiceRequestPrintCmd';
+	formObj.target='SvcRequestPrintPop';
+	formObj.submit();
+}
+function openCustomerInvoicePop(soNo, wtyClaimNo,customerPan) {
+	
+	var w = window
+			.open(
+					"",
+					"CustomerInvoicePop",
+					'width=800,height=730,top=50,left=200,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+
+	var forward_page = "";
+	$('invoiceForm').claimno.value = wtyClaimNo;
+	$('invoiceForm').action = urlPatternGZIP + '?forward_page=' + forward_page; 
+	if ("C550" == _l.u.c && _l.u.CountryCd == "IN"){
+		$('invoiceForm').action = urlPatternGZIP + '?forward_page=' + forward_page + "&custPan=" + customerPan + "&objectID=" + soNo;
+	}
+	
+	$('invoiceForm').cmd.value = 'TaxInvoicePrintCmd';
+	$('invoiceForm').target = 'CustomerInvoicePop';
+	$('invoiceForm').submit();
+}
+
+//Customer info
+function search_related_bp(flag) {
+	related_bp_search = false;
+	if(flag) related_bp_search = true;
+	var bpNo='';
+	if(related_bp_search ==false){
+		bpNo = $j('#CONSUMER').val();
+	}else{
+		bpNo = related_bp_no;
+	}
+	
+	var formId='related_bpForm';
+	$j("#"+formId).remove();
+	var $frm = $j('<form id="'+formId+'" method=post />');
+	$frm.append('<input type="hidden" name="cmd" value="SVCPopCustomerDetailCmd" />');
+	$frm.append('<input type="hidden" name="BP_NO" value="'+bpNo+'" />');
+	$j('body').append($frm);
+	
+	AjaxRequest(urlPattern+'?BP_ONLY=X', formId, set_related_bp);
+}
+var related_bp_search = false;
+var related_bp_no = '';
+function set_related_bp(response) {
+	jsonObj = eval('('+response.responseText+')');
+	var obj = jsonObj.dataLists;
+	if(obj.length > 0){
+		var obj = jsonObj.dataLists[0];
+		
+		if(related_bp_search ==false){
+			related_bp_no = obj.RELATED_BP;
+			if(related_bp_no !='') search_related_bp(true);
+		}else{
+			$j("#rel_com").html(obj.NAME_FIRST);
+			$j("#rel_addr").html(obj.REGION+' '+obj.CITY+' '+obj.DISTRICT+' '+obj.STREET1+' '+obj.STREET2);
+			$j("#rel_phone").html(obj.OFFICE_PHONE);
+			$j("#rel_key_man").html(obj.KEY_MAN);
+		}
+	}
+}
+
+function searchDealerStorage(dealer) {
+	$j("#dealerSearchForm").remove();
+	var $frm = $j('<form id="dealerSearchForm" method=post />');
+	$frm.append('<input type="hidden" name="cmd" />');
+	$frm.append('<input type="hidden" name="IV_DEALER_CODE"/>');
+	$frm.append('<input type="hidden" name="IV_STORAGE" id=IV_STORAGE />');
+	$j('body').append($frm);
+	
+	
+	$j("#dealerSearchForm [name=IV_DEALER_CODE]").val(dealer);
+	$('dealerSearchForm').cmd.value = 'ZifGspnBpStorageInfoCmd';
+	AjaxRequest(urlPattern, "dealerSearchForm", setDealerStorage);
+}
+
+function setDealerStorage(response) {
+	$j("#storageInfo").html("");
+	$j("#storageAddr").val("");
+	$j("#storageZipcode").val("");
+	
+	jsonObj = eval('('+response.responseText+')');
+	var obj = jsonObj.eT_STORAGE_INFO;
+	if(obj.length > 0){
+		var obj = jsonObj.eT_STORAGE_INFO[0];
+		var strName = obj.storage_name;
+		var strAddr = obj.state_name+' '+obj.city+' '+obj.colony+' '+obj.street;
+		$j("#storageInfo").html('['+strName+'] ('+obj.zipcode+') '+strAddr);
+		$j("#storageAddr").val(strAddr);
+		$j("#storageZipcode").val(obj.zipcode);
+		if($j('#SERVICE_TYPE').val()=='IS') $j("#storageInfo").hide();
+	}
+}
+
+function searchDealerDetail(dealer) {
+	$j("#dealerSearchForm").remove();
+	var $frm = $j('<form id="dealerSearchForm" method=post />');
+	$frm.append('<input type="hidden" name="cmd" />');
+	$frm.append('<input type="hidden" name="IV_DEALER_CODE"/>');
+	$j('body').append($frm);
+	
+	$j("#dealerSearchForm [name=IV_DEALER_CODE]").val(dealer);
+	$('dealerSearchForm').cmd.value = 'zifGspnBpDealerInfoCmd';
+	AjaxRequest(urlPattern, "dealerSearchForm", setDealerDetail);
+}
+
+function setDealerDetail(response) {
+	$j("#DEALER_TYPE").val('');
+	$j("#DEALER_NAME").html('');
+	$j("#DEALER_TEL_NO").html('');
+	
+	jsonObj = eval('('+response.responseText+')');
+	var obj = jsonObj.eT_DEALER_INFO;
+	if(obj.length > 0){
+		var obj = jsonObj.eT_DEALER_INFO[0];
+		$j("#DEALER_TYPE").val(obj.dealer_type);
+		$j("#DEALER_NAME").html(obj.dealer_name);
+		$j("#DEALER_TEL_NO").html(obj.tel_no);
+	}
+}
+
+function searchPopDealerDetail() {
+    var url = "/svctracking/common/SVCPopViewDealerDetail.jsp?dealerCode="+$('DEALER').value;
+    w = window.open(url,"DealerDetail_popup",
+'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');
+    w.focus();
+}
+//Customer info
+//Product info
+function pop_sbsc_pack() {
+	var url = "";
+	if($j('[name=detailForm] #prod_category').val()=='HHP'){
+		url = "/csb2b/contract/packmgt/ZifGspnMstB2bPackSearchPop.jsp?pi_serial_no="+$j('[name="SERIAL_NO"]').val()+"&pi_imei="+$j('[name="IMEI"]').val();
+	} else {
+		url = "/csb2b/contract/packmgt/ZifGspnMstB2bPackSearchPop.jsp?pi_serial_no="+$j('[name="SERIAL_NO"]').val()+"&pi_imei="+$j('[name="SERIAL_NO2"]').val();
+	}
+    
+    w = window.open(url,"sample_popup",'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,'
+    		+'top=150,left=200,width=900,height=430');
+    w.focus();
+}
+
+/*
+1. IT :  앞세자리가  CLP  MLP PRT TFB HSB MMC RAM SSD
+2. HA :  앞세자리가  MWO  DWM  PAC REF  REG RES SEW SRA SRB SAL CAC DVM FJM SAC 
+3. HHP:  앞세자리가  THB , 
+4. VD :  앞세자리가  PJM PPM  DVD HMT SST CAM BPV BTV CTV PDP PTV LCD-TV  
+5. DSC:  앞세자리가  DSC, DVC
+ */
+function C6V0_fieldChekGroup() {
+	var group = $j('[name=detailForm] #SVC_PRCD').val().substr(0,3);
+	//IT
+	if(group=='CLP'||group=='FAX'||group=='LFD'||group=='LPF'||group=='MFP'||group=='MLP'||group=='MON'||group=='NPC'||group=='OLM'
+		||group=='PDM'||group=='PRT'||group=='SDT'||group=='TFT'||group=='TFB'||group=='HSB'||group=='MMC'||group=='RAM'){
+		return "IT";
+	}
+	//HA
+	else if(group=='MWO'||group=='DWM'||group=='PAC'||group=='REF'||group=='REG'||group=='RES'||group=='SEW'||group=='SRA'||group=='SRB'
+		||group=='SAL'||group=='CAC'||group=='DVM'||group=='FJM'||group=='SAC'){
+		return "HA";
+	}
+	//HHP
+	else if(group=='THB'){
+		return "HHP";
+	}
+	//VD
+	else if(group=='PJM'||group=='PPM'||group=='DVD'||group=='HMT'||group=='SST'||group=='CAM'||group=='BPV'||group=='BTV'||group=='CTV'
+		||group=='PDP'||group=='PTV'||group=='LCD'){
+		return "VD";
+	}
+	//DSC
+	else if(group=='DSC'||group=='DVC'){
+		return "DSC";
+	}
+}
+
+function C6V0_fieldView() {
+	if(!isNewChina) return;
+	// hide Restore..
+	fieldViewGroupHA(false);
+	fieldViewGroupVD(false);
+	fieldViewGroupHHP(false);
+
+	var group = C6V0_fieldChekGroup();
+	if(group == "HA") fieldViewGroupHA(true);
+	else if(group == "VD") fieldViewGroupVD(true);
+	else if(group == "HHP") fieldViewGroupHHP(true);
+	
+}
+function fieldViewGroupHA(flag) {
+	if(flag){
+		$j('#txt_imei').hide();
+		$j('#IMEI').hide();
+		$j('#trNewFirm').hide();
+		$j('#trNewModel').hide();
+
+	}else{
+		$j('#txt_imei').show();
+		$j('#IMEI').show();
+		$j('#trNewFirm').show();
+		$j('#trNewModel').show();
+	}
+}
+function fieldViewGroupVD(flag) {
+	var localProduct = $j('#LOC_PRCD').val();
+	var cicProduct = $j('#CIC_PRCD').val();
+	if(flag){
+		$j('#trNewFirm').hide();
+		$j('#trNewModel').hide();
+
+		if((localProduct == "VDE_LED" || localProduct == "VDE_PDP") && (cicProduct == "VDE")){
+			$j('#trNewFirm').show();
+		}
+			
+	}else{
+		$j('#trNewFirm').show();
+		$j('#trNewModel').show();
+	}
+}
+function fieldViewGroupHHP(flag) {
+	if(flag){
+		$j('#txt_serial2').hide();
+		$j('[name="SERIAL_NO2"]').hide();
+	}else{
+		$j('#txt_serial2').show();
+		$j('[name="SERIAL_NO2"]').show();
+	}
+}
+function viewAIR_INOUT_TYPE() {
+	if(_l.SERVICE_TYPE=='II' && $j('[name=detailForm] #prod_category').val()=='ACN'/*ACN*/) {
+		$j('#tdAirIn').attr('class','ser_ti');
+		$j('#txtAirIn').show();
+		$j('[name=AIR_INOUT_TYPE]').show();
+		$j('[name=AIR_INOUT_TYPE_VIEW]').show();
+	}else{
+		$j('#tdAirIn').attr('class','ser_td');
+		$j('#txtAirIn').hide();
+		$j('[name=AIR_INOUT_TYPE]').val("").hide();
+		$j('[name=AIR_INOUT_TYPE_VIEW]').hide();
+	}
+}
+//Product Repair Info
+function getGasChargeInfo() {
+	$('wtyCostCheckForm').action = urlPattern;
+	$('wtyCostCheckForm').cmd.value = 'WtyCostCheckCmd';
+	$('wtyCostCheckForm').COST_TYPE.value = 'GASCHARGE';
+	AjaxRequest(urlPattern, "wtyCostCheckForm", setGasChargeInfo);
+}
+function setGasChargeInfo(response) {
+	try {
+		jsonGasCharge = eval('('+response.responseText+')');
+		getOtherList();
+	} catch (e) {}
+}
+function getOtherList() {
+	$('wtyCostCheckForm').action = urlPattern;
+	$('wtyCostCheckForm').cmd.value = 'WtyCostCheckCmd';
+	$('wtyCostCheckForm').COST_TYPE.value = 'OTHER';
+	AjaxRequest(urlPattern, "wtyCostCheckForm", setOtherList);
+}
+function setOtherList(response) {
+	jsonOther = eval('('+response.responseText+')');
+	aryProdGroupII = jsonOther.prodGroupII;
+	
+	setWtyCostCondition();
+}
+function setWtyCostCondition() {
+	getLaborList2();
+	setGasChargeCombo();
+    setProdOptField();
+    setOtherOptField();
+
+    if(isNewChina){
+    	setDistanceCombo();
+    }
+    
+    setWtyObjAttr();
+}
+function getLaborList2() {
+	$('wtyCostCheckForm').action = urlPattern;
+	$('wtyCostCheckForm').cmd.value = 'WtyCostCheckCmd';
+	$('wtyCostCheckForm').COST_TYPE.value = 'LABOR2';
+	
+	var params = {};
+	params['CICPROD'] = $j("#prod_category").val();
+	params['SVCPROD'] = $j("#SVC_PRCD").val();
+	
+	AjaxSyncRequest(urlPattern + "?" + $j.param(params), "wtyCostCheckForm", setLaborList2);
+}
+function setLaborList2(response) {
+	try {
+		jsonLaborCheckList = eval('('+response.responseText+')');
+		getProdGroup();
+	} catch (e) {}
+}
+//<%--에어컨안에 여러svc_prod가 있어서, svc_prod에 해당하는 대표prod 코드를 가져옴(Start)--%>
+function getProdGroup() {
+	$j("#local_svc_prod").val($j("#SVC_PRCD").val());
+	$j("#PROD_GROUP").val($j("#SVC_PRCD").val());
+	$j("#PROD_GROUP_F").val($j("#SVC_PRCD").val());
+	$j("#PROD_GROUP_O").val($j("#SVC_PRCD").val());
+	$j("#PROD_GROUP_II").val($j("#SVC_PRCD").val());
+	$j("#STS_PROD_GROUP").val( $j("#SVC_PRCD").val().substr(0, 3) );
+	
+	if ( jsonLaborCheckList.prodMap != null ) {
+		if ( jsonLaborCheckList.prodMap.length > 0 ) {
+			var len = jsonLaborCheckList.prodMap.length;
+			for ( var i = 0 ; i < len ; i++ ) {
+				if ( jsonLaborCheckList.prodMap[i].costType == 'LABOR' ) {
+					var svcPrcd = $j("#SVC_PRCD").val();
+					if(loginUserCorpCode == 'C610') svcPrcd = $j("#prod_category").val();
+					if ( jsonLaborCheckList.prodMap[i].svcProd == svcPrcd ) {
+						$j("#PROD_GROUP").val(jsonLaborCheckList.prodMap[i].prodGroup);
+					}
+				}
+				if ( jsonLaborCheckList.prodMap[i].costType == 'FREIGHT' ) {
+					if ( jsonLaborCheckList.prodMap[i].svcProd == $j("#SVC_PRCD").val() ) {
+						$j("#PROD_GROUP_F").val(jsonLaborCheckList.prodMap[i].prodGroup);
+					}
+				}
+				if ( jsonLaborCheckList.prodMap[i].costType == 'OTHER' ) {
+					if ( jsonLaborCheckList.prodMap[i].svcProd == $j("#SVC_PRCD").val() ) {
+						$j("#PROD_GROUP_O").val(jsonLaborCheckList.prodMap[i].prodGroup);
+					}
+				}
+				if ( jsonLaborCheckList.prodMap[i].costType == 'PROD_GROUP_II' ) {
+					var svcPrcd = $j("#SVC_PRCD").val().substr(0, 3);
+					if(loginUserCorpCode == 'C610') svcPrcd = $j("#prod_category").val();
+					if ( jsonLaborCheckList.prodMap[i].svcProd == svcPrcd ) {
+						$j("#PROD_GROUP_II").val(jsonLaborCheckList.prodMap[i].prodGroup);
+					}
+				}
+			}
+		}
+	}
+}
+//<%--에어컨안에 여러svc_prod가 있어서, svc_prod에 해당하는 대표prod 코드를 가져옴(End)--%>
+
+
+//<%-- GasCharge 정보가져오기(Start) --%>
+function setGasChargeCombo() {
+	
+	if ( jsonGasCharge != null ) {
+		var svc_prod = $j('#PROD_GROUP_O').val();
+		$j('#sel_gas_charge option').remove();
+
+		if ( svc_prod != 'ACG' && svc_prod != 'ACN' ) {
+			$j("#trGasCharge").hide();
+			return;
+		}
+
+		//<%-- SRC36(현장할인):PD이고, SRC36건이 있을경우->거리없음 --%>
+		if ( _l.SERVICE_TYPE == 'PD' ) {
+			if ( isSRC36 ) {
+				$j("#trGasCharge").hide();
+				return;
+			}
+		}
+
+		//<%-- RH이고, RH_OTHER_AMT 의 SUB_CATEGORY 일경우->거리없음 --%>
+		if ( _l.SERVICE_TYPE == 'RH' ) {
+			if ( jsonOther.rhOtherAmt != null && jsonOther.rhOtherAmt != undefined ) { 
+				var len = jsonOther.rhOtherAmt.length;
+				for ( var i = 0 ; i < len ; i++ ) {
+					if ( $j("#LOC_PRCD").val() == jsonOther.rhOtherAmt[i].codeId ) {
+						$j("#trGasCharge").hide();
+						$j("#RH_OTHER_AMT").val(jsonOther.rhOtherAmt[i].codeName);
+						return;
+					}
+				}
+			}
+		}
+
+		//<%--일반(ACG)이고, RepairType이 A13일때, GAS_CHARGE_BYMODEL 목록이 채워진다. --%>
+		//<%--A15, B02 추가 (2013.07.11 by yinyu) --%>
+		if ( svc_prod == 'ACG' ) {
+			if ( _l.IRIS_REPAI == 'A13' || _l.IRIS_REPAI == 'A15' || _l.IRIS_REPAI == 'B02' ) {
+				$j("<option></option>").text("- -").attr("value", "").appendTo("#sel_gas_charge");
+				var len = jsonGasCharge.gasChargeModel.length;
+				for ( var i = 0 ; i < len ; i++ ) {
+					if (jsonGasCharge.gasChargeModel[i].codeName == _l.MODEL ) {
+						$j("<option></option>").text(jsonGasCharge.gasChargeModel[i].codeName).attr("value", jsonGasCharge.gasChargeModel[i].sapCodeId).appendTo("#sel_gas_charge");						
+						$j("#trGasCharge").show();
+						break;
+					}
+				}
+			} else {
+				$j("#trGasCharge").hide();
+				return;
+			}
+		} 
+		//<%--중앙ACN일떄, GAS_CHARGE 목록이 채워진다. --%>
+		else if ( svc_prod == 'ACN' ) {
+			$j("<option></option>").text("- -").attr("value", "").appendTo("#sel_gas_charge");
+			var len = jsonGasCharge.gasCharge.length;
+			for ( var i = 0 ; i < len ; i++ ) {
+				$j("<option></option>").text(jsonGasCharge.gasCharge[i].codeName).attr("value", jsonGasCharge.gasCharge[i].codeId).appendTo("#sel_gas_charge");
+			}
+		}
+		
+		if ( $j('#sel_gas_charge option').size() == 0 ) {
+			$j("#trGasCharge").hide();
+		} else {
+			$j("#sel_gas_charge").val( $j('[name=GAS_CHARGE]').val() );
+			$j("#trGasCharge").show();
+		}
+	}
+}
+//<%-- GasCharge 정보가져오기(End) --%>
+//<%-- 설치옵션세팅(Start) --%>
+function setProdOptField() {
+	var svc_type = _l.SERVICE_TYPE;
+	var local_svc_prod = $j("#SVC_PRCD").val();		//<%--local svc prod --%>
+	var svc_prod = $j("#PROD_GROUP").val();			//Labor 대표 코드
+	var prodOpt = jsonLaborCheckList.prodOpt;
+	var len = prodOpt.length;
+	var str = '';
+	var str1 = '';
+	var isExistProdOpt = false;
+	var isExistProdOpt43 = false;
+	var isAutoLabor = false;
+
+	for ( var i = 0 ; i < len ; i++ ) {
+		
+		//<%-- 설치옵션 없이,DefectType고정인 경우  --%>
+		if ( prodOpt[i].field02 == "" ) {
+			
+			//<%-- ServiceType이 ZZZ인 경우, local svc prod만 비교함  --%>
+			if ( prodOpt[i].svcType == 'ZZZ' ) {
+				if ( prodOpt[i].prodOpt == local_svc_prod ) {
+					$j("#LAB_TYPE").val(prodOpt[i].defectType);
+					$j("#spanProdOpt").html(prodOpt[i].defectType);
+					isAutoLabor = true;
+				}
+			} else {
+				if ( svc_type == prodOpt[i].svcType && prodOpt[i].prodOpt == local_svc_prod ) {
+					$j("#LAB_TYPE").val(prodOpt[i].defectType);
+					$j("#spanProdOpt").html(prodOpt[i].defectType);
+					isAutoLabor = true;
+				}
+			}
+			
+		//<%-- 설치옵션 있는 경우(TV:벽걸이 등)  --%>
+		} else {
+			if ( svc_type == prodOpt[i].svcType && svc_prod == prodOpt[i].svcProd  && (prodOpt[i].prodOpt.indexOf("01") > -1 || prodOpt[i].prodOpt.indexOf("02") > -1 )) {
+				str1 += "<input type='radio' name='PROD_OPT' value='" + prodOpt[i].prodOpt + "' def_type='" + prodOpt[i].defectType + "'/>" + prodOpt[i].prodOptName + "&nbsp;&nbsp;&nbsp;";
+				//str += "<input type='radio' name='PROD_OPT' value='" + prodOpt[i].prodOpt + "' txt='" + prodOpt[i].prodOptName + "'/>" + prodOpt[i].prodOptName + "&nbsp;&nbsp;&nbsp;";
+				isExistProdOpt = true;
+				isExistProdOpt43 = true;
+			}else if(svc_type == prodOpt[i].svcType && svc_prod == prodOpt[i].svcProd){
+				str += "<input type='radio' name='PROD_OPT' value='" + prodOpt[i].prodOpt + "' def_type='" + prodOpt[i].defectType + "'/>" + prodOpt[i].prodOptName + "&nbsp;&nbsp;&nbsp;";
+				//str += "<input type='radio' name='PROD_OPT' value='" + prodOpt[i].prodOpt + "' txt='" + prodOpt[i].prodOptName + "'/>" + prodOpt[i].prodOptName + "&nbsp;&nbsp;&nbsp;";
+				isExistProdOpt = true;
+			}
+
+		}
+	}
+	
+	//<%-- 설치옵션이 있으면, DefectType고정 --%>
+	if ( isExistProdOpt ) {
+		$j("#spanProdOpt").html(str+"<br>"+str1);
+		$j("#trProdOpt").show();
+		
+		if ( $j('[name=INSTALL_TYPE]').val() == '' ) {
+			var sDefaultInstallType = '';
+			
+			if(loginUserCorpCode == 'C610') {
+
+			} else {
+				$j("input:radio[name=PROD_OPT]").eq(0).attr("checked", true);
+				$j("input:radio[name=PROD_OPT]").eq(0).trigger("click");
+			}
+		} else {
+			$j("input:radio[name=PROD_OPT]").filter('input:radio[value='+$j('[name=INSTALL_TYPE]').val()+']').attr("checked", true);
+			$j("input:radio[name=PROD_OPT]").filter('input:radio[value='+$j('[name=INSTALL_TYPE]').val()+']').trigger("click");
+		}
+						
+	} else {
+		if ( isAutoLabor ) {
+			
+		} else {
+			$j("#spanProdOpt").html("");
+			$j("#trProdOpt").hide();
+			
+		}
+	}
+	
+	var group = $j('[name=detailForm] #SVC_PRCD').val().substr(0,3);
+	var airType = $j('[name=AIR_INOUT_TYPE]').val();
+	if( jQuery.type($j('[name=AIR_INOUT_TYPE]').val()) === 'undefined' ) {
+		airType = '';
+		} 
+	
+	
+	if($j('#SERVICE_TYPE').val()=='II' && (group=='RAS'||group=='RAO' ||group=='PAC'||group=='PAO' ) && loginUserCorpCode=='C610' ) {
+		if ( airType == "I" ) {
+			$j("input:radio[name=PROD_OPT]").filter('input:radio[value=ACNIN]').attr("checked", true);
+		} else if ( airType == "O" ) {
+			$j("input:radio[name=PROD_OPT]").filter('input:radio[value=ACNEX]').attr("checked", true);
+		}
+		$j("input:radio[name=PROD_OPT]").attr('disabled', true);
+	}
+	
+	if($j('#SERVICE_TYPE').val()=='II' && (group=='RAS'||group=='RAO' ||group=='PAC'||group=='PAO' ) && isNewChina) {
+		if ( airType == "I" ) {
+			$j("input:radio[name=PROD_OPT]").filter('input:radio[value=ACNIN]').attr("checked", true);
+		} else if ( airType == "O" ) {
+			$j("input:radio[name=PROD_OPT]").filter('input:radio[value=ACNEX]').attr("checked", true);
+		}
+
+	}else if($j('#SERVICE_TYPE').val()=='II' && (group=='SWD'||group=='SWM' ||group=='AUD '||group=='HTS ' ||$j('[name=detailForm] #SVC_PRCD').val()=='ZHA08' ||$j('[name=detailForm] #SVC_PRCD').val()=='ZHA07')){
+		$j("input:radio[name=PROD_OPT]").attr('disabled', true);	
+		
+	}else{
+		 if($j('#SERVICE_TYPE').val()=='II'){
+		    $j("input:radio[name=PROD_OPT]").attr('disabled', false);	
+		 }
+	}
+	
+	if(loginUserCorpCode == 'C610') $j("input:radio[name=PROD_OPT]").attr('disabled', true);
+	
+	if ( isNewChina ) {
+		//TV 벽걸이 설치 재고 수량 조회..
+		if ( svc_type == 'II' && ( svc_prod == 'LTV' || svc_prod == 'TV43S' || svc_prod == 'TV43SP')) {
+			$j("#text_wmStock").show();
+			searchWmStock();
+		} else {
+			$j("#text_wmStock").hide();
+		}
+	}
+}
+
+function searchWmStock(){
+	var formId = 'searchWmStockForm';
+	$j("#"+formId).remove();
+	var $frm = $j('<form id="'+formId+'" method=post />');
+	$frm.append('<input type="hidden" name="cmd" value="ZifGspnInvWmStockStatusCmd"/>');
+	$frm.append('<input type="hidden" name="IV_ASC_CODE" value="'+$j('[name=detailForm] [name=ASC_CODE]').val()+'" />');
+	$j('body').append($frm);
+	
+	AjaxRequest(urlPattern,formId, setWmStock);
+}
+function setWmStock(response){
+	var jsonObj = eval('('+response.responseText+')');
+	if(jsonObj.eT_STOCK_INFO.length>0){
+		var stock_qty = jsonObj.eT_STOCK_INFO[0].stock_qty;
+		$j("#txt_wmQty").html(stock_qty);
+		$j("#wm_stock_qty").val(stock_qty);
+	}else{
+		$j("#txt_wmQty").html("0");
+		$j("#wm_stock_qty").val("0");
+	}
+}
+function setOtherOptField() {
+	var svc_prod = $j('#PROD_GROUP_O').val();
+	var svc_type = _l.SERVICE_TYPE;
+	var repairCd = _l.IRIS_REPAI;
+	
+	var otherAry = jsonOther.otherAry;
+	var len = otherAry.length;
+	var str = "<input type='radio' name='OTHER_OPT' value=''/>" + noValue + "&nbsp;&nbsp;&nbsp;";
+	var str1 = "";
+	var isExistOtherOpt = false;
+	var brTag = '';
+	var cnt = 0;
+	for ( var i = 0 ; i < len ; i++ ) {
+		if ( otherAry[i].svcProd == svc_prod && otherAry[i].svcType == svc_type ) {
+			cnt++;
+			if ( cnt%2 == 0 ) brTag = '<br>';
+			else brTag = '';
+			str1 += "<input type='radio' name='OTHER_OPT' title='" + otherAry[i].svcInd + "' value='" + otherAry[i].svcInd + "' />" + otherAry[i].name + "&nbsp;&nbsp;&nbsp;" + brTag;
+			isExistOtherOpt = true;
+		}
+	}
+	
+	//<%-- 2013.07.23 Added  --%>
+	if ( $j('[name=detailForm] #SVC_PRCD').val() == "LED05" && (svc_type == "IH" || svc_type == "PS" || svc_type == "SI") && repairCd == "A06" ) {
+		str1 = "<input type='radio' name='OTHER_OPT' value='D1' title='D1' txt='" + led05IND + "'/>" + led05IND + "&nbsp;&nbsp;&nbsp;" + brTag;
+		isExistOtherOpt = true;
+	}
+
+	if ( isExistOtherOpt ) {
+		$j("#spanOtherOpt").html(str + str1);
+		$j("#trOtherOpt").show();
+		
+		if ( ticketGAS_CHARGE == '' ) {
+			$j("input[name=OTHER_OPT]").eq(0).attr('checked', true);
+		} else {
+			$j("input:radio[name=OTHER_OPT]").filter('input:radio[value=' + ticketGAS_CHARGE + ']').attr("checked", "checked");
+		}
+	} else {
+		$j("#spanOtherOpt").html("");
+		$j("#trOtherOpt").hide();
+	}
+	
+	//<%--예외로직1--%>
+	if ( svc_prod == 'NPC' ) {
+		$j("#trIntWty").show();
+		$j("input:radio[name=IND_INT_WTY]").filter('input:radio[value='+$j('[name=INTER_WTY_FLAG]').val()+']').attr("checked", true);
+	} else {
+		$j("#trIntWty").hide();
+	}
+}
+//<%-- Freight-Distance 콤보세팅(Start) --%>
+function setDistanceCombo() {
+	
+	if ( loginUserCorpCode == 'C610' ) {
+		$j('#i_distance option').remove();
+		$j("#trDistance").hide();
+		return;
+	}
+
+	//<%--Distance 예외로직--%>
+	//<%--KT빼고, IS추가(2013.07.30) --%>
+	//<%--IU추가(2013.10.02) --%>
+	//<%--CC추가(2016.07.02) --%>
+	if ( _l.SERVICE_TYPE == 'CI' || _l.SERVICE_TYPE == 'ER'
+			|| _l.SERVICE_TYPE == 'PL' || _l.SERVICE_TYPE == 'PR' || _l.SERVICE_TYPE == 'SC' || _l.SERVICE_TYPE == 'IU'
+			|| _l.SERVICE_TYPE == 'CC') {
+		$j('#i_distance option').remove();
+		$j("#trDistance").hide();
+		return;
+	}
+	
+	if(_l.SERVICE_TYPE == 'IS' ){
+		$j("#trDistance").hide();	
+	}
+	
+	//<%--KT인경우, TV가 아니면 원거리 없음(2013.07.30) --%>
+	if ( _l.SERVICE_TYPE == 'KT' && $j("#PROD_GROUP_F").val() != 'TV' ) {
+		$j('#i_distance option').remove();
+		$j("#trDistance").hide();
+		return;
+	}
+
+	//C18090002188 [GSPN]_Request for deleting (samsung Distance) item
+	if (C6V0_fieldChekGroup() == 'HHP' && ( _l.SERVICE_TYPE == 'AD' || _l.SERVICE_TYPE == 'BS' ||  _l.SERVICE_TYPE == 'SH')) {
+		$j('#i_distance option').remove();
+		$j("#trDistance").hide();
+		return;
+	}
+	
+	if ( _l.SERVICE_TYPE == 'PS' ) {
+		if( $j("#STS_PROD_GROUP").val() != 'REF' && $j("#STS_PROD_GROUP").val() != 'SBS' 
+				&& $j("#STS_PROD_GROUP").val() != 'HTV' && $j("#STS_PROD_GROUP").val() != 'LED' 
+				&& $j("#STS_PROD_GROUP").val() != 'LTV' && $j("#STS_PROD_GROUP").val() != 'PDP' ) {
+			$j('#i_distance option').remove();
+			$j("#trDistance").hide();
+			return;
+		}
+	}
+	if ( _l.SERVICE_TYPE == 'II' ) {
+		//<%-- 설치 && SBS/REF && BCD-4* => REQUEST_SHIP_FEE가 빈값이면, 거리X --%>
+		var model = _l.MODEL;
+		if ( $j("#SVC_PRCD").val() == 'SBS01' || model.indexOf("BCD-4") >= 0 ) {
+//			if ( !auth_request_ship_fee  ) {
+				$j('#i_distance option').remove();
+					$j("#trDistance").hide();
+					return;
+//			}
+		}
+		if ( model.indexOf("BCD-28") >= 0 ) {
+			$j('#i_distance option').remove();
+			$j("#trDistance").hide();
+			return;
+		}
+
+	}
+
+	//<%-- SRC36(현장할인):PD이고, SRC36건이 있을경우. --%>
+	if ( _l.SERVICE_TYPE == 'PD' ) {
+		if ( isSRC36 ) {
+			$j('#i_distance option').remove();
+			$j("#trDistance").hide();
+			return;
+		}
+	}
+	
+	//<%-- RH이고, RH_OTHER_AMT 의 SUB_CATEGORY 일경우->거리없음 --%>
+	if ( _l.SERVICE_TYPE == 'RH' ) {
+		if ( jsonOther.rhOtherAmt != null && jsonOther.rhOtherAmt != undefined ) { 
+			var len = jsonOther.rhOtherAmt.length;
+			for ( var i = 0 ; i < len ; i++ ) {
+				if ( $j("#LOC_PRCD").val() == jsonOther.rhOtherAmt[i].codeId ) {
+					$j('#i_distance option').remove();
+					$j("#trDistance").hide();
+					return;
+				}
+			}
+		}
+	}
+
+	//<%-- SW이고, Printer제품이지만, InBound인 경우 ->거리없음 --%>
+	if ( _l.SERVICE_TYPE == 'SW' && $j("#PROD_GROUP_F").val() == "PRT" ) { 
+		if ( ticketCALL_CATEGORY == 'I' ) {
+			$j('#i_distance option').remove();
+			$j("#trDistance").hide();
+			return;
+		}
+	}
+	//<%--Distance 예외로직--%>
+	
+	$('wtyCostCheckForm').action = urlPattern;
+	$('wtyCostCheckForm').cmd.value = 'WtyCostCheckCmd';
+	$('wtyCostCheckForm').COST_TYPE.value = 'FREIGHT';
+	
+	$('wtyCostCheckForm').SVC_TYPE.value = _l.SERVICE_TYPE;
+	$('wtyCostCheckForm').TF_SVC_PROD.value = $j("#SVC_PRCD").val();
+
+	//<%-- Dealer마스터정보의 Dealer유형 먼저체크. 그다음, Consumer Type 체크--%>
+	//<%-- DEALER_GUBUN(M:양판점, L:경소상, C:고객)--%>
+	if ( $j("#DEALER_TYPE").val() == 'DT02' ) {
+		$('wtyCostCheckForm').DEALER_GUBUN.value = 'L' + gsASCType;
+	} else  {
+		$('wtyCostCheckForm').DEALER_GUBUN.value = 'C' + gsASCType;
+	}
+	
+	if($j("#DEALER_TYPE").val() == 'DT05'){
+	   if($j('#storageAddr').val() == '' && 
+       ($j('[name=detailForm] #SVC_PRCD').val() == 'SBS01' || $j('[name=detailForm] [name=MODEL]').val().substr(0,5) == 'BCD-4'
+    	   || $j('[name=detailForm] #SVC_PRCD').val() == 'SBS02'|| $j('[name=detailForm] #SVC_PRCD').val() == 'SBS03'
+    		   || $j('[name=detailForm] #SVC_PRCD').val() == 'SBS04'|| $j('[name=detailForm] #SVC_PRCD').val() == 'REF02'
+    			   || $j('[name=detailForm] #SVC_PRCD').val() == 'SKR01')){
+		$('wtyCostCheckForm').DEALER_GUBUN.value = 'D';
+	   }
+	}
+	AjaxRequest(urlPattern, "wtyCostCheckForm", setDistance);
+}
+function setDistance(response) {
+	try {
+		jsonFreight = eval('('+response.responseText+')');
+		$j('#i_distance option').remove();
+		$j("<option></option>").text("- -").attr("value", "").appendTo("#i_distance");
+		var len = jsonFreight.freightAry.length;
+		for ( var i = 0 ; i < len ; i++ ) {
+			
+			//<%-- 해당제품에, B2B/B2C구분값이 SVC_IND와 같으면 추가하지 않음(2013.07.05)  --%>
+			if ( gB2B_B2C == 'B2C' ) {
+				if ( jsonFreight.freightAry[i].svcProd == 'TV' && 'L010' == jsonFreight.freightAry[i].svcInd ) {
+					continue;
+				}
+			}
+			$j("<option></option>").text(jsonFreight.freightAry[i].distDesc).attr("value", jsonFreight.freightAry[i].svcInd).attr("title", jsonFreight.freightAry[i].svcInd).appendTo("#i_distance");
+		}
+		if ( len == 0 ) {
+			$j("#trDistance").hide();
+		}
+		else {
+			
+			//<%-- PD(F/U)인 경우->거리60만 나오게. --%>
+			if ( _l.SERVICE_TYPE == 'PD' ) {
+				if ( isPD_FU ) {
+					$('i_distance').length = 2;
+				}
+			}
+
+			
+			//<%-- 2013.07.11. SI/SR인경우, R15 추가(경소상거리). --%>
+			if ( _l.SERVICE_TYPE == 'SI' || _l.SERVICE_TYPE == 'SR' ) {
+				$j("#i_distance option:eq(1)").before(gDealerOption);
+			}
+			
+			//<%-- LABOR,LTV인 경우, TVWE이면 원거리항목 안보이게 처리 (2013.09.09) --%>
+			var checkedVal = $j("input[name=PROD_OPT]:checked").val();
+			if ( $j("#PROD_GROUP").val() == 'LTV' ) {
+				if ( checkedVal == 'TVWE' ) {
+					$j("#trDistance").hide();
+					return;
+				}
+			}
+			$j("#trDistance").show();
+			$j('#i_distance').val( $j('[name=DISTANCE]').val() );
+			//<%-- LABOR,LTV인 경우, TVWE이면 원거리항목 안보이게 처리 (2013.07.27) --%>
+			if ( $j("#PROD_GROUP").val() == 'TV43S' || $j("#PROD_GROUP").val() == 'TV43SP' ) {
+				
+				if(checkedVal == "TVFL01" || checkedVal == "TVIP01" || checkedVal == "TVR401" || checkedVal == "TVR402" || checkedVal == "TVWE"){
+					$j("#trDistance").hide();
+					$('i_distance').value = "";
+				}else{
+					$j("#trDistance").show();
+				}
+			}
+			
+			if(isNewChina && _l.REP_TYPE == "IS"){
+						if(_l.IRIS_REPAI == 'RR' || _l.IRIS_REPAI == 'RP' || _l.IRIS_REPAI == 'RT'  || _l.IRIS_REPAI == 'RN'  || _l.IRIS_REPAI == 'RD'){
+						$j("#trDistance").show();
+						$j('#i_distance').val( $j('[name=DISTANCE]').val() );
+		               }else{
+		            	$('i_distance').value = "";
+		            	$j("#trDistance").hide();
+		               }
+			}
+
+		}
+	} catch (e) {}
+	
+}
+//<%-- Freight-SvcInd 콤보세팅(End) --%>
+function setWtyObjAttr() {
+	
+	$j('select option').each(function(index){
+		this.title = this.value;
+	});
+	$j('input[type="radio"]').each(function(index){
+		$j(this).attr('title', (this.name == ''?this.id:this.name)+'='+this.value  );
+	});
+	
+	$j("select,input[type='radio']").prop("disabled", true);
+}
+//VIP
+function onlyNumeric(e) {
+	var characterCode;
+	if(e && e.which) 				//if which property of event object is supported (NN4)
+	{
+		characterCode = e.which; 	//character code is contained in NN4's which property
+	}
+	else{
+		e = event;
+		characterCode = e.keyCode; 	//character code is contained in IE's keyCode property
+	}
+	if( (characterCode<48 ||characterCode>57) //exclude all characters except numeric
+	){
+		return false;
+	 }
+	else{
+		return true;
+	}
+}
+function vipCardSearch() {
+    var url = "/svctracking/common/svcPopVIPCardPoint.jsp";
+    w = window.open(url, "vip_popup",
+'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');
+    w.focus();
+}
+function setVIPInfo(obj, cardInfo) {
+	$j('[name=CARD_NO]').val(obj.CARD_NO);
+	$j('#cardValidTerm').html(cardInfo.VALID_FROM_VIEW +' ~ '+ cardInfo.VALID_TO_VIEW );
+	
+	$j('#vipHistory tr').remove();
+	$j('<tr>'
+		+'<td class="td_ac">'+obj.CARD_NO+'</td>'
+		+'<td class="td_al">'+obj.BENEFIT_CAT_DIC+'</td>'
+		+'<td class="td_ac">'+obj.USE_DATE+'</td>'
+		+'<td class="td_al">'+obj.USE_PLACE+'</td>'
+		+'<td class="td_al">'+obj.USE_DESC+'</td>'
+		+'<td class="td_ar">'+obj.USE_COUNT+'</td>'
+	+'</tr>').appendTo('#vipHistory');
+	$j('#divCardPoint').show();
+}
+
+//교환환불
+function exchTabControl(){
+	
+	if( (isRepairOrder && $j("#SERVICE_TYPE").val()=='PD') || isCompensation ) {
+		$j('#exchCouncel,#exchDetail,#exchGrGi').hide();
+		$j('#exchProof').show();
+	}
+	else if(!isRepairOrder)
+		$j('#exchCouncel,#exchDetail,#exchGrGi,#exchProof').show();
+	else if(isRepairOrder)
+		$j('#exchCouncel,#exchDetail,#exchGrGi,#exchProof').hide();
+	
+	if(isCompensation && isExchange){
+		$j('#trProdRepInfo').show();// 교환 환불일 경우
+	}
+	if(isQQUser){
+		$j('#trProdRepInfo').show();// QQ Logic
+	}	
+	
+	initExchData();
+}
+function initExchData(){
+
+	loadExchData();
+	loadExchNote();
+
+}
+function loadExchData(){
+	var $form = $j('#frm');
+	var orderNo = _l.ObjectId;
+	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZifGspnSvcExchDetailCmd").appendTo($form);
+	$j("<input type='hidden' name='motoObjectId'/>").val(motoObjectId).appendTo($form);
+	$j("<input type='hidden' name='ORI_PUR_AMT'/>").val(ORI_PUR_AMT).appendTo($form);
+	$j("<input type='hidden' name='ORI_EX_STATUS'/>").val(ORI_EX_STATUS).appendTo($form);
+	
+	AjaxRequest(urlPattern+'?IV_OBJECT_ID='+orderNo,'frm', setExchData);
+	$('progressloading').startWaiting();
+}
+
+function setExchData(response){
+	$('progressloading').stopWaiting();
+	var jsonData = response.responseText.evalJSON();
+	if (jsonData.error) {
+		cfExceptionPop(jsonData);
+	}	
+
+	refreshExchList(jsonData.ES_EXCH_INFO);
+	refreshGR_INFO(jsonData.ES_PROD_INFO);
+	refreshGI_INFO(jsonData.ES_PROD_INFO);
+	refreshSEND_INFO(jsonData.ET_PROOF_INFO, jsonData.ES_PROD_INFO);
+}
+function refreshExchList(EXCH_INFO){
+	var tbodyObj = $('exchTableBody');
+
+	var fieldArray=[
+		"DETAIL_TYPE",	//처리방안
+		"EXCH_MODEL",	//교환모델
+		"COMPANY_PAYMENT",//삼성 실지불비
+		"DEPR_AMO",	//감가상각비용
+		"STATUS"		//상태
+	];
+	
+	var trTag = $j("<tr/>");
+	var tdTag = null;
+	for(var i=0; i<fieldArray.length; i++){
+		var key = fieldArray[i];
+		var content = EXCH_INFO[key];//+'&nbsp;';
+		var style = "td_ac";
+		tdTag = $j('<td title="'+key+'" class="'+style+'"/>');
+		if(key =='DETAIL_TYPE'){
+			$j('#DETAIL_TYPE').val(content);
+			content = $j('#DETAIL_TYPE option:selected').text();
+		}else if(key == 'COMPANY_PAYMENT' || key == 'DEPR_AMO'){
+			style = "td_ar";
+		}else if(key == 'STATUS'){
+			for (var j=0; j<codeNegotiationStatus.length; j++) {
+				if (codeNegotiationStatus[j]['codeId'] == content) {
+					var stockIn = content;
+					var stockIn_nm = codeNegotiationStatus[j]['codeName'];
+					content = $j('<span>'+ stockIn_nm +'</span>');
+					tdTag.append(content);
+					content = $j('<input type="hidden" name="NEGOTIATION_STATUS" value="'+ stockIn +'">');
+					tdTag.append(content);
+					content = $j('<input type="hidden" name="NEGOTIATION_STATUS_DESC" value="'+ stockIn_nm +'">');
+					break;
+				}
+			}
+		}else if(key == 'EXCH_MODEL'){
+			
+			var exModel = content;
+			var exNegoTd = EXCH_INFO['EX_NEGO'];
+			content = $j('<span>'+ content +'</span>');
+			tdTag.append(content);
+			content = $j('<input type="hidden" name="' + 'EXCH_MODEL' +'" value="'+ exModel +'">');
+			tdTag.append(content);
+			content = $j('<input type="hidden" name="' + 'EX_NEGO_TD' +'" value="'+ exNegoTd +'">');
+		}
+		
+		tdTag.append(content);
+		trTag.append(tdTag);
+	}
+	$j(tbodyObj).html(trTag);
+
+	
+}
+
+function refreshGR_INFO(GR_INFO){
+	var tbodyObj = $('grInfoTableBody');
+
+	var fieldArray=[
+	"MODEL",
+	"SERIAL_NO",
+	"SERIAL_NO2",
+	"NEW_MODEL",
+	"NEW_SERIAL_NO",
+	"NEW_SERIAL_NO2",
+	"PARTS_PLBM_YN",
+	"APPEAR_PLBM_YN",
+	"PARTS_PLMB_DESC",
+	"REMARK2",
+	"DELAY_REASON_DESC"
+	];
+	
+	var trTag = $j("<tr/>");
+	var tdTag = null;
+	for ( var i = 0; i < fieldArray.length; i++) {
+		var key = fieldArray[i];
+		var content = GR_INFO[key];//+'&nbsp;';
+		var style = "td_ac";
+		tdTag = $j('<td title="'+key+'" class="'+style+'"/>');
+		if(key == 'MODEL'){
+			var temp = $j('<input type="hidden" name="' + 'MODEL_TD' +'" value="'+ content +'">');
+			tdTag.append(temp);
+			content = $j('<span>'+ content +'</span>');
+		}else if(key == 'SERIAL_NO'){
+			var temp = $j('<input type="hidden" name="' + 'SERIAL_NO_TD' +'" value="'+ content +'">');
+			tdTag.append(temp);
+			content = $j('<span>'+ content +'</span>');		
+		}			
+		tdTag.append(content);
+		trTag.append(tdTag);
+	}
+	$j(tbodyObj).html(trTag);
+	
+}
+
+function refreshGI_INFO(GI_INFO){
+	var tbodyObj = $('giInfoTableBody');
+
+	/*
+	출고일자	운송장No	도착확인
+	*/
+	var fieldArray=[
+	"SEND_DATE",
+	"SEND_DOC_NO",
+	"SEND_COURIER"
+	];
+	
+	var trTag = $j("<tr/>");
+	var tdTag = null;
+	for ( var i = 0; i < fieldArray.length; i++) {
+		var key = fieldArray[i];
+		var content = GI_INFO[key];//+'&nbsp;';
+		var style = "td_ac";
+		tdTag = $j('<td title="'+key+'" class="'+style+'"/>');
+		if(key == 'SEND_DATE'){
+			var temp = $j('<input type="hidden" name="' + 'SEND_DATE_TD' +'" value="'+ content +'">');
+			tdTag.append(temp);
+			content = $j('<span>'+ content +'</span>');
+		}		
+		tdTag.append(content);
+		trTag.append(tdTag);
+	}
+	$j(tbodyObj).html(trTag);
+		
+}
+
+function refreshSEND_INFO(SEND_INFO, SEND_PROD_INFO){
+	var tbodyObj = $j('#sendInfoTableBody');
+	tbodyObj.children().remove();
+	/*
+	택배회사	택배전화	택배번호	자료수	내용	발송일자	삼성도착일자	삼성반송일자	상태	사유
+	*/
+	var fieldArray=[
+	"SEND_COURIER",
+	"SEND_TEL_NO",
+	"SEND_DOC_NO",
+	"SEND_DOC_CNT",
+	"SEND_REMARK",
+	"ASC_SEND_DATE",
+	"DELIVERED_DATE", //삼성도착일자
+	"RETURN_DATE",  //삼성반송일자
+	"STATUS_DESC",  //상태
+	"CONFIRM_REMARK" // 사유
+	];
+	
+	var idx = 0;
+	var seq = 0;
+	var length = SEND_INFO.length;
+	if(SEND_INFO.length==0) SEND_INFO[0]=new Object();
+	for ( var ix = 0; ix < SEND_INFO.length; ix++) {
+		var trTag = $j("<tr/>");
+		var tdTag = null;
+		var aTag = null;
+		var temp = "";
+		var content = "";
+		for ( var i = 0; i < fieldArray.length; i++) {
+			
+			var key = fieldArray[i];
+			var style = "td_ac";
+			tdTag = $j('<td title="'+key+'" class="'+style+'"/>');
+			if(length != 0) {
+				content = SEND_INFO[ix][key];
+				temp = content;
+				//content, hidden
+				if(key == 'SEND_DOC_NO'){
+					if("" != content){
+						
+						tdTag.append(content);
+					}
+				} else if (key == 'STATUS_DESC'){
+					if("" != content){
+						for (var j=0; j<codeExchangeConfirm.length; j++) {
+							if (codeExchangeConfirm[j]['codeId'] == SEND_INFO[ix]['STATUS']) {
+								temp = codeExchangeConfirm[j]['codeName'];
+								break;
+							}
+						}
+
+						tdTag.append(temp);
+					}
+				} else {
+					if(key == 'SEND_COURIER'){
+						content = $j('<input type="hidden" name="' + 'SEQ' +'" value="'+ SEND_INFO[ix]['SEQ'] +'">');
+						tdTag.append(content);
+					} else if (key == 'CONFIRM_REMARK'){
+						var short = getStrCuts(temp, 5);
+						content = $j('<input type="hidden" name="' + 'CONFIRM_REMARK_LONG' +'" value="'+ temp +'">');
+						tdTag.append(content);
+						content = $j('<input type="hidden" name="' + 'CONFIRM_DATE' +'" value="'+ SEND_INFO[ix]['CONFIRM_DATE'] +'">');
+						tdTag.append(content);
+						if(short != "") temp = short + "....";
+					}
+					content = $j('<span>'+ temp +'</span>');
+					tdTag.append(content);
+				}
+			}
+			
+			content = $j('<input type="hidden" name="' + key +'" value="'+ temp +'">');
+			tdTag.append(content);
+			trTag.append(tdTag);
+		}
+		$j(tbodyObj).append(trTag);
+	}
+	
+
+}
+
+function getStrCuts(str, max) {//25자이상글자자르기
+    ns = str.substr(0, max);
+    if (ns.length != str.length) {
+        ns = ns + "";
+    }
+    return ns;
+}
+
+function loadExchNote(){
+	
+	var $form = $j('#frm');
+	var orderNo = _l.ObjectId;
+	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZifGspnSvcExchNoteCmd").appendTo($form);
+	$j("<input type='hidden' name='motoObjectId'/>").val(motoObjectId).appendTo($form);
+	$j("<input type='hidden' name='ORI_PUR_AMT'/>").val(ORI_PUR_AMT).appendTo($form);
+	$j("<input type='hidden' name='ORI_EX_STATUS'/>").val(ORI_EX_STATUS).appendTo($form);
+	
+	AjaxRequest(urlPattern+'?IV_OBJECT_ID='+orderNo,'frm', setExchNote);
+	$('progressloading').startWaiting();	
+}
+function setExchNote(response){
+	$('progressloading').stopWaiting();
+	var jsonData = response.responseText.evalJSON();
+	if (!jsonData.success) {
+		if (jsonData.error) {
+			cfExceptionPop(jsonData);
+		}else alert(jsonData.returnMessage);
+    }
+
+	refreshExchNote(jsonData.ES_GR_INFO);
+}
+
+function refreshExchNote(ES_GR_INFO){
+	$j('#tbodyExchNote').children().remove();
+	var tbodyObj = $('tbodyExchNote');
+
+	var fieldArray=[
+		"GRPLANT",	//입고처
+		"PLANT_MGR",	//창고담당
+		"MGR_TEL_NO",//전화번호
+		"GR_ADDR",	//창고 상세 주소
+		"REGIST_DT", 	//등록일
+		"REGIST_BY_NAME",	//등록자
+		"Print"	//Print
+	];
+	
+	var trTag = $j("<tr/>");
+	var tdTag = null;
+	for(var i=0; i<fieldArray.length; i++){
+		var key = fieldArray[i];
+		var content = ES_GR_INFO[key];//+'&nbsp;';
+		var style = "td_ac";
+		tdTag = $j('<td title="'+key+'" class="'+style+'"/>');
+		if(key=='Print'){
+			content = "";
+		} else if(key=='GRPLANT'){
+			for (var j=0; j<codeAccountName.length; j++) {
+				if (codeAccountName[j]['codeId'] == content) {
+					var stockIn = content;
+					var stockIn_nm = codeAccountName[j]['codeName'];
+					content = $j('<span>'+ stockIn_nm +'</span>');
+					tdTag.append(content);
+					content = $j('<input type="hidden" name="GRPLANT" value="'+ stockIn +'">');
+					tdTag.append(content);
+					content = $j('<input type="hidden" name="GRPLANT_NM" value="'+ stockIn_nm +'">');
+					break;
+				}
+			}
+		} else if(key == 'REGIST_DT'){
+			var registDt = content;
+			content = $j('<span>'+ registDt +'</span>');
+			tdTag.append(content);
+			content = $j('<input type="hidden" name="REGIST_DT" value="'+ registDt +'">');
+		} else if(key == 'REGIST_BY_NAME'){
+			var name = content;
+			if("" == name){
+				content = ES_GR_INFO['REGIST_BY'];
+			}
+		}
+			
+		tdTag.append(content);
+		trTag.append(tdTag);
+	}
+	$j(tbodyObj).html(trTag);
+}
+
+//doa dap
+function doaTabControl(){
+	
+	if(doaVisible){
+		//Swap
+		if(doaVisible && isRepairOrder && $j("#SERVICE_TYPE").val()=='SW')
+			$j('#doaInspectTab').show();
+		else
+			$j('#doaInspectTab').hide();
+		
+		initDoaData();
+		
+	}else if(accVisible){
+		//악세사리에서 사용하지 않는 TR숨김
+		$j("#swversionTr,#unlocked_ynTr").hide();
+		loadInspection();
+	}
+}
+function initDoaData(){
+	//SW건중 HHP교환 SAW승인이 있는것은 HHP교환(RETUN)으로 처리
+	//Other건은 DOA/DAP로 처리
+	if(isHhpExchApprovalFlag){
+		$j('#doaInspectTab').hide();
+		$j('#doaGiTab').show();
+		
+		loadHhpExchData();  //HHP 교환			
+	
+	}else{
+		loadDOADefect();	//DOADAP						
+	}	
+}
+function loadHhpExchData(){
+// 	Saw list에서 신규모델정보를 로드한 후에 작업한다.
+	loadSawHhpNewModel(setSawHhpNewModelForLoad);
+}
+//HHP교환 SAW승인된건의 saw no불러와서 sawlist조회후 신모델정보 가져옴 
+//newModelHhpExch 에 저장 
+function loadSawHhpNewModel(afterFun){
+	
+	var sawNo = hhpExchApprovalSawNo;		
+	var $form = $j('#frm');
+	var orderNo = _l.ObjectId;
+	var ascCode = _l.ASC_CODE;
+	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("SawStatusListCmd").appendTo($form);
+	
+	AjaxRequest(urlPattern+'?isawNo='+sawNo+'&ascCode='+ascCode
+			+'&objectID='+orderNo,'frm', afterFun);
+	$('progressloading').startWaiting();
+	
+}
+function setSawHhpNewModelForLoad(response){
+	try{
+		var jsonObj = eval('('+response.responseText+')');
+		var length = jsonObj.etSawInfo.length;
+		var i = 0;
+		var idx = 0;
+		
+		if(length > 0){
+			for(i=0; i<length; i++){
+				//승인 상태일 경우
+				if(jsonObj.etSawInfo[i].STATUS == "SS010" && jsonObj.etSawInfo[i].REQ_CATEGORY == "SRC54"){
+					idx = i;
+				}
+			}
+			
+			newModelHhpExch = jsonObj.etSawInfo[idx].EXCH_MODEL;
+			newModelHhpExchAccessory  = jsonObj.etSawInfo[idx].HHP_ACCESSORY_STS;
+			if(newModelHhpExchAccessory == "ALL"){
+				$j("#tdAccesory").each(function(){this.style.display = ''});
+				$j("#tdAccesory").show();
+			}
+			newPro_Comp = jsonObj.etSawInfo[idx].PRO_COMP;
+			loadDOAModelList(setHhpExchModel);
+		}
+	
+	}catch(e){
+		alert(e);
+	}finally{
+		$('progressloading').stopWaiting();
+	}
+}
+function loadDOADefect() {	
+	loadDOAModelList(setDOAModelCompany);
+}
+
+function loadDOAModelList(afterFunction) {	
+	var $form = $j('#frm');
+	var modelNo ="";
+		
+	if(newModelHhpExch==""){
+		modelNo = $j('form[name="detailForm"] [name="MODEL"]').val();
+	}else{	//다차수리일 경우 최종 승인된 새로운 모델코드
+		modelNo = newModelHhpExch;
+	}
+	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZcseDoarfRbModelListCmd").appendTo($form);
+	
+	AjaxRequest(urlPattern+'?PI_FLAG=M&MATNR='+modelNo,'frm', afterFunction);
+	$('progressloading').startWaiting();
+}
+function setHhpExchModel(response){
+	$('progressloading').stopWaiting();
+	var jsonObj = eval('('+response.responseText+')');
+	
+	var length = jsonObj.pT_OUTPUT.length;
+	if(length>0){
+		doaReqModel = jsonObj.pT_OUTPUT[0].matnr;
+		
+//		칼라정보 세팅 ..NPC초기교환이 아닌경우
+//		if(isNpcExchFlag != true) $j("#doaForm [name=COLOR]").val(jsonObj.pT_OUTPUT[0].color);
+		
+		$j("#doaInspectTab [name=COLOR]").val(jsonObj.pT_OUTPUT[0].color);
+		
+		modelRbCompany = jsonObj.pT_OUTPUT[0].rb_company;			
+		loadHhpExch(newPro_Comp);
+		
+	}else{
+		//XXX Model does not DOA/DAP Model. Please contact SBSC Admin.
+		var modelNo = $j('form[name="detailForm"] [name="MODEL"]').val();		
+		alert(modelNo+"模型做不是DOA/ DAP模型的。请联系SBSC帮助");
+	}
+}
+function setDOAModelCompany(response) {
+	$('progressloading').stopWaiting();
+	var jsonObj = eval('('+response.responseText+')');
+
+	var length = jsonObj.pT_OUTPUT.length;
+	if(length>0){
+		doaReqModel = jsonObj.pT_OUTPUT[0].matnr;
+		
+		modelRbCompany = jsonObj.pT_OUTPUT[0].rb_company;
+		//DOA탭 칼라정보 수기입력불가 펑션에서 출력된 칼라정보 지정으로 수정
+		//장준재 책임요청으로 수정 2013-04-16		
+		//색상	
+		$j("#doaInspectTab [name=COLOR]").val(jsonObj.pT_OUTPUT[0].color);																								
+		//용량		
+		$j("#doaInspectTab [name=VERSION]").val(jsonObj.pT_OUTPUT[0].version);						
+		//통신향	
+		$j("#doaInspectTab [name=BUYER]").val(jsonObj.pT_OUTPUT[0].buyer);	
+			
+		loadDOADefectList(modelRbCompany);
+		
+	}else{
+		//XXX Model does not DOA/DAP Model. Please contact SBSC Admin.
+		var modelNo = $j('form[name="detailForm"] [name="MODEL"]').val();		
+		alert(modelNo+"模型做不是DOA/ DAP模型的。请联系SBSC帮助");
+	}
+	
+}
+
+function loadHhpExch(modelRbCompany){
+	
+	var $form = $j('#frm');
+	var orderNo = _l.ObjectId;
+	var ascCode = _l.ASC_CODE;
+	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZcseDoarfRcvDefectCmd").appendTo($form);
+	
+	AjaxRequest(urlPattern+'?PI_FLAG=V&PI_BUKRS='+modelRbCompany+'&PI_KUNNR='+ascCode
+			+'&ACCEPT_NO='+orderNo,'frm', setHhpExch);
+	$('progressloading').startWaiting();
+}
+function setHhpExch(response){
+	$('progressloading').stopWaiting();
+	var jsonObj = eval('('+response.responseText+')'); 
+	var length = jsonObj.pT_OUTPUT.length;
+
+	var tbodyObj = $j('#tbodyDoaDefect');
+	tbodyObj.children().remove();	
+	
+	var arr = [
+	   		'accept_no'	,//접수번호
+	   		'kunnr'		,//ASC No		 
+	   		'matnr'		,//Model code
+	   		'imei_esn'	,//IMEI/ESN No 
+	   		'serno'		,//Serial No
+	   		'status_text'	,//상태
+	   		'rb_company'	,//접수DC
+	   		'status_date1'	,//불량품 재생 요청일
+	   		'status_date2'	//고장품 출고일자					
+	   	];
+	//출고탭을 보여준다
+	$j("#doaGiTab").show();	
+	if(length==0){
+		jsonObj.pT_OUTPUT[0] = new Object();
+	}else{
+						
+		loadDOAShipping(newPro_Comp);
+		for (var i = 0; i < jsonObj.pT_OUTPUT.length; i++) {
+			var obj = jsonObj.pT_OUTPUT[i];
+			
+			var trTag = $j("<tr/>");
+			var tdTag = null;
+			for(var i=0; i<arr.length; i++){
+				
+				var key = arr[i];
+				var content = obj[key];
+				
+				if(key == 'rb_company'){				
+					var len1 = aryRB_COMPANY.length;	
+					for (var k = 0 ; k < len1 ; k++) {
+						if (aryRB_COMPANY[k].codeId == content) {												
+							content = aryRB_COMPANY[k].codeName;
+							break;
+						}
+					}
+				}				
+				tdTag = $j('<td class="td_ac"/>');
+				//IMEI PROJECT
+				if(key=='imei_esn'){
+					tdTag.append(markIMEI(content));
+				}else{
+					tdTag.append(content);
+				}
+				
+				trTag.append(tdTag);
+			}
+			$j(tbodyObj).append(trTag);
+		}		
+	}
+}
+function loadDOADefectList(modelRbCompany) {
+	
+	var $form = $j('#frm');
+	var orderNo = _l.ObjectId;
+	var ascCode = _l.ASC_CODE;
+	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZcseDoarfRcvDefectCmd").appendTo($form);
+
+	AjaxRequest(urlPattern+'?PI_FLAG=V&PI_BUKRS='+modelRbCompany+'&PI_KUNNR='+ascCode+'&ACCEPT_NO='+orderNo,'frm', setDOADefectList);
+	$('progressloading').startWaiting();
+}
+function setDOADefectList(response) {
+	$('progressloading').stopWaiting();
+	var jsonObj = eval('('+response.responseText+')'); 
+	var length = jsonObj.pT_OUTPUT.length;
+
+	var tbodyObj = $j('#tbodyDoaDefect');
+	tbodyObj.children().remove();	
+	
+//	if(length>0 && jsonObj.pT_OUTPUT[0].secu_no == ""){		
+//		$j('#DOAPrintPopBtn').show();
+//	}
+	
+	var arr = [
+		'accept_no'	,//접수번호
+		'kunnr'		,//ASC No		 
+		'matnr'		,//Model code
+		'imei_esn'	,//IMEI/ESN No 
+		'serno'		,//Serial No
+		'status_text'	,//상태
+		'rb_company'	,//접수DC
+		'status_date1'	,//불량품 재생 요청일
+		'status_date2'	//고장품 출고일자					
+	];
+
+	var secu_no = "";
+	if(length==0){
+		$j("#doaGiTab").hide();
+		jsonObj.pT_OUTPUT[0] = new Object();
+
+	}else{		
+		$j("#doaGiTab").show();
+		//생산법인 출고이력조회
+		loadDOAShipping(modelRbCompany);
+	}
+	for (var i = 0; i < jsonObj.pT_OUTPUT.length; i++) {
+		var obj = jsonObj.pT_OUTPUT[i];
+		
+		if(i==0) secu_no = obj.secu_no;
+		
+		var trTag = $j("<tr/>");
+		var tdTag = null;
+		for(var i=0; i<arr.length; i++){
+			
+			var key = arr[i];
+			var content = obj[key];
+
+			if(key == 'rb_company'){				
+				var len1 = aryRB_COMPANY.length;	
+				for (var k = 0 ; k < len1 ; k++) {
+					if (aryRB_COMPANY[k].codeId == content) {												
+						content = aryRB_COMPANY[k].codeName;
+						break;
+					}
+				}
+			}
+			
+			tdTag = $j('<td class="td_ac"/>');
+			//IMEI PROJECT
+			if(key=='imei_esn'){
+				tdTag.append(markIMEI(content));
+			}else{
+				tdTag.append(content);
+			}
+			
+			
+			trTag.append(tdTag);
+		}
+		$j(tbodyObj).append(trTag);
+	}
+	loadInspection();
+
+}
+
+function loadDOAShipping(modelRbCompany) {
+	
+	var $form = $j('#frm');
+	var orderNo = _l.ObjectId;
+	var ascCode = _l.ASC_CODE;
+
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZcseDoarfShippingCmd").appendTo($form);
+		
+	AjaxRequest(urlPattern+'?PI_FLAG=N&PI_BUKRS='+modelRbCompany+'&PI_ACCEPT_NO='+orderNo+'&PI_KUNNR='+ascCode,'frm', setDOAShipping);
+	$('progressloading').startWaiting();
+}
+
+function setDOAShipping(response) {
+	$('progressloading').stopWaiting();
+	var jsonObj = eval('('+response.responseText+')');
+
+	var tbodyObj = $j('#tbodyDoaShipping');
+	tbodyObj.children().remove();
+
+	var arr = [
+		'accept_no',	//접수번호
+		'exch_type',	//교환유형 
+		'request_dt',	//신청일자
+		'rb_gi_dt',		//출고일자
+		'new_matnr',	//신모델코드
+		'new_imei_esn',	//신IMEI/ESN No
+		'new_serno',	//신Serial No
+		'new_color',	//신Color
+		'matnr',		//구모델
+		'imei_esn',		//구IMEI/ESN No
+		'serno'		//구Serial No
+	];
+	
+	var length = jsonObj.pT_OUTPUT.length;
+	if(length==0){
+		jsonObj.pT_OUTPUT[0] = new Object();
+		$j("#doaGrTab").hide();
+	}else{
+		$j("#doaGrTab").show();
+	}
+	for (var i = 0; i < jsonObj.pT_OUTPUT.length; i++) {
+		var obj = jsonObj.pT_OUTPUT[i];
+		
+		var trTag = $j("<tr/>");
+		var tdTag = null;
+		for(var i=0; i<arr.length; i++){
+			var key = arr[i];
+			var content = obj[key];
+			
+			tdTag = $j('<td class="td_ac"/>');
+			//IMEI PROJECT
+			if(key=='imei_esn' || key=='new_imei_esn'){
+				tdTag.append(markIMEI(content));
+			}else{
+				tdTag.append(content);
+			}
+			
+			trTag.append(tdTag);
+		}
+		$j(tbodyObj).append(trTag);
+	}
+}
+function loadInspection(){
+	
+	var $form = $j('#frm');	
+	$form.empty();
+	$j("<input type='hidden' name='cmd'/>").val("ZifGspnSvcInspectionListCmd").appendTo($form);
+	$j("<input type='hidden' name='IV_OBJECT_ID'/>").val(_l.ObjectId).appendTo($form);
+	$j("<input type='hidden' name='IV_ASC_CODE'/>").val(_l.ASC_CODE).appendTo($form);
+	
+	AjaxRequest(urlPattern,'frm', afterLoadInspection);
+	$('progressloading').startWaiting();
+}
+function afterLoadInspection(response){
+	$('progressloading').stopWaiting();
+	
+	var jsonObj = eval('('+response.responseText+')');
+	if (jsonObj.error) {
+		cfExceptionPop(jsonObj);
+	}
+	//NPC초기교환인 경우에 교환유형을 SWAP로 강제지정하고 DAP와 같게 한다.
+	if(isNpcExchFlag == true){		
+		$j("#doaInspectTab [name=EXCH_TYPE]").empty();		
+		$j("#doaInspectTab [name=EXCH_TYPE]").append($j("<option/>").val("SWAP").text("SWAP"));
+		
+	}
+	
+	var ET_INSPECT_LIST = new Object();
+	//테이터가 있는경우 
+	if(jsonObj.ET_INSPECT_LIST.length>0){
+				
+		ET_INSPECT_LIST = jsonObj.ET_INSPECT_LIST[0];		
+		$j('#doaInspectTab input').each(function(index){
+			setDoaInspectData(ET_INSPECT_LIST,this);
+		});
+		$j('#doaInspectTab select').each(function(index){
+			setDoaInspectData(ET_INSPECT_LIST,this);
+		});
+				
+		var state = $j("#doaInspectTab").find("#STATE");
+		var city = $j("#doaInspectTab").find("#CITY");
+		var colony = $j("#doaInspectTab").find("#COLONY");
+		
+		$j("<option/>").text(ET_INSPECT_LIST.STATE).appendTo(state);
+		$j("<option/>").text(ET_INSPECT_LIST.CITY).appendTo(city);
+		$j("<option/>").text(ET_INSPECT_LIST.COLONY).appendTo(colony);
+		
+		//조회시 달력을 보여주지 않고 텍스트로 보여준다. 박스개봉일자, 바이오스구매일자
+		$j("#BOX_OPEN_DT_TD").text(ET_INSPECT_LIST.BOX_OPEN_DT);
+		$j("input #BOX_OPEN_DT").hide();
+		$j("#bios_dateTd1").text(ET_INSPECT_LIST.BIOS_PUR_DT);
+		$j("input #BIOS_PUR_DT").hide();
+							
+		//환불여부에 따라서 환불이유 필드 show,hide
+		if($j("#doaInspectTab #REFUND_FLAG").val() == "X"){
+			$j("#REFUND_REASON").show();
+			$j("#REFUND_REASON").attr("disabled", false);
+		}else{
+			$j("#REFUND_REASON").hide();
+			$j("#REFUND_REASON").attr("disabled", true);
+		}
+		//인터넷판매상
+		if($j("#doaInspectTab #EXCH_TYPE").val()=="INT"){	
+
+			$j("#problem_typeTd").attr("colspan", "1");
+			$j("#intDelerListTd").show();
+			$j("#intDelerListTd1").show();
+			$j("#INT_DELAER").attr("disabled", false);
+		}else{
+			$j("#INT_DELAER").attr("disabled", true);
+			$j("#intDelerListTd").hide();
+			$j("#intDelerListTd1").hide();	
+
+			$j("#problem_typeTd").attr("colspan", "3");
+		}
+		//구매15일이내 필드값 조정
+		if(doaVisible){
+			if($j("#doaInspectTab #PURCHASE15DAYS").val() == "X"){
+				$j("#doaInspectTab #PUR_15").val("是");
+			}else{
+				$j("#doaInspectTab #PUR_15").val("否");
+			}			
+		}else if(accVisible){
+			$j("#doaInspectTab #PUR_15").val("是");
+		}
+		//수정금지추가
+		$j("#doaInspectTab").find("input,select").prop("disabled", true);
+		
+					
+	}else{//Inspection 데이터가 없는경우
+		$j("#doaInspectTab").hide();		
+	}
+	
+	setTimeout(function() {
+		checkPrcdField();			
+	}, 500);
+}
+function setDoaInspectData(ET_INSPECT_LIST,obj){
+	var value = ET_INSPECT_LIST[obj.name];
+	if(value){
+		$j(obj).val(value);
+		return;
+	}
+}
+function checkPrcdGroup(){
+	var code = $j('[name=detailForm] #SVC_PRCD').val();
+	var group = $j('[name=detailForm] #SVC_PRCD').val().substr(0,3);
+	
+	if(group == 'THB'){
+		group = 'HHP';
+	}
+	//코드 SDT02(데스크탑)에 한해서 NPC분류에 적용함 2013-05-20 법인IT담당자 요청으로 수정
+	if(group=='NPC'|| code =='SDT02'){
+		group = 'NPC';
+	}
+	if(group=='CLP'||group=='FAX'||group=='PRT'||group=='MFP'||group=='MLP'){
+		group='PRT';
+	}
+	return group;
+}
+//'NPC' 또는 'PRT'제품 판단해서 특정필드만 보여주기
+var aryDisabled = [];
+function checkPrcdField(){	
+	var group =  checkPrcdGroup();
+	
+	$j("#doaInspectTab #REFUND_FLAG").live("change", function(){
+		if($j(this).val() == "X"){
+			$j("#REFUND_REASON").show();
+			$j("#REFUND_REASON").attr("disabled", false);
+		}else{
+			$j("#REFUND_REASON").hide();
+			$j("#REFUND_REASON").attr("disabled", true);
+		}
+	});
+	
+	$j("#doaInspectTab #EXCH_TYPE").live("change" , function(){
+		if($j(this).val() == "INT"){
+			$j("#problem_typeTd").attr("colspan", "1");			
+			$j("#intDelerListTd").show();
+			$j("#intDelerListTd1").show();
+			$j("#INT_DELAER").attr("disabled", false);
+		}else{
+			$j("#problem_typeTd").attr("colspan", "3");
+			$j("#INT_DELAER").attr("disabled", true);
+			$j("#intDelerListTd").hide();
+			$j("#intDelerListTd1").hide();				
+		}
+	});
+
+	if(group == "NPC" || group == "PRT"){
+		//색상 - 노트북,프린트 X
+		$j("#colorTd").hide();
+		$j("#colorTd1").hide();
+		
+		$j("#requester_typeTd").attr("colspan", "5");
+		//교환여부,사유 - 노트북,프린트X
+		$j("#refund_flagTr").hide();
+		
+		
+		//영수증,협의서 - 노트북,프린트X
+		$j("#receiptTr").hide();
+		//SW버전,라벨번호,비닐봉지번호 - 노트북,프린트X
+		$j("#swversionTr").hide();
+		//해제여부 - 노트북,프린트X
+		$j('#unlocked_ynTr').hide();
+		
+		//고장재현비율,시간 - 노트북,프린트X
+		$j("#emersion_rateTr").hide();
+		
+		//soft인위고장,검측빈도 - 노트북,프린트O
+		$j("#soft_defectTr").show();
+		//검측방법 - 노트북,프린트O - 2013-05-20 DOADAP IT담당자의 요청으로 검측방법 필드삭제처리
+//		$j("#inspect_descTr").show();
+		//기기외관상황 - 노트북,프린트O
+		$j("#appear_descTr").show();		
+		//포장상황 - 노트북,프린트O
+		$j("#pack_descTr").show();
+		//악세사리상황 - 노트북O - 2013-07-04 프린터 일때도 DOA/DAP일때 악세사리 상황보여달라고 요청들어옴
+		$j("#accessory_descTr").show();
+		$j("#doaInspectTab #ACCESSORY_DESC").attr("disabled" ,false);
+		
+		if(group == "NPC"){
+			//특수설명 - 노트북O,프린트X - 2013-05-17 프린터일때 특수설명 안보이게 변경요청으로 수정
+			$j("#spe_descTr").show();
+			$j("#doaInspectTab #SPE_DESC").attr("disabled" ,false);
+			
+		}
+		//기타비고 - 프린트O, 2013-05-17 HHP일때도 비고란이 보여달라고 신명하 과장요청으로
+		//기타비고항목 다 보여주도록 수정
+//		if(group == "PRT"){
+//			$j("#remark_remarkTr").show();
+//			$j("form[name=doaForm] #REMARK").attr("disabled" ,false);
+//		}
+		
+		exchTypeChangeOp($j("#EXCH_TYPE").val(), group);
+		
+		$j("#EXCH_TYPE").live("change", function(e){
+			exchTypeChangeOp($j(this).val() , group);
+		});
+		
+		autoSelect();	
+		//파라미터 비활성화
+		aryDisabled = ["COLOR","REFUND_FLAG","REFUND_REASON","RECEIPT_NO","RECEIPT_CODE","AGREE_NO","SW_VERSION","LABEL_NO","COVER_NO","UNLOCKED_FLAG","EMERSION_TERM"];
+		changeDisable(aryDisabled,1);
+		//파라미터 활성화
+		aryDisabled =["SOFT_DEFECT","DEFECT_FREQ","INSPECT_DESC","APPEAR_DESC","PACK_DESC","SPE_DESC"];
+		changeDisable(aryDisabled,2);
+	}	
+	
+	//수정하지 못하도록 처리한다.
+	$j("#doaInspectTab").find("input,select").prop("disabled", true);
+}
+function exchTypeChangeOp(exchType, prcdGroup){
+	//DAP선택시
+	if(exchType == "DAP" || exchType == "SWAP"){
+		//구매영수증여부
+		$j("#pop_ynTr").show();
+		//구매15일 이내 여부,상품보증부합성능고장,판정결과
+		$j("#pur_15Tr").show();
+		aryDisabled = ["POP_YN","PUR_15","PURCHASE15DAYS"];				
+		changeDisable(aryDisabled,2);
+		
+		//결실된 악세서리
+		if(prcdGroup == "NPC"){
+			$j("#missing_accsTr").show();
+			$j("#bios_Tr").hide();			
+			$j("#os_statusTr").hide();
+			$j("#WTY_DEFECT_FLAG_Tr").show();
+			
+			$j("#doaInspectTab #MISSING_ACCS").attr("disabled" ,false);
+			$j("#doaInspectTab #WTY_DEFECT_FLAG").attr("disabled" ,false);
+			aryDisabled = ["BIOS_PUR_FLAG","BIOS_PUR_DT","OS_STATUS","HDD_USE_TIME","OTH_EQUIP_CODE"];
+			changeDisable(aryDisabled,1);
+		
+		}
+		//OA자재라인번호,기타악세서리상황
+		else if(prcdGroup == "PRT"){
+			$j("#oa_labelTr").show();
+			$j("#PRINTED_CNT_TR").hide();
+				
+//			$j("#other_accsTd").show();
+//			$j("#other_accsTd1").show();			
+			
+			aryDisabled = ["OA_LABEL_NO"];
+			changeDisable(aryDisabled,2);
+			$j("#doaInspectTab #PRINTED_CNT").attr("disabled" ,true);
+			
+		}
+		
+		$j("#box_openTr").hide();
+		$j("#used_descTr").hide();
+		$j("#result_descTr").hide();
+		
+		aryDisabled = ["BOX_OPEN_DT","DEFECT_CLASS","USED_DESC","RESULT_DESC"];
+		changeDisable(aryDisabled,1);
+						
+	}
+	//DOA선택시
+	else if(exchType == "DOA"){
+		//구매영수증여부
+		$j("#pop_ynTr").hide();
+		
+		//구매15일 이내 여부,상품보증부합성능고장,판정결과
+		$j("#pur_15Tr").hide();
+		aryDisabled = ["POP_YN","PUR_15","PURCHASE15DAYS"];
+		changeDisable(aryDisabled,1);
+		
+		
+		//결실된 악세서리
+		if(prcdGroup == "NPC"){
+			$j("#bios_Tr").show();
+			$j("#os_statusTr").show();			
+			$j("#missing_accsTr").hide();
+			$j("#WTY_DEFECT_FLAG_Tr").hide();
+			$j("#doaInspectTab #WTY_DEFECT_FLAG").attr("disabled" ,true);
+			
+			$j("#doaInspectTab #MISSING_ACCS").attr("disabled" ,true);
+			
+			aryDisabled = ["BIOS_PUR_FLAG","BIOS_PUR_DT","OS_STATUS","HDD_USE_TIME","OTH_EQUIP_CODE"];
+			changeDisable(aryDisabled,2);
+		}
+		//OA자재라인번호,기타악세서리상황
+		else if(prcdGroup == "PRT"){
+			$j("#oa_labelTr").show();
+//			$j("#other_accsTd").hide();
+//			$j("#other_accsTd1").hide();	
+			$j("#PRINTED_CNT_TR").show();
+			
+			
+//			$j("form[name=doaForm] #ETC_ACC_STATUS").attr("disabled" ,true);
+						
+			aryDisabled = ["OA_LABEL_NO","PRINTED_CNT"];
+			changeDisable(aryDisabled,2);
+			
+		}
+		
+		$j("#box_openTr").show();
+		$j("#used_descTr").show();
+		$j("#result_descTr").show();
+								
+		aryDisabled = ["BOX_OPEN_DT","DEFECT_CLASS","USED_DESC","RESULT_DESC"];
+		changeDisable(aryDisabled,2);
+		
+	}
+	//OTHER선택시
+	else{
+		//구매영수증여부
+		$j("#pop_ynTr").hide();		
+		//구매15일 이내 여부,상품보증부합성능고장,판정결과
+		$j("#pur_15Tr").hide();
+		aryDisabled = ["POP_YN","PUR_15","PURCHASE15DAYS"];
+		changeDisable(aryDisabled,1);
+		//결실된 악세서리
+		if(prcdGroup == "NPC"){
+			$j("#missing_accsTr").hide();
+			$j("#bios_Tr").hide();
+			$j("#os_statusTr").hide();
+			$j("#WTY_DEFECT_FLAG_Tr").hide();
+			$j("#doaInspectTab #WTY_DEFECT_FLAG").attr("disabled" ,true);
+			
+			aryDisabled = ["MISSING_ACCS","BIOS_PUR_FLAG","BIOS_PUR_DT","OS_STATUS","HDD_USE_TIME","OTH_EQUIP_CODE"];
+			changeDisable(aryDisabled,1);
+		}
+		//OA자재라인번호,기타악세서리상황
+		else if(prcdGroup == "PRT"){
+			$j("#oa_labelTr").hide();
+//			$j("#other_accsTd").hide();
+//			$j("#other_accsTd1").hide();
+			$j("#PRINTED_CNT_TR").hide();
+			
+			aryDisabled = ["OA_LABEL_NO","PRINTED_CNT"];
+			changeDisable(aryDisabled,1);
+						
+		}
+		
+		$j("#box_openTr").hide();
+		$j("#used_descTr").hide();
+		$j("#result_descTr").hide();
+		
+		aryDisabled = ["BOX_OPEN_DT","DEFECT_CLASS","USED_DESC","RESULT_DESC"];
+		changeDisable(aryDisabled,1);		
+	}
+
+}
+function autoSelect(){	
+	//bios Y선택에 따라서 달력보여주고 안보여주기 구현
+	if($j("[name=BIOS_PUR_FLAG]").val() == "X"){
+		$j("#bios_dateTd").show();
+		$j("#bios_dateTd1").show();
+		$j("#bios_purTd").attr("colspan" , "1");
+	}else{
+		$j("#bios_dateTd").hide();
+		$j("#bios_dateTd1").hide();
+		$j("#bios_purTd").attr("colspan" , "5");
+	}
+	$j("#BIOS_PUR_FLAG").live("change" , function(e){
+		if($j(this).val() == "X"){
+			$j("#bios_dateTd").show();
+			$j("#bios_dateTd1").show();
+			$j("#bios_purTd").attr("colspan" , "1");
+			$j("#BIOS_PUR_DT").attr("disabled" ,false);
+		}else{
+			$j("#bios_dateTd").hide();
+			$j("#bios_dateTd1").hide();
+			$j("#bios_purTd").attr("colspan" , "5");
+			$j("#BIOS_PUR_DT").attr("disabled" ,true);
+		}
+	});
+}
+function changeDisable(ary , type){
+	
+	if(type == 1){
+		for(var i=0;i<ary.length;i++){			
+			$j('#doaInspectTab #'+ary[i]).attr("disabled", true);
+		}
+	}else{
+		for(var i=0;i<ary.length;i++){
+			$j('#doaInspectTab #'+ary[i]).attr("disabled", false);
+		}	
+	}
+}
+
+function openSTSSvcPrintPop(){
+	var group = $j('[name=detailForm] #SVC_PRCD').val().substr(0,3);
+	if(group=='THB'){
+		group = "HHP";
+	}else{
+		group = "CE_IT";
+	}
+	
+	var url = "";
+	if(_l.SERVICE_TYPE == "II"){
+		url = "/svctracking/svcorder/sts/accept_install_print.jsp?pageType=page";
+	}else{
+		if(group == 'HHP') url = "/svctracking/svcorder/sts/accept_hhp_print_new.jsp?objectID="+ _l.ObjectId+"&pageType=page";
+		else url = "/svctracking/svcorder/sts/accept_hhp_print.jsp?objectID="+ _l.ObjectId+"&pageType=page";;
+	}
+	
+	w = window.open(url,"SvcRequestPrintPop",'width=1180,height=650,top=50,left=100,toolbar=no,location=no,directories=no,'
+		+'status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+}
+
+function loadAscProfile(){	
+	var formId = 'AscProfileSearchForm';
+	$j("#"+formId).remove();
+	var $frm = $j('<form id="'+formId+'" method=post />');
+	$frm.append('<input type="hidden" name="cmd" value="ZnwNetworkProfileDisplayCnCmd" />');
+	$frm.append('<input type="hidden" name="ascCode" value="'+_l.ASC_CODE+'"/>');
+	$j('body').append($frm);
+    
+	$('progressloading').startWaiting();
+    AjaxRequest(urlPatternGZIP, formId, setAscProfile);
+}
+
+function setAscProfile(response){
+	$('progressloading').stopWaiting();
+    var jsonObjC = eval('('+response.responseText+')');
+    
+    if(!jsonObjC.eS_CENTER_ATTR) return;
+	var centerAttr = jsonObjC.eS_CENTER_ATTR;
+    
+    AscChk_soUse = (centerAttr.chk_so && centerAttr.chk_so!="")?true:false;
+	viewHqConfField();//AscChk_soUse
+}
+
+function viewHqConfField(){
+	if(AscChk_soUse && display_hqConf == true){
+		$j('#textdHqConf,[name=HQ_CONF_FLAG],[name=HQ_CONF_FLAG_view]').show();
+		$j('#tdHqConf').attr('class','ser_ti');
+	}else{
+		$j('#textdHqConf,[name=HQ_CONF_FLAG],[name=HQ_CONF_FLAG_view]').hide();
+		$j('#tdHqConf').attr('class','ser_td');
+	}
+}
+function openSendDocumentPop(){
+	var url = "";
+	w = window
+			.open(
+					url,
+					"rrr_popup",
+					'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=250,left=300,width=650,height=280');
+	w.focus();
+	var formObj = $('detailForm');
+	formObj.action =  urlPatternGZIP+'?pageType=DetailPage';
+	formObj.cmd.value = 'ServiceOrderSendDocumentCmd';
+	formObj.target = 'rrr_popup';
+	formObj.submit();	
+}

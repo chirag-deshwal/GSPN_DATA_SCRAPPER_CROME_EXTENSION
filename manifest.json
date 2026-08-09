@@ -1,0 +1,80 @@
+{
+  "manifest_version": 3,
+  "name": "GSPN Data Scraper",
+  "version": "1.1.1",
+  "description": "Scrape service ticket data from Samsung GSPN portal, export to Excel, and auto-fill service orders with Closer Helper",
+  "permissions": ["activeTab", "scripting", "downloads", "storage", "alarms"],
+  "host_permissions": [
+    "https://biz2.samsungcsportal.com/*",
+    "https://raw.githubusercontent.com/*",
+    "file:///*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://biz2.samsungcsportal.com/gspn/operate.do*",
+        "file:///*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": ["content.js", "complaintHealthContent.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://biz2.samsungcsportal.com/svctracking/common/SVCPopCustomerSearch.jsp*"],
+      "js": ["customerSearchContent.js"],
+      "all_frames": true,
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://biz2.samsungcsportal.com/*",
+        "file:///*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": ["closerContent.js", "viewModeContent.js"],
+      "all_frames": true,
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup.html",
+        "popup.js",
+        "popup.css",
+        "tailwind.min.css",
+        "profileManager.js",
+        "profiles.html",
+        "profiles.js",
+        "profiles.css",
+        "closer_helper_settings.html",
+        "closer_helper_settings.js",
+        "closer_helper_settings.css",
+        "webpage_source/src/products_keys.json"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
+

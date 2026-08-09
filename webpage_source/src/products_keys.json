@@ -1,0 +1,711 @@
+{
+    "_doc": "Master config for GSPN Closer Helper — Products, Work Types, and Field Defaults",
+    "products": {
+        "AC": {
+            "label": "Air Conditioner",
+            "workTypes": {
+                "installation": {
+                    "label": "Installation",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": "DEMO INSTALLATION DONE SET OK"
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "4",
+                            "valueLabel": "Installation Trouble"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "FL",
+                            "valueLabel": "Flat Rate"
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "9999",
+                            "valueLabel": "OTHERS"
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "HLZ23",
+                            "valueLabel": "Installation Done"
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "R",
+                            "valueLabel": "Open"
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "SRC004",
+                            "valueLabel": "Installation Problem",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "HX8",
+                            "valueLabel": "Installation requested",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "SRC004",
+                            "valueLabel": "Installation Problem",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "E01",
+                            "valueLabel": "Initial installation",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                },
+                "repair": {
+                    "label": "Repair",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": ""
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": ""
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": ""
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": ""
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": ""
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": ""
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": ""
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "1",
+                            "valueLabel": "Defect"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                }
+            }
+        },
+        "WM": {
+            "label": "Washing Machine",
+            "workTypes": {
+                "installation": {
+                    "label": "Installation",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": ""
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": ""
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": ""
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": ""
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": ""
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": ""
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": ""
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "4",
+                            "valueLabel": "Installation Trouble"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "9999",
+                            "valueLabel": "OTHERS"
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                },
+                "repair": {
+                    "label": "Repair",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": ""
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": ""
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": ""
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": ""
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": ""
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": ""
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": ""
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "1",
+                            "valueLabel": "Defect"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                }
+            }
+        },
+        "REF": {
+            "label": "Refrigerator",
+            "workTypes": {
+                "repair": {
+                    "label": "Repair",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": ""
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": ""
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": ""
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": ""
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": ""
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": ""
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": ""
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "1",
+                            "valueLabel": "Defect"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                }
+            }
+        },
+        "LED": {
+            "label": "LED TV",
+            "workTypes": {
+                "installation": {
+                    "label": "Installation",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": "done by kaushal"
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": "done by kaushal"
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": "demo installation done set ok"
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": "demo installation done set ok"
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": "demo installation done set ok"
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": "demo installation done set ok"
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": "done by kaushal"
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "4",
+                            "valueLabel": "Installation Trouble"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "FL",
+                            "valueLabel": "Flat Rate"
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "9999",
+                            "valueLabel": "OTHERS"
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "HLZ23",
+                            "valueLabel": "Installation Done"
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "R",
+                            "valueLabel": "Open"
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "SRC004",
+                            "valueLabel": "Installation Problem",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "AX8",
+                            "valueLabel": "Installation requested",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "SRC004",
+                            "valueLabel": "Installation Problem",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "E01",
+                            "valueLabel": "Initial installation",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                },
+                "repair": {
+                    "label": "Repair",
+                    "fields": {
+                        "REPAIRDESC_L": {
+                            "type": "text",
+                            "label": "Repair Detail DESC",
+                            "value": ""
+                        },
+                        "REPAIR_DESC": {
+                            "type": "hidden",
+                            "label": "Repair Detail (mirror)",
+                            "value": ""
+                        },
+                        "DEFECTDESC_L": {
+                            "type": "text",
+                            "label": "Defect Detail DESC",
+                            "value": ""
+                        },
+                        "DEFECT_DESC": {
+                            "type": "hidden",
+                            "label": "Defect Detail (mirror)",
+                            "value": ""
+                        },
+                        "STATUS_COMMENT": {
+                            "type": "text",
+                            "label": "Status Comment",
+                            "value": ""
+                        },
+                        "REMARK": {
+                            "type": "text",
+                            "label": "Remark (readonly)",
+                            "value": ""
+                        },
+                        "EDITEXT": {
+                            "type": "text",
+                            "label": "Edit Text (GSPN Update)",
+                            "value": ""
+                        },
+                        "IRIS_CONDI": {
+                            "type": "select",
+                            "label": "Condition Code",
+                            "value": "1",
+                            "valueLabel": "Defect"
+                        },
+                        "LAB_TYPE": {
+                            "type": "select",
+                            "label": "Defect Type",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "DEF_BLK": {
+                            "type": "select",
+                            "label": "Defect Block",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "REASON": {
+                            "type": "select",
+                            "label": "Reason Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_DEFECT": {
+                            "type": "select",
+                            "label": "Defect Code",
+                            "value": "",
+                            "valueLabel": ""
+                        },
+                        "IRIS_SYMPT_QCODE": {
+                            "type": "select_parent",
+                            "label": "Symptom Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_SYMPT"
+                        },
+                        "IRIS_SYMPT": {
+                            "type": "select_child",
+                            "label": "Symptom Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_SYMPT_QCODE"
+                        },
+                        "IRIS_REPAIR_QCODE": {
+                            "type": "select_parent",
+                            "label": "Repair Q-Code (parent)",
+                            "value": "",
+                            "valueLabel": "",
+                            "triggers": "IRIS_REPAIR"
+                        },
+                        "IRIS_REPAIR": {
+                            "type": "select_child",
+                            "label": "Repair Code (child)",
+                            "value": "",
+                            "valueLabel": "",
+                            "parent": "IRIS_REPAIR_QCODE"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,2779 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0098)https://biz2.samsungcsportal.com/gspn/operate.do?cmd=ServiceOrderDetailLiteCmd&objectID=4437544200 -->
+<html lang="en"><style id="gspnCustomBtnStyle">
+        .gspn-helper-panel {
+          display: inline-flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 10px 12px;
+          margin-left: 8px;
+          background: rgba(79, 70, 229, 0.12);
+          border: 1px solid rgba(124, 58, 237, 0.2);
+          border-radius: 14px;
+          box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+          color: #eef2ff;
+          font-size: 12px;
+          min-width: 180px;
+        }
+        .gspn-helper-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+        .gspn-helper-title {
+          font-weight: 700;
+          color: #eef2ff;
+          letter-spacing: 0.15px;
+        }
+        .gspn-toggle-group {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          user-select: none;
+        }
+        .gspn-toggle-group input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+          position: absolute;
+        }
+        .gspn-toggle-slider {
+          width: 36px;
+          height: 18px;
+          border-radius: 999px;
+          background: rgba(148, 163, 184, 0.22);
+          position: relative;
+          transition: background 0.25s;
+        }
+        .gspn-toggle-slider::after {
+          content: '';
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 14px;
+          height: 14px;
+          border-radius: 999px;
+          background: #fff;
+          transition: transform 0.25s;
+        }
+        .gspn-toggle-group input:checked + .gspn-toggle-slider {
+          background: linear-gradient(135deg, #7c3aed, #6366f1);
+        }
+        .gspn-toggle-group input:checked + .gspn-toggle-slider::after {
+          transform: translateX(18px);
+        }
+        .gspn-toggle-text {
+          color: #c7d2fe;
+          font-size: 11px;
+          font-weight: 600;
+        }
+        .gspn-button-row {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .gspn-btn {
+          flex: 1 1 auto;
+          min-width: 70px;
+          border: none;
+          border-radius: 999px;
+          padding: 8px 12px;
+          color: #ffffff;
+          background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+          font-weight: 700;
+          letter-spacing: 0.1px;
+          cursor: pointer;
+          transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+        }
+        .gspn-btn:hover {
+          transform: translateY(-1px);
+          filter: brightness(1.05);
+        }
+        .gspn-btn:active {
+          transform: translateY(0);
+        }
+        .gspn-secondary-btn {
+          background: rgba(255, 255, 255, 0.12);
+          color: #e0e7ff;
+          box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+        }
+        .gspn-helper-fragment {
+          padding: 8px 10px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.08);
+          color: #c7d2fe;
+          font-size: 11px;
+          line-height: 1.4;
+        }
+      </style><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GSPN</title>
+
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true">
+<link rel="stylesheet" type="text/css" href="./gspn(1).css">
+<link rel="stylesheet" type="text/css" href="./jquery-ui-1.8.18.custom.css">
+<link rel="stylesheet" type="text/css" href="./timePicker.css">
+<link rel="stylesheet" type="text/css" href="./layout.css">
+<link rel="stylesheet" type="text/css" href="./protoload.css">
+<link rel="stylesheet" type="text/css" href="./lite.css">
+<link rel="stylesheet" type="text/css" href="./ro_address.css">
+<script type="text/javascript">
+	var dateFormat = 'dd.mm.yy';
+	var zeroDate = '00.00.0000';
+
+	/**
+	 * 법인별 사용자 boolean변수
+	 */
+	var isAmericaRegion = false;
+	var isEuropeRegion = false;
+	var isAsiaRegion = true;	 
+	var isChinaRegion = false;
+
+	var isAfUser = false;
+	var isMeaUser = false;
+	var isCisUser = false;
+	var isEuUser = false;
+
+	var isEaUser = false;
+	var isJpUser = false;
+	var isWaUser = true;
+	var isCnUser = false;
+
+	var isLaUser = false;
+	var isNaUser = false;
+
+	/**
+	 * 사용자Center Type
+	 */
+	var isFscUser = false;
+
+	/**
+	 * 로그인 사용자의 법인 정보
+	 */
+	var loginUserCorpCode = "C550";
+	var loginUserCorpName = "SIEL";
+
+	/**
+	 * paging.js에서 사용
+	 */
+
+	var prevPageChar = 'Prev.';
+	var nextPageChar = 'Next';	
+
+	/**
+	 * common.js에서 사용
+	 */
+	var addToCartSuccessMsg = 'successfuly added into Cart';
+	var addToCartFailMsg = 'failed';
+	var dataNotFoundMsg = 'No Data Found.';
+	
+	var Gmsg = new Array();
+	Gmsg[0] = "item should be filled up";
+	Gmsg[1] = "You can input only number.";
+	Gmsg[2] = "Incorrect E-mail Format!";
+	/**
+	 * 페이징 처리시 한 페이지당 화면에 출력할 개수
+	 */
+	var numPerPage = '100'
+
+	/**
+	 * 현재 선택된 페이지 번호
+	 */
+	var searchPageNo = 0;
+
+	/**
+	 * 현재 선택된 블럭번호
+	 */
+	var searchBlckNo = 0;
+
+	/**
+	 * 그리드 데이터의 출력 시작번호
+	 */
+	var displayBeginRow = 0;
+
+	/**
+	 * 그리드 데이터의 출력 마지막 번호
+	 */
+	var displayFinishRow = 0;
+
+	/**
+	 * 총 그리드 데이터
+	 */
+	var totRow = 0;
+
+	/**
+	 * Url Mapping Controller
+	 */
+	var urlPattern = '/gspn/operate.do';
+	
+	var urlPatternGZIP = '/gspn/operate.do';
+
+	/**
+	 * Cache Url Mapping Controller
+	 */
+	var cacheUrlPattern = '/gspn/cache.do';
+
+	/**
+	 * SAP 데이터를 그리드에 페이징 처리를
+	 * 위한 시작 데이터와 마지막 데이터의 처리함수.
+	 */
+	function setDisplayRow() {
+		if (searchPageNo == 0) {
+			displayBeginRow = 0;
+			displayFinishRow = (searchPageNo + 1) * numPerPage;
+		} else {
+			displayBeginRow = searchPageNo * numPerPage;
+			displayFinishRow = (searchPageNo + 1) * numPerPage;					
+		}
+	}
+
+	/**
+	 * 변수 데이터 초기화
+	 */
+	function initialDisplayRowVariable() {
+		searchPageNo = 0;
+		searchBlckNo = 0;
+		displayBeginRow = 0;
+		displayFinishRow = 0;
+		totRow = 0;
+	}
+	
+	var isFEWIS = false;
+	var isNewChina = false;
+	var chinaCorpCode = "C6V0";
+	var isWtyIntegrationCorpCode = true;
+	var isWtyIntegration = true;
+</script>
+</head><body style="background-color: transparent; height: 100%; font-size: 10px;"><form id="formHelp" method="post" action="https://biz2.samsungcsportal.com/gspn/operate.do">
+<input type="hidden" name="cmd" value="">
+<input type="hidden" name="MENUID" value="">
+</form>
+<script type="text/javascript">
+var manageE_Warranty = false;
+var needPurchaseDateForOW = false;
+var canSeeCallAttempt = false;
+var canChangeCustInfoDirectly = false;
+
+var parallelImportCheck = false;
+var isSumitSymptom = false;
+var isSumitFeedback = false;
+
+
+var isMedisonUser = false;
+var isHmeUser = false;	// HME user role 화면 2015.04.17 jiw
+var isRunningOnOperation = true;
+
+var isReturnedGMES = true;
+var isIrisFiltering = true;
+
+/*  alert message constant for checkLogicForRO.js */
+var RO_MSG_MODEL = "Please Input the MODEL";
+var RO_MSG_STREET = "Please Input the Street";
+var RO_MSG_CITY = "Please Input the City/District";
+var RO_MSG_REGION = "Please Input the State/Country(Region)";
+var RO_MSG_ZIPCODE = "Please Input the Zip Code";
+var RO_MSG_CORRECT_ZIPCODE = "Please input the correct Zip Code.";
+var RO_MSG_CUST_SYMPTOM = "Please Input the Customer Symptom";
+var RO_MSG_OFF_POPUPBLOCKER = "Please turn off your pop-up blocker.";
+
+/*Our system indicates that the customer’s address may be invalid.\nPlease select OK to review and change the address. \nIf the address is correct, please select Cancel.*/
+var RO_MSG_INVALID_ADDRESS1 = "Our system indicates that the customer\'s address may be invalid.\nPlease select \"OK\" to review and change the address.\nIf the address is correct, please select \"Cancel.\"";
+/*You have chosen not to make any changes to the customer’s address. \nPlease note that without a validated address, the system will find the corresponding latitude/longitude information for the zip code, rather than the address.*/
+var RO_MSG_INVALID_ADDRESS2 = "You have chosen not to make any changes to the customer\'s address.\nPlease note that without a validated address, the system will find the corresponding latitude/longitude information for the zip code, rather than the address.";
+var RO_MSG_MODIFY_HOUSENUMBER = "Please modify house number exactly.";
+
+//china version intergration 2016/08/03 js1.baek
+var isChinaRegion = false;
+var isRepairOrder = true;
+var isCompensation = false;
+var doaVisible = false;
+var exchVisible = false;
+var accVisible = false;
+var isExchange = false; 
+var isPredPart = true; 
+var isQQUser =false;
+var isHhpExchApprovalFlag = false;
+var isNpcExchFlag = false;
+var hhpExchApprovalSawNo = "";
+var AscChk_soUse = false;
+var display_hqConf = false;
+var paper_free_flag = false;
+</script>
+<script type="text/javascript">
+<!--
+	/**
+	* u : userVO, r.m : resource.getMessage, c : resource.getContent
+	**/
+	var _l={u:{}, r:{m:{}, c:{}}};
+	_l.u.c = "C550";
+	_l.u.CountryCd = "IN";
+	_l.u.DateFormat = "dd.mm.yy";
+	_l.u.Locale = "en";
+	_l.u.UserId = "Rahul_1990";
+	_l.u.GroupId = "SUPVOR";
+	//china version intergration 2016/08/12 js1.baek
+	_l.u.isChinaRegion = false;
+	
+	_l.r.m.MAND_XVALUE_00457 = "Please Input the Model";
+	_l.r.m.MAND_XVALUE_00748 = "Please Input the Serial No";
+	_l.r.m.EXT_0039 = "There is no part to order P/O, All item has already ordered";
+	_l.r.c.SHOWALL = "Show All";
+	_l.r.c.HIDEALL = "Hide All  ";
+	_l.r.c.LBL06268 = "0~60(经销商)";
+	_l.r.m.EXT_0589 = "Builder Ticket! Please contact the customer to confirm the schedule date. Once confirmed, ensure that the appointment date is met.";
+	_l.u.WEB_MSG_PREFIX = "[WEB]";
+	
+	
+	_l.billingFlag = true;
+	_l.isWtyClaimed = false;
+	_l.jspName = "";
+	_l.FrYear = "";
+	_l.FrMonth = "";
+	_l.ToYear = "";
+	_l.ToMonth = "";
+	_l.partslength = 0;
+	_l.isBillingSaved = false;
+	_l.sawlength = 1;
+	_l.filelength = 6;
+	_l.displayRepairScenario = false;
+	_l.displayRepairHistory = false;
+	
+	_l.SymptomMovieID = "";
+	
+	_l.bpRegionCode = "07";
+	_l.purchaseDateReadOnly = true;
+	_l.BosBusinessCollect = true;
+	_l.BosBusinessWarns = false;
+	_l.BosBusinessWarningMessage = "The customer’s Serial Number did not validate. Please validate the customer’s S/N. If the customer’s unit is missing the S/N or the S/N on file matches the unit, attach a BOS";
+	_l.BOS_FLAG = "";
+	_l.ObjectId = "4437544200"; 
+	_l.SERIAL_NO = "05UUPPCY401404N";
+	_l.MODEL = "AR60F24D13WNNA";
+	_l.IMEI = "";
+	_l.SVC_LEVEL = "";
+	_l.ASC_CODE = "0006423261";
+	_l.CONSUMER = "6886323212";
+	_l.rtAccount = '457a7d45c0fac32978f46b4a3cfd.2359a527e1d94c73af74c9422998ac99';
+	_l.rtModelCode = '9652e9298a85eb3424003ee09b0c.3aeb65725831150bf37637544f4d09b4';
+	_l.rtCompany = 'c08cf23f.6345561c78d68d994a200986219c3f11';
+	_l.rtSerialNo = 'd542d966b8af985cdbf7513416ea24.c8fac240191b65337d4f51305744177f';
+	_l.rtSymptom1 = 'edfc.c8f55fc14b3da6752e6c116594db8f5d';
+	_l.rtSymptom2 = '278c.4f9b3f9e391bfc8a0264ea9ed311bf24';
+	_l.rtSymptom3 = 'dc78.bf4516a198e318fecccbc7bc826e1d55';
+	_l.rtSymptom4 = '';
+	_l.SYMPTOM1_CODE = 'L3';
+	_l.SYMPTOM1_CODE = '01';
+	_l.SYMPTOM1_CODE = '01';
+	_l.SYMPTOM1_CODE = '';
+	_l.SERVICE_TYPE = "II";
+	_l.SymptomMovieID = "";
+	_l.ServiceTypeReason = "";
+	_l.CurrReason = "HLZ23";
+	_l.CurrStatus = "ST035";
+	_l.FSC = false;
+	_l.InventoryFlag = true;
+	_l.WTY_BILL_NO = "";
+	_l.IRIS_CONDI = "4";
+	_l.IRIS_SYMPT = "HX8";
+	_l.IRIS_DEFEC = "R";
+	_l.IRIS_REPAI = "E01";
+	_l.DEF_BLK = "9999";
+	_l.SVC_INDICATOR = "";
+	_l.parts = [];	
+	_l.LAST_APP_DATE = "22.06.2026";
+	
+	_l.userDynatrace = "false";
+	_l.dtADKCode = "AS!SIEL<C550>@IN&Dhanwapur, Gurgaon^0006423261$0006423261";
+	//china version intergration 2016/08/03 js1.baek
+ 	_l.hideBOSBtn = _l.u.isChinaRegion;
+ 	_l.isReadOnlyBOS = _l.hideBOSBtn;
+	_l.ASC_JOB_NO = "4437544200";
+	_l.REP_TYPE = "II";
+	_l.postingDate = "21.06.2026";
+	_l.FIRST_APP_DATE = "21.06.2026";
+	_l.PURCHASE_DATE = "11.06.2026"; 	
+	_l.ENGINEERNAME = "JEESHAN KHAN";	
+	_l.ENG_ASSIGN_DATE = "22.06.2026";
+	_l.ENG_ASSIGN_TIME = "09:06:28";
+	_l.REPAIR_COMP_DATE = "22.06.2026";
+	_l.REPAIR_COMP_TIME = "16:18:54";
+	_l.DEFECT_DESC = "Demo installation done set ok";
+	_l.REPAIR_DESC = "DONE BY JEESHAN";
+	_l.REMARK = "Demo installation done set ok";
+	_l.CREATE_TIME = "09:58:37";
+	
+	_l.isUseGcicIris = true;
+	_l.r.c.PPID_PRD_CODE_LIST = '[{"codeGroup":"PPID_PRD_CODE","codeId":"LDI08","code":"","sapCodeId":"LDI08","fnlRegDate":"20200601111041","fstRegDate":"20200601111041","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI12","code":"","sapCodeId":"LDI12","fnlRegDate":"20200601111042","fstRegDate":"20200601111042","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI15","code":"","sapCodeId":"LDI15","fnlRegDate":"20200601111042","fstRegDate":"20200601111042","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI16","code":"","sapCodeId":"LDI16","fnlRegDate":"20231017203923","fstRegDate":"20231017203923","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI20","code":"","sapCodeId":"LDI20","fnlRegDate":"20200601111042","fstRegDate":"20200601111042","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI25","code":"","sapCodeId":"LDI25","fnlRegDate":"20200601111042","fstRegDate":"20200601111042","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI33","code":"","sapCodeId":"LDI33","fnlRegDate":"20200601111042","fstRegDate":"20200601111042","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI40","code":"","sapCodeId":"LDI40","fnlRegDate":"20200601111044","fstRegDate":"20200601111044","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI60","code":"","sapCodeId":"LDI60","fnlRegDate":"20200601111043","fstRegDate":"20200601111043","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDI85","code":"","sapCodeId":"LDI85","fnlRegDate":"20220920204715","fstRegDate":"20220920204715","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDO60","code":"","sapCodeId":"LDO60","fnlRegDate":"20200601111043","fstRegDate":"20200601111043","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDO80","code":"","sapCodeId":"LDO80","fnlRegDate":"20200601111043","fstRegDate":"20200601111043","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LDX60","code":"","sapCodeId":"LDX60","fnlRegDate":"20220920204714","fstRegDate":"20220920204714","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LEO10","code":"","sapCodeId":"LEO10","fnlRegDate":"20200601111043","fstRegDate":"20200601111043","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LEO16","code":"","sapCodeId":"LEO16","fnlRegDate":"20200601111043","fstRegDate":"20200601111043","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LEP10","code":"","sapCodeId":"LEP10","fnlRegDate":"20200601111043","fstRegDate":"20200601111043","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"},{"codeGroup":"PPID_PRD_CODE","codeId":"LEP16","code":"","sapCodeId":"LEP16","fnlRegDate":"20200601111042","fstRegDate":"20200601111042","codeName":"LED Signage","description":"LED Signage","corpCd":"C100","locale":"en"}]';
+	
+//-->
+
+function svcOrderLink(orderNo, cmd) {
+	orderPop= window.open("", "orderPop","");
+	orderPop.focus();
+
+	var formObj=$('searchOrderForm');
+	formObj.cmd.value = cmd;//'ServiceOrderDetailCmd';
+	formObj.objectID.value = orderNo;
+
+	formObj.action='/gspn/operate.do';
+	formObj.target='orderPop';
+	formObj.submit();
+}
+</script>
+
+
+
+
+
+<form id="authForm" name="authForm" method="post" style="display: inline;" action="https://biz2.samsungcsportal.com/gspn/operate.do"><input type="hidden" name="cmd" value="AuthCommandListCmd"><input type="hidden" name="menuUrl" value="/svctracking/lite/ServiceOrderListLite.jsp"><input type="hidden" name="subRegionCd" value="WA"><input type="hidden" name="aclId" value="SUPVOR"></form>
+<div id="progressloading" style="position:absolute; left:0px; top:0px; width:100%; height:100%; text-align:center; background:#fff; _background:none; opacity:.75; z-index:1; display: none;"><table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="loading"><img src="./loading.gif" width="32" height="32"></td></tr></tbody></table></div>
+
+<form name="detailForm" id="detailForm" method="post">
+<input type="hidden" name="OBJECT_ID" id="OBJECT_ID" value="4437544200">
+
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+  <tbody><tr>
+	<td height="100%" align="right" class="tbR_pad">
+	<!-- 본문 레이아웃 삽입 시작 -->
+	<!-- locater 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	  <tbody><tr>
+		<td class="locater"><a name="top"></a><img src="./locater_arrow.gif" width="9" height="9" align="absmiddle"> Home &gt; Service Tracking &gt; <span class="locater_ov">Service Order Detail </span></td>
+      </tr>
+    </tbody></table>
+	<!-- locater 끝 -->
+	<!-- title 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	  <tbody><tr>
+		  <td width="100%" class="title">
+		  SERVICE ORDER DETAIL INFORMATION
+		  		<span class="blue">( Related Ticket : 5222960448 )</span>
+		  	
+		  </td>
+		  <td>
+				<!-- button -->
+  				
+	<input type="hidden" name="VIEW_PAGE_ONLY" id="VIEW_PAGE_ONLY" value="false">
+	<input type="hidden" name="cmd" value="ServiceOrderSendDocumentCmd">
+		  <!-- 버튼 레이아웃 테이블 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+        <td width="100%">&nbsp;</td>
+
+
+
+	
+			 <td class="btn_pad2">
+			 
+			 	<input type="button" onclick="openSvcRequestPrintPop()" value="Print">		 
+			 		
+			 </td>
+	
+		 <td class="btn_pad2">		 
+		 	<input type="button" value="List" onclick="goList()">
+		 </td>
+
+		 <td class="btn_pad2" id="btnShowHideAll"><input type="button" value="Hide All  " onclick="closeAllDiv()"></td>
+		 
+      </tr>
+    </tbody></table>
+	<!-- 버튼 레이아웃 테이블 끝 -->
+		  </td>
+        </tr>
+    </tbody></table>
+	<!-- title 끝 -->
+	
+	<!-- Warning Message ---------->
+	
+	<!---------- Warning Message -->
+		
+	<!-- header 전체 layout 테이블 시작 -->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	  <tbody><tr>
+	    <td>
+		    <table id="errTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+		      <tbody id="errBody">
+		      </tbody>
+		    </table>
+	    </td>
+	  </tr>
+	  
+	  <tr>
+	  	<td>
+	  			<!-- general information -->
+	  			
+
+
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+            <td class="label_left"></td>
+			<td width="12" class="label">
+		  <a href="javascript:moreOpenid(1);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid1" style="display: none;"></a>
+		  <a href="javascript:moreCloseid(1);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid1" style=""></a>
+			
+		  </td>
+          <td class="label">
+		  General Information ( <span class="blue">4437544200</span> )</td>
+          <td class="label_right">
+		  </td>
+        </tr>
+      </tbody></table>
+	  <!-- 서브타이틀 끝 -->	  
+	  
+	  
+	<div id="moretailid1" style="">
+		<!-- General information table 시작 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+			<tbody><tr>
+				<td width="15%" nowrap="" class="ser_ti">Service Order No. </td>
+				<td width="15%" nowrap="" class="ser_td">
+				<span id="OBJECT_ID">4437544200</span>
+				</td>
+				<td width="12%" nowrap="" class="ser_ti">ASC Job No </td>
+				
+				<td colspan="3" class="ser_td">
+				
+						Auto Bill
+					
+				</td>
+				
+				<td width="10%" class="ser_ti">Created By </td>
+				<td width="15%" class="ser_td">
+				  SIELN0613.IDO(OutBound)
+				</td>
+			</tr>
+			<tr>
+				<td nowrap="" class="ser_ti">Service Branch </td>
+				<td colspan="5" class="ser_td" title="0006423261">
+				0006423261 / 0006423261 / Telecell &amp; Electronics Services Dhanwapur, Gurgaon Shop No 111,
+				</td>
+				<td class="ser_ti">Date</td>
+				<td class="ser_td">
+		
+<!-- 21.06.2026  09:58:37-->
+21.06.2026 09:58:37
+				</td>
+			</tr>
+			<tr>
+				
+				<td nowrap="" class="ser_ti">Collection Point </td>
+				<td class="ser_td">
+					<table border="0" width="100%" cellspacing="0" cellpadding="0" id="ccTable">
+						<tbody><tr>
+							<td>
+							<span id="CC_CODE"></span>
+							<span id="CC_CODE_NAME"></span>
+							</td>
+						</tr>
+					</tbody></table>
+				</td>
+				
+				<td class="ser_ti" id="cpdealer">CP/Dealer Ref. No</td>
+				<td class="ser_td" id="cpdealerin">				
+				
+				</td>
+				
+				<td class="ser_ti" id="dataorigin">Data Origin</td>
+				<td class="ser_td">
+					O &nbsp;
+					From C/Center
+				</td>			
+				<td class="ser_ti">B2B SVC</td>
+				<td class="ser_td" width="130"> </td>
+			
+			</tr>
+									
+		</tbody></table>
+		<!-- General information table 끝 -->
+	  </div>
+	  
+	  
+<!-- 여백 테이블 시작 -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr>
+		<td height="5"></td>
+	</tr>
+</tbody></table>
+<!-- 여백테이블 끝 -->
+
+	  	</td>
+	  </tr>
+	  
+	  <tr>
+	  	<td>
+	  			<!-- customer information -->
+	  			
+
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+          <td class="label_left"></td>
+          <td class="label" width="12"><a href="javascript:moreOpenid(2);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid2" style="display: none;"></a>
+	    <a href="javascript:moreCloseid(2);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid2" style=""></a></td>
+
+		 <td class="label">Customer Information ( <span class="blue">SUSHANT CHAUDHARY &nbsp;&nbsp;6886323212</span> )</td>
+		 <td class="label">
+		 </td>
+          <td class="label_right">
+		  </td>
+        </tr>
+      </tbody></table>
+	  <!-- 서브타이틀 끝 -->
+
+
+	  <div id="moretailid2" style="">
+ 
+
+		<!-- customer information 테이블 시작 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+			<tbody><tr>
+				<td width="15%" class="ser_ti">Customer</td>
+				<td class="ser_td" nowrap="">
+				  <span id="d_CUSTNAME" style="display:inline">
+					General Customer,
+					SUSHANT CHAUDHARY
+					
+				  </span>&nbsp;&nbsp;
+				6886323212
+				</td>
+				<td width="15%" class="ser_ti">Contact Permission </td>
+				<td class="ser_td" id="D_CONTACT_FLAG">
+				Check Permission
+				</td>
+			</tr>
+			<tr>
+				<td class="ser_ti">Phone No</td>
+				<td class="ser_td">
+					<span id="TELTEXT">
+				[Home]9999312909&nbsp;&nbsp;
+				[Office]9999312909&nbsp;&nbsp;
+				<b>[Mobile]9999312909</b>&nbsp;&nbsp;
+				
+					</span>
+                   	9999312909
+				</td>
+				<td class="ser_ti">Samsung Account</td>
+				<td class="ser_td">
+					<span id="D_SAMSUNG_ACCOUNT"></span>
+					<input id="SAMSUNG_ACCOUNT" name="SAMSUNG_ACCOUNT" type="hidden" class="input" style="width:150" value="">
+				</td>
+			</tr>
+			<tr>
+				<!-- Premium Product for India. 2019. 05. 25 j.peter.kim -->
+				<td class="ser_ti">Premium Product</td>
+				<td class="ser_td">
+					NO
+				</td>
+				
+			</tr>
+			<tr>
+				<td class="ser_ti">E-Mail</td>
+				<td class="ser_td">
+					<span id="d_EMAIL"></span>
+				</td>
+				<td class="ser_ti">Unique ID</td>
+				<td class="ser_td"><div id="UNIQUE_ID"></div></td>
+			</tr>
+			<tr>
+				<td class="ser_ti">Street</td>
+				<td class="ser_td">
+					<span id="d_STREET">
+				 GURUGRAM Gurgaon  BARISTRO CAFE SECTOR 29 GYMKHANA CLUB NEAR CROWN PLAZA
+					</span>
+				</td>
+				<td class="ser_ti">Zip Code </td>
+				<td class="ser_td">
+					<span id="d_POST_CODE">122001</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="ser_ti">City/District</td>
+				<td class="ser_td">
+					<span id="City/District">GURGAON HARYANA</span>
+				</td>
+				<td class="ser_ti">State/Country(Region)</td>
+				<td class="ser_td">
+					<span id="State/Country">06-Haryana IN</span>
+				</td>
+			</tr>
+			
+			
+			<!-- 
+				* 미주 통합
+				- RT-008
+				- Customer Tab 으로 Contact Preference 정보 이동
+				- C310은 읽기 전용 , C370은 수정 가능
+				- 2015-09-01
+			 -->
+			
+			
+			
+		</tbody></table>
+		<!-- customer information 테이블 끝 -->
+  
+  </div>
+  
+<!-- 여백 테이블 시작 -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr>
+		<td height="5"></td>
+	</tr>
+</tbody></table>
+<!-- 여백테이블 끝 -->  
+	  	</td>
+	  </tr>
+	  
+	  <tr>
+	    <td>
+	    		<!-- product information -->
+				
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+          <td class="label_left"></td>
+          <td class="label" width="12">
+		  <a href="javascript:moreOpenid(3);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid3" style="display: none;"></a>
+		    <a href="javascript:moreCloseid(3);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid3" style=""></a>          
+		  </td>
+		  <td class="label">Product Information ( <span class="blue">AR60F24D13WNNA 05UUPPCY401404N</span> )
+		  
+		  
+		  </td>
+          <td class="label_right">
+		  </td>
+        </tr>
+      </tbody></table>
+	  <!-- 서브타이틀 끝 -->
+
+	  <div id="moretailid3" style="">
+		<!-- Product information 테이블 시작 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+			<tbody><tr>
+				<td width="15%" class="ser_ti">Model</td>
+				
+				<td colspan="5" class="ser_td" nowrap="">
+				
+					<table border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr>
+							<td class="padR_2">
+								AR60F24D13WNNA
+							</td>
+							<td class="padR_2">
+								</td>
+							<td class="padR_2">
+							<input name="MODEL_DESC" type="text" class="inputRO" style="width:250" value="RAC,6.30,KW,SETIN,CO,R32">
+							</td>
+							<td class="padR_2">
+							<input name="LOC_PRCD_DESC" type="text" class="inputRO" style="width:100" value="Room ACN (Spilt)">
+							
+							</td>
+							<td class="padR_2">
+								<input name="SVC_PRCD_DESC" type="text" class="inputRO" style="width:150" value="INVERTER AC">
+								<input name="CIC_PRCD" id="CIC_PRCD" title="CIC_PRCD:ACN" type="text" class="inputRO" style="width:1" value="ACN">
+								<input name="LOC_PRCD" id="LOC_PRCD" title="LOC_PRCD:ACN_SPL" type="text" class="inputRO" style="width:1" value="ACN_SPL">
+								<input name="SVC_PRCD" id="SVC_PRCD" title="SVC_PRCD:A/C08" type="text" class="inputRO" style="width:50" value="A/C08">
+								<input type="hidden" name="SOLD_COUNTRY_CODE" id="SOLD_COUNTRY_CODE" class="inputRO inputIDS" style="width:50" readonly="" value="">
+								<input name="HQ_SVC_PRCD" id="HQ_SVC_PRCD" type="hidden" value="RAC07">
+							</td>
+						</tr>
+					</tbody></table>
+					
+				</td>
+			</tr>
+			<tr>
+				<td width="15%" class="ser_ti">
+				Serial / IMEI
+				</td>
+				<td class="ser_td" colspan="3">
+					 <table border="0" cellspacing="0" cellpadding="0">
+						 <tbody><tr>
+						 							 
+							 <td class="padR_2" nowrap="">
+							 	05UUPPCY401404N
+							 </td>
+							
+							 <td class="padR_2">
+							 <!-- IMEI PROJECT -->
+							 	
+							 <div id="divModuleId" style="display: none;">
+								<table id="tableModuleId" border="0" cellspacing="0" cellpadding="0">
+									<tbody><tr>
+										<td id="tdModuleLabel" class="view_ti">Module ID</td>
+						                <td id="tdModuleInput" width="180" class="ser_td">
+						                  <input name="MODULE_ID" id="MODULE_ID" type="text" class="inputIDS" value="" maxlength="50" style="width:180">
+						                </td>
+									</tr>
+								</tbody></table>
+							 </div>
+							 </td>
+							 
+							
+							 
+							 <td width="15%" class="ser_ti">Prod.Date</td> 
+							<td class="ser_td">
+								01.04.2025
+							</td>
+							
+	
+						 </tr>
+					 </tbody></table>
+				</td>	 
+				
+				<td width="15%" class="ser_ti">Labor/Parts</td>
+				<td class="ser_td">
+					12 / 12
+				</td>
+			</tr>
+			<tr>
+				<td class="ser_ti">Purchase Date </td>
+				<td class="ser_td">
+				  <table border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+					  <td class="ser_td">
+						11.06.2026
+					  </td>
+					  <td class="padR_2">
+					  </td>
+					</tr>
+					<tr>					
+					  <!-- BOS Button for SEA ------------------------------------------------>
+					  <td id="tdBOS" class="padR_2" colspan="2" style="display:none;">
+					  	<table id="tableBOSList" border="0" cellspacing="0" cellpadding="0">
+					  		<tbody id="bosAttContentTableBody">
+							</tbody>
+					  	</table>
+					  	<input type="button" id="tableBOSBtn" value="BOS">
+					  </td>
+					  <!------------------------------------------------ BOS Button for SEA -->
+					</tr>
+				  </tbody></table>
+				</td>
+				<td class="ser_ti">Wty Exception </td>
+				<td class="ser_td" nowrap="">
+VOID5-Paid Installation
+
+
+				</td>
+				<td class="ser_ti">Wty Term </td>
+				<td class="ser_td">
+					<input name="IN_OUT_WTY" id="IN_OUT_WTY" type="text" readonly="" class="inputRO" style="width:25" onmouseover="this.title=this.value;" value="OW">
+					<input name="NEW_LABOR_WT_D" id="NEW_LABOR_WT_D" type="text" readonly="" class="inputRO" style="width:75" onmouseover="this.title=this.value;" value="(L)11.06.2027">
+					<input name="NEW_PARTS_WT_D" id="NEW_PARTS_WT_D" type="text" readonly="" class="inputRO" style="width:75" onmouseover="this.title=this.value;" value="(P)11.06.2027">
+				</td>
+			</tr>
+			
+			<tr>
+				<td class="txt_12">&nbsp;</td>
+				
+					<td class="txt_12" colspan="5">
+				
+				  <font color="#e90000">
+				  Please make sure to click \'warranty check\' button to confirm Warranty term!
+				  </font>
+				</td>
+				
+			</tr>
+			
+			<tr>
+				<td class="ser_ti">Place of Purchase </td>
+			
+				<td class="ser_td">
+			
+					<!-- change builder display -->
+					<input type="text" name="BUILDER" id="BUILDER" class="inputRO" style="width:120" value="" readonly=""> 
+              		<input type="text" name="BUILDER_BP_KIND_DESC" id="BUILDER_BP_KIND_DESC" class="inputRO" style="width:100" value="" readonly="">
+              		<input type="text" name="BUILDER_NAME" id="BUILDER_NAME" class="inputRO" style="width:300" value=" " readonly="">
+					
+				</td>
+				
+						<td class="ser_ti">Dealer</td>
+						<td class="ser_td"></td>
+						<td class="ser_ti">Dealer Invoice</td>
+						<td class="ser_td"></td>
+					
+			</tr>
+			
+				<tr>
+	              <td class="ser_ti">Managed SVC Code / Description</td>
+	              <td class="ser_td" colspan="5">
+	              	<input type="text" name="MANAGED_SVC_CODE" id="MANAGED_SVC_CODE" class="inputRO" style="width:150" readonly=""> <input type="text" name="MANAGED_SVC_DESC" id="MANAGED_SVC_DESC" class="inputRO" style="width:500" readonly="">
+	              </td>
+	            </tr>
+				
+			<tr>
+				
+					<td class="ser_ti">Accessory</td>
+					<td colspan="5" class="ser_td"></td>
+				
+			</tr>
+
+		
+			<tr>
+				<td class="ser_ti">Defect Desc</td>
+				<td colspan="5" class="ser_td">
+				Demo installation done set ok
+				</td>
+			</tr>
+			<tr>
+				
+				<td width="15%" class="ser_ti">Remark</td>
+				<td colspan="5" class="ser_td">
+				Demo installation done set ok
+				</td>
+				
+			</tr>
+
+		</tbody></table>
+		<!-- Product information  테이블 끝 -->
+	  </div>
+
+	  
+	  		  <!-- 여백 테이블 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		  <tbody><tr>
+			<td class="td_pad"></td>
+		  </tr>
+		</tbody></table>
+		<!-- 여백테이블 끝 -->
+		  </td>
+	  </tr>
+	
+		<tr>
+			<td>
+					<!-- repair history -->
+								
+			</td>
+		</tr>
+	 
+			<tr>
+				<td>
+	  				<!-- repair Scenario -->
+								
+			</td>
+		</tr>
+	  
+	  
+	  <tr>
+	    <td>
+	    		<!-- Job Infomation-->
+	    		
+
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+          <td class="label_left"></td>
+          <td class="label" width="12">
+		  	<a href="javascript:moreOpenid(4);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid4" style="display: none;"></a>
+		    <a href="javascript:moreCloseid(4);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid4" style=""></a>
+		  </td>
+		  <td class="label">Job information ( <span class="blue">Repair Completed</span> )</td>
+          <td class="label_right">
+		  </td>
+        </tr>
+      </tbody></table>
+	  <!-- 서브타이틀 끝 -->
+
+	  <div id="moretailid4" style="">
+		<!-- job information table 시작 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+			<tbody><tr>
+				<td width="15%" class="ser_ti">Customer Symptom </td>
+				<td colspan="5" nowrap="" class="ser_td">
+				
+										
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr>
+								<td>
+								<input name="SYMPTOM_CAT1" id="SYMPTOM_CAT1" type="text" class="inputRO" readonly="" style="width:20" value="L3">
+								<input name="SYMPTOM1_TEXT" type="text" class="inputRO" readonly="" style="width:150" value="Operation">
+								<input name="SYMPTOM_CAT2" id="SYMPTOM_CAT2" type="text" class="inputRO" readonly="" style="width:20" value="01">
+								<input name="SYMPTOM2_TEXT" type="text" class="inputRO" readonly="" style="width:200" value="Doesn&#39;t work">
+								<input name="SYMPTOM_CAT3" id="SYMPTOM_CAT3" type="text" class="inputRO" readonly="" style="width:20" value="01">
+								<input name="SYMPTOM3_TEXT" type="text" class="inputRO" readonly="" style="width:200" value="Cooling / Heating">
+								
+								</td>
+
+						</tr>
+					</tbody></table>
+					
+			  </td>
+			</tr>
+			<tr id="SymptomReason" style="display:none">
+			
+			<td width="15%" class="ser_ti">Reason </td>
+							<td class="td_al" valign="top" colspan="5">
+							<table border="0" cellspacing="0" cellpadding="0">
+									   <tbody><tr>
+										  <td width="10%" class="ser_td" colspan="5"><b>&nbsp;&nbsp;*This survey is to figure out symptom's effectiveness and only for internal reserch purpose. in case of "New symptom code required" please explain the details of symptoms.</b></td>
+									   </tr>
+								   </tbody></table>
+								<textarea id="IV_FEEDBACK" name="IV_FEEDBACK" wrap="hard" class="input" style="width:100%;" rows="4"></textarea>								   
+							</td>
+						</tr>
+			<tr id="trSvcType">
+				<td width="15%" class="ser_ti">Service Type </td>
+				<td class="ser_td" colspan="5">
+					II-Initial Installation
+					/  <span id="ServiceTypeReasonDesc"></span>
+
+				</td>
+			</tr>
+			
+
+			<tr>
+				<td width="15%" class="ser_ti">Status/ Reason </td>
+				<td colspan="5" class="ser_td">
+					Repair Completed <!--  %=currStatus%-->
+					 / HLZ23 <span id="statusReasonDesc">Installation Done</span>
+
+					
+					
+				</td>
+			</tr>
+			<tr>
+				<td width="15%" class="ser_ti">Status Comment</td>
+				<td class="ser_td" colspan="5">Demo&nbsp;installation&nbsp;done&nbsp;set&nbsp;ok</td>
+			</tr>
+			
+			
+			<tr id="trNewFirm">
+				<td nowrap="" class="ser_ti" width="15%">New Firmware</td>
+				<td class="ser_td" colspan="3">
+					
+				</td>
+				<td width="15%" class="ser_ti">Unit Location </td>
+				<td class="ser_td">
+							
+				</td>
+			</tr>
+			<tr id="trNewModel">
+				<td nowrap="" class="ser_ti" width="15%">New Model</td>
+				<td class="ser_td">
+							  
+				</td>
+				<td width="15%" class="ser_ti">New Serial No </td>
+				<td class="ser_td" id="newserialno">
+										
+				</td>
+				<td width="15%" class="ser_ti" id="newimei">New IMEI </td>
+				<!-- IMEI PROJECT -->
+				<td class="ser_td" id="newimeiin">
+					
+				</td>
+			</tr>
+			
+			<tr id="trEngineer">
+				<td class="ser_ti" width="15%">Engineer</td>
+				<td colspan="5" class="ser_td">
+					8486265984 &nbsp; 
+					JEESHAN KHAN
+				
+				</td>
+			</tr>
+			
+		</tbody></table>
+		<!-- job information table 끝 -->
+      </div>
+
+
+  
+<!-- 여백 테이블 시작 -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr>
+		<td height="5"></td>
+	</tr>
+</tbody></table>
+<!-- 여백테이블 끝 -->  
+		  </td>
+	  </tr>
+	
+	  <tr>
+	    <td>
+	    		<!-- Job Infomation(Date) -->
+				
+
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody><tr>
+		  <td class="label_left"></td>
+		  <td class="label" width="12">
+		  		<a href="javascript:moreOpenid(5);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid5" style="display: none;"></a>
+				<a href="javascript:moreCloseid(5);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid5" style=""></a>
+			</td>
+		  <td class="label">Job Information(Date) </td>
+		  <td class="label_right">
+		  </td>
+		</tr>
+	  </tbody></table>
+	  <!-- 서브타이틀 끝 -->
+	  
+	  <div id="moretailid5" style="">
+		<!-- Product information 테이블 시작 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+			<tbody><tr>
+				<td width="13%" class="ser_ti">Call Received </td>
+				<td class="ser_td">
+					21.06.2026&nbsp;
+					09:58:37
+				</td>
+				<td width="13%" class="ser_ti" id="customerreq">Customer Preferred Date</td>
+				<td class="ser_td" id="customerreqin">
+					00.00.0000&nbsp;
+					00:00:00
+				</td>
+				<td width="13%" class="ser_ti">ASC Assigned </td>
+				<td class="ser_td" id="ascassign">
+					21.06.2026&nbsp;
+					20:30:05						
+
+				</td>
+			</tr>
+			<tr>
+				<td class="ser_ti">CC 1st App </td>
+				<td class="ser_td">
+					00.00.0000&nbsp;
+					00:00:00
+				</td>
+				<td class="ser_ti">ASC Acknow. </td>
+				<td class="ser_td">
+21.06.2026&nbsp;	
+20:39:48		
+				</td>
+				<td class="ser_ti">Unit Received </td>
+				<td class="ser_td">
+					00.00.0000&nbsp;
+					00:00:00
+				</td>
+			</tr>
+			<tr>
+				<td class="ser_ti">ASC 1st App </td>
+				<td class="ser_td">
+					21.06.2026&nbsp;
+					12:00:00
+				</td>
+			    <td class="ser_ti">1st Visit </td>
+				<td class="ser_td">
+					21.06.2026&nbsp;
+					11:55:10
+				</td>
+				<td class="ser_ti">Repair Completed</td>
+				<td class="ser_td">
+					22.06.2026&nbsp;
+					16:18:54				
+					
+					
+				</td>
+			</tr>
+			<tr>
+
+				<td class="ser_ti">ASC last App </td>
+				<td class="ser_td">
+					22.06.2026&nbsp;
+					12:00:00&nbsp;
+					
+
+				</td>
+
+
+			
+
+				
+				<td class="ser_ti">Last Visit </td>
+				<td class="ser_td" id="lastvisit">
+					21.06.2026&nbsp;
+					11:55:10
+				</td>
+				
+				<td class="ser_ti" id="goodsdel">Goods Delivered </td>
+				<td class="ser_td" id="goodsdelin">
+					00.00.0000&nbsp;
+					00:00:00
+				</td>
+				
+			</tr>
+			<tr>
+				<td class="ser_ti">Engineer Assigned</td>
+				<td class="ser_td" colspan="5">
+					22.06.2026&nbsp;
+					09:06:28
+
+				</td>
+			</tr>
+		</tbody></table>
+		<!-- Product information  테이블 끝 -->
+      </div>
+		<!-- 여백 테이블 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tbody><tr>
+				<td height="5"></td>
+			</tr>
+		</tbody></table>
+		<!-- 여백테이블 끝 -->
+
+		  </td>
+	  </tr>
+	
+	
+	  <tr>
+	    <td>
+	    		<!-- shipping Infomation -->
+				
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr><td class="label_left"> </td>
+          <td class="label" width="12">
+		  <a href="javascript:moreOpenid(6);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid6" style="display: none;"></a>
+		  <a href="javascript:moreCloseid(6);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid6" style=""></a></td>
+
+		  <td class="label">Shipping Information </td>
+          <td class="label_right">
+		  </td>
+        </tr>
+      </tbody></table>
+	  <!-- 서브타이틀 끝 -->
+
+	  <div id="moretailid6" style="">
+
+		<!-- shipping information 테이블 시작 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+			
+			<tbody><tr>
+				<td width="15%" nowrap="" class="ser_ti">Unit Received </td>
+				<td class="ser_td">
+					00.00.0000
+				</td>
+				<td width="15%" class="ser_ti">Delivery Date (Pre) </td>
+				<td class="ser_td">
+					00.00.0000
+				</td>
+				<td width="12%" class="ser_ti">Shipment No (Pre) </td>
+				<td class="ser_td">
+					
+				</td>
+			</tr>
+			<tr>
+				<td class="ser_ti">Shipping Date (Post)</td>
+				<td class="ser_td">
+						00.00.0000
+				</td><td class="ser_ti">Delivery Date (Post) </td>
+				<td class="ser_td">
+					00.00.0000
+				</td><td class="ser_ti">Shipment No (Post) </td>
+				<td class="ser_td">
+					
+				 </td>
+			</tr>
+			<tr>
+				<td class="ser_ti">Shipping Company </td>
+				<td class="ser_td">
+					
+				</td>
+				
+				<td colspan="4" class="ser_td">
+							
+				</td>
+				
+			</tr>
+			<!-- 서브타이틀 시작 -->
+			</tbody></table><table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tbody><tr>
+					<td class="label02_left"></td>
+					<td class="label02">Customer and Shop Information (Pick-Up Service)</td> 
+				</tr>
+			</tbody></table>
+			<!-- 서브타이틀 끝 -->
+
+			<!-- shipping information 테이블 시작 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+				<tbody><tr>
+					<td width="15%" nowrap="" class="ser_ti">Cust. Request Date </td>
+					<td class="ser_td">
+						00.00.0000&nbsp;
+						00:00:00&nbsp;
+					</td>
+					<td width="15%" class="ser_ti">Cust. Received Date </td>
+					<td class="ser_td">
+						00.00.0000&nbsp;
+						00:00:00&nbsp;
+					</td>
+					<td width="12%" class="ser_ti">Cust. Eula Date </td>
+					<td class="ser_td">
+						00.00.0000&nbsp;
+						00:00:00&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td class="ser_ti">Shop GI Date</td>
+					<td class="ser_td">
+						00.00.0000&nbsp;
+						00:00:00&nbsp;
+					</td>
+					<td class="ser_ti">Shop GR Date </td>
+					<td class="ser_td">
+						00.00.0000&nbsp;
+						00:00:00&nbsp;
+					</td>
+				</tr>
+			</tbody></table>
+			
+		</div></td></tr></tbody></table>
+	    <!-- shipping information  테이블 끝 -->
+
+
+      
+		<!-- 여백 테이블 시작 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tbody><tr>
+				<td height="5"></td>
+			</tr>
+		</tbody></table>
+		<!-- 여백테이블 끝 -->
+		<input type="hidden" name="ship_in_no" value="">
+		<input type="hidden" name="ship_out_no" value="">
+
+
+<script type="text/javascript" src="./dragtable.js.download"></script>
+<script type="text/javascript" src="./hashtable.js.download"></script>
+<script type="text/javascript" src="./json_sans_eval.js.download"></script>
+<script type="text/javascript" src="./paging.js.download"></script>
+<script type="text/javascript" src="./common.js.download"></script>
+<script type="text/javascript" src="./prototype.js.download"></script>
+<script type="text/javascript" src="./protoload.js.download"></script>
+<script type="text/javascript" src="./sorttable.js.download"></script>
+<script type="text/javascript" src="./jquery-1.7.1.min.js.download"></script>
+<script type="text/javascript" src="./jquery-ui-1.8.18.custom.min.js.download"></script>
+<script type="text/javascript" src="./jquery.timePicker.min.js.download"></script>
+<script type="text/javascript" src="./jquery.printElement.min.js.download"></script>
+<script type="text/javascript" src="./jquery.tablesorter.min.js.download"></script>
+<script type="text/javascript" src="./commonLite.js.download"></script>
+<script type="text/javascript">
+
+	$j(document).ready(function(){
+		if("PS" == 'II' && false){
+			//loadSFPromiseInDT();
+		}
+		if("PS" == 'II' && false){
+			//loadSFPromiseOutDT();
+		}
+	});
+
+	// lx.huang 2024.06.25 sf interface
+	function loadSFPromiseInDT(){
+		
+		$j("#promise_pre_date").attr("value", '');
+		$j("#promise_pre_time").attr("value", '');
+
+		var mailNo = $j('#SHIP_IN_NO').val(); // pro
+		//var mailNo = "179252588123";             // test
+		console.log("test_mailNo:" + mailNo);
+		if(mailNo)
+		{
+			var paramMap = {};
+			paramMap.mailNo = mailNo;
+			paramMap.cmd = "ZifGspnSvcShippingPromiseCmd";
+			$('progressloading').startWaiting();
+			
+				$j.ajax({
+					type : "POST",
+					async : true,
+					url : '/gspn/operate.do',
+					data : paramMap,
+					success : function(data) {
+						callbackGetPromiseInDT(data);
+						$('progressloading').stopWaiting();
+					},
+					error : function () {
+						$j("#promise_pre_date").attr("value", '0000.00.00');
+						$j("#promise_pre_time").attr("value", '00:00:00');
+						$('progressloading').stopWaiting();
+					},
+					dataType : 'json'
+				});
+			
+		} else {
+			$j("#promise_pre_date").attr("value", '0000.00.00');
+			$j("#promise_pre_time").attr("value", '00:00:00');
+		}
+		
+	}
+
+	function loadSFPromiseOutDT(){
+
+		$j("#promise_post_date").attr("value", '');
+		$j("#promise_post_time").attr("value", '');
+
+		var mailNo = $j('#SHIP_OUT_NO').val();
+		//var mailNo = "179252588123";             // test
+		if(mailNo)
+		{
+			var paramMap = {};
+			paramMap.mailNo = mailNo;
+			paramMap.cmd = "ZifGspnSvcShippingPromiseCmd";
+			$('progressloading').startWaiting();
+
+			$j.ajax({
+				type : "POST",
+				async : true,
+				url : '/gspn/operate.do',
+				data : paramMap,
+				success : function(data) {
+					callbackGetPromiseOutDT(data);
+					$('progressloading').stopWaiting();
+				},
+				error : function () {
+					$j("#promise_post_date").attr("value", '0000.00.00');
+					$j("#promise_post_time").attr("value", '00:00:00');
+					$('progressloading').stopWaiting();
+				},
+				dataType : 'json'
+			});
+		} else {
+			$j("#promise_post_date").attr("value", '0000.00.00');
+			$j("#promise_post_time").attr("value", '00:00:00');
+		}
+		
+	}
+
+	function callbackGetPromiseInDT(jsonObj){
+
+		try {
+
+			if (jsonObj.success) {
+				var date = jsonObj.promiseDate;
+				var time = jsonObj.promiseTime;
+				$j("#promise_pre_date").attr("value", date);
+				$j("#promise_pre_time").attr("value", time);
+			} else {
+				$j("#promise_pre_date").attr("value", '0000.00.00');
+				$j("#promise_pre_time").attr("value", '00:00:00');
+			}
+		} catch (e) {}
+	}
+
+	function callbackGetPromiseOutDT(jsonObj){
+
+		try {
+
+			if (jsonObj.success) {
+				var date = jsonObj.promiseDate;
+				var time = jsonObj.promiseTime;
+				$j("#promise_post_date").attr("value", date);
+				$j("#promise_post_time").attr("value", time);
+			} else {
+				$j("#promise_post_date").attr("value", '0000.00.00');
+				$j("#promise_post_time").attr("value", '00:00:00');
+			}
+		} catch (e) {}
+	}
+</script>
+  
+		  </td>
+	  </tr> 
+	  
+	  <tr id="trProdRepInfo">
+	    <td>
+	    		<!-- product repair Infomation -->
+				
+<script type="text/javascript">
+//china version intergration 2016/08/03 js1.baek
+
+var gsASCType = "";
+var noValue = "N/A : [LBL/NO_COST]";
+
+var isSRC36 = false;
+
+var isPD_FU = false;
+var ticketCALL_CATEGORY = 'O';
+</script>
+<input type="hidden" id="sel_customer_type" value="C001">
+<input type="hidden" id="local_svc_prod">
+<input type="hidden" id="PROD_GROUP" name="PROD_GROUP">
+<input type="hidden" id="PROD_GROUP_F" name="PROD_GROUP_F">
+<input type="hidden" id="PROD_GROUP_O" name="PROD_GROUP_O">
+<input type="hidden" id="PROD_GROUP_G" name="PROD_GROUP_G"><!-- 중국 오토워런티시 넘ㅁ겨야 하기에 추가함.. -->
+<input type="hidden" id="PROD_GROUP_II" name="PROD_GROUP_II">
+<input type="hidden" id="STS_PROD_GROUP" name="STS_PROD_GROUP">
+<input type="hidden" id="RH_OTHER_AMT" name="RH_OTHER_AMT">
+
+	<!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+          <td class="label_left"></td>
+          <td class="label" width="12">
+		  <a href="javascript:moreOpenid(7);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid7" style="display: none;"></a>
+		    <a href="javascript:moreCloseid(7);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid7" style=""></a>          
+		  </td>
+		  <td class="label">Product Repair Information</td>
+    
+		  <td class="label">
+		  <!-- 버튼 레이아웃 테이블 시작 -->
+
+			<!-- 버튼 레이아웃 테이블 끝 -->
+		  </td>
+          <td class="label_right">
+		  </td>
+        </tr>
+      </tbody></table>
+	  <!-- 서브타이틀 끝 -->
+	  
+	  
+     <div id="moretailid7" style="">
+        <!-- Warranty information 테이블 시작 -->
+	  <table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+      <tbody><tr>
+          <td width="15%" nowrap="" class="ser_ti">Wty Service Type </td>
+          <td width="35%" class="ser_td">
+          	Initial Installation
+			
+		  </td>
+		  <td width="15%" nowrap="" class="ser_ti">Defect Type </td>
+		  <td nowrap="" class="ser_td">
+			Flat Rate
+		  </td>
+	  </tr>
+	  
+	  <tr id="defectbolck">
+		  <td nowrap="" class="ser_ti">Defect Block </td>
+		  <td class="ser_td" colspan="3">
+		  9999 <span id="DEF_BLK_DESC">OTHERS</span>
+		  </td>
+	  </tr>
+  
+	  <tr id="IrisCodeDec">
+		  <td nowrap="" class="ser_ti">Condition Code </td>
+		  <td nowrap="" class="ser_td">
+			4 <span id="IRIS_CONDI_DESC">Installation Trouble</span>
+		  </td>
+		  <td nowrap="" class="ser_ti">Symptom Code </td>
+		  <td class="ser_td"><span id="IRIS_SYMPT_QCODE_DESC">(SRC004-Installation Problem) </span>
+		  	HX8 <span id="IRIS_SYMPT_DESC">Installation requested</span>
+		  </td>
+	  </tr>
+
+	  
+	  <tr>
+		  <td nowrap="" class="ser_ti" id="tdIrisDef1">Defect Code </td>
+		  <td nowrap="" class="ser_td" id="tdIrisDef2"><span id="IRIS_DEFECT_QCODE_DESC"></span>
+		  R <span id="IRIS_DEFECT_DESC">Open</span>
+		  </td>
+		  <td nowrap="" class="ser_ti">Repair Code </td>
+		  <td class="ser_td"><span id="IRIS_REPAIR_QCODE_DESC">(SRC004-Installation Problem) </span>
+		  E01 <span id="IRIS_REPAIR_DESC">Initial installation</span>
+		  </td>
+	  </tr>
+	  <tr>
+		  <td width="15%" class="ser_ti">Repair Desc.</td>
+		  <td colspan="3" class="ser_td">
+		  DONE&nbsp;BY&nbsp;JEESHAN
+	  </td></tr>
+
+	  <tr>
+		  	<td width="15%" class="ser_ti"><!--Service Indicator-->Service Indicator</td>
+		  	<td class="ser_td" colspan="3">
+		  	 <span id="SVC_INDICATOR_DESC"></span>
+			</td>
+	  </tr>
+
+	  <tr id="GasChargeDistanceTr">
+		  <td width="15%" class="ser_ti"><!--Gas Charge-->Gas Charge</td>
+		  <td class="ser_td">
+			
+		  </td>
+		  <td width="15%" class="ser_ti"><!--Distance-->Distance(Km)</td>
+		  <td class="ser_td">
+
+		  </td>
+	  </tr>
+	
+		<tr id="SmartThingsTr">
+			<td class="ser_ti"><!--Smart Things-->SmartThings</td>
+			<td class="ser_td">
+				N
+			</td>
+	
+			<td class="ser_ti"><!--Time-->Time</td>
+			<td class="ser_td">
+				
+			</td>
+		</tr>
+	</tbody></table>
+	  <!-- Warranty information  테이블 끝 -->
+
+</div>
+	<!-- 여백 테이블 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody><tr>
+			<td height="5"></td>
+		</tr>
+	</tbody></table>
+	<!-- 여백테이블 끝 -->
+
+		  </td>
+	  </tr>
+	  
+	  
+		  <tr id="trBillingInfo">
+		    <td>
+	    		<!-- billing Infomation -->
+		    	
+
+<!-- U01 Start : 2017.06.27 채보람 서남아 Demand : GST 관련 필드 추가 -->
+
+<!-- U01 End   : 2017.06.27 채보람 서남아 Demand : GST 관련 필드 추가 -->
+
+
+  
+  <!-- 서브타이틀 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+          <td class="label_left"></td>
+          <td class="label" width="12">
+				  <a href="javascript:moreOpenid(14);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid14" style="display: none;"></a>
+				  <a href="javascript:moreCloseid(14);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid14" style=""></a></td>          
+		  <td class="label">Billing Information </td>
+		  <td class="label" width="50%">
+		  <!-- 버튼 레이아웃 테이블 시작 -->
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			    <tbody><tr>
+			        <td width="100%">&nbsp;</td>
+
+
+		           
+		           
+			    </tr>
+			</tbody></table>
+			<!-- 버튼 레이아웃 테이블 끝 -->
+		  </td>
+          <td class="label_right">
+		  </td>
+		</tr>
+	 </tbody></table>
+	 
+
+     <div id="moretailid14" style="">
+       <!-- billing information 테이블 시작 -->
+	  <table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+		<tbody><tr>
+		  <td width="15%" nowrap="" class="ser_td">
+	
+				Billing Amount
+	
+		  </td>
+		  <td class="ser_td">
+		  <!-- 테이블 내 보기 테이블시작 -->
+		  <table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+		  
+			  <tbody><tr>
+				  <td class="tb_ti"><b>&nbsp;
+				  </b></td>
+				  <td width="12%" class="tb_ti">Labor</td>
+				  <td width="12%" class="tb_ti">Parts</td>
+				  <td width="12%" class="tb_ti">Transportation</td>
+				  <td width="12%" class="tb_ti">Others</td>
+				  
+				  <td width="12%" class="tb_ti">Tax</td>
+				  
+				  
+				  <!-- U01 Start : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <!-- U01 End   : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <td width="15%" class="tb_ti">Invoice Amount</td>
+			  </tr>
+			  
+			  <tr>
+				  <td class="view_ti"><b>Total Billing</b> </td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  
+				  <td class="td_ar">0.00</td>
+				  
+				  
+				  <!-- U01 Start : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <!-- U01 End   : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <td class="td_ar">0.00</td>
+			  </tr>
+			  <tr>
+				  <td class="view_ti">To Samsung </td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  
+				  <td class="td_ar">0.00</td>
+				  
+				  
+				  <!-- U01 Start : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <!-- U01 End   : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <td class="td_ar">0.00</td>
+			  </tr>
+			  <tr>
+				  <td class="view_ti">To Samsung(SAW) </td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  				  
+				  <td class="td_ar">0.00</td>
+				  
+				  
+				  <!-- U01 Start : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <!-- U01 End   : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <td class="td_ar">0.00</td>
+			  </tr>
+			  
+			  <tr> 
+				  <td class="view_ti">To ASC (Discount) </td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  
+				  <td class="td_ar">0.00</td>
+				  
+				  
+				  <!-- U01 Start : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <!-- U01 End   : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <td class="td_ar">0.00</td>
+			  </tr>
+			  			  
+			  <tr>
+				  <td class="view_ti">To Customer </td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  <td class="td_ar">0.00</td>
+				  				  
+				  <td class="td_ar">0.00</td>
+				  
+				  
+				  <!-- U01 Start : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <!-- U01 End   : 2017.06.21 채보람 서남아 Demand : 인도일 경우 Cess 필드 노출 -->
+				  
+				  <td class="td_ar">0.00</td>
+			  </tr>
+			  
+		  </tbody></table>
+		  <!-- 테이블 내 보기 테이블끝 -->
+		  </td>
+		</tr>
+			  
+    </tbody></table>
+	<!-- billing information  테이블 끝 -->
+	</div>
+	
+<!-- 여백 테이블 시작 -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr>
+		<td height="5"></td>
+	</tr>
+</tbody></table>
+<!-- 여백테이블 끝 -->
+
+			  </td>
+		  </tr> 
+		  
+	  
+		
+	  <tr>
+	    <td>
+				<!-- attachment -->
+	  			
+
+				<!-- 서브타이틀 시작 -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+						<td class="label02_left"></td>
+						<td class="label02" width="15">
+						<a href="javascript:moreOpenid(8);"><img src="./label_up02.gif" width="14" height="13" border="0" align="absmiddle" id="btnheadid8" style="display: none;"></a>
+						<a href="javascript:moreCloseid(8);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid8" style=""></a> </td>
+						<td class="label02">Attachment</td>
+						<td class="label02_right"></td>
+					</tr>
+
+				</tbody></table>
+						  <!-- 서브타이틀 끝 -->
+
+			<div id="moretailid8" style="">
+					<!-- Attachment table 시작 -->
+					<table id="attachTable" width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+						<tbody><tr>
+							<td width="40" class="tb_ti">No</td>
+							<td width="100" class="tb_ti">Doc Type </td>
+							<td width="100" class="tb_ti">File Type</td>
+							<td class="tb_ti">File Name</td>
+							<td width="90" class="tb_ti">Size</td>
+							<td width="120" class="tb_ti">Date</td>
+							<td width="15" class="tb_ti">&nbsp;</td>
+						</tr>
+						</tbody><tbody id="attachTableBody">					
+
+						<tr>
+							<td class="td_ac">1</td>
+							<td class="td_al">S/N Label</td>
+							<td class="td_al">Image File</td>
+							<td class="td_ac">
+							
+								<a href="javascript:downFile(&#39;34735A9AC0C81FE19BA7436AF92A75A1&#39;,&#39;SN_4437544200_0.jpg&#39;,&#39;000000809555&#39;);">
+									SN_4437544200_0.jpg
+								</a>
+							
+								
+							</td>
+							<td class="td_ac">809555</td>
+							<td class="td_al">21.06.2026 115617</td>
+							<td class="td_ac">
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">2</td>
+							<td class="td_al">S/N Label</td>
+							<td class="td_al">Image File</td>
+							<td class="td_ac">
+							
+								<a href="javascript:downFile(&#39;34735A9AC1DE1FD19BA75FEFD6F0780F&#39;,&#39;SN_4437544200_1.jpg&#39;,&#39;000000989785&#39;);">
+									SN_4437544200_1.jpg
+								</a>
+							
+								
+							</td>
+							<td class="td_ac">989785</td>
+							<td class="td_al">21.06.2026 120239</td>
+							<td class="td_ac">
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">3</td>
+							<td class="td_al">Official Document</td>
+							<td class="td_al">Image File</td>
+							<td class="td_ac">
+							
+								<a href="javascript:downFile(&#39;34735A9AC7441FD19BBFC54201218844&#39;,&#39;OFF_WhatsApp Image 2026-06-21 at 20.22.56.jpeg&#39;,&#39;000000146376&#39;);">
+									OFF_WhatsApp Image 2026-06-21 at 20.22.56.jpeg
+								</a>
+							
+								
+							</td>
+							<td class="td_ac">146376</td>
+							<td class="td_al">22.06.2026 111944</td>
+							<td class="td_ac">
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">4</td>
+							<td class="td_al">Proof of Purchase</td>
+							<td class="td_al">Image File</td>
+							<td class="td_ac">
+							
+								<a href="javascript:downFile(&#39;34735A9AC7441FD19BBFC5735E57C848&#39;,&#39;POP_WhatsApp Image 2026-06-21 at 20.23.33.jpeg&#39;,&#39;000000171946&#39;);">
+									POP_WhatsApp Image 2026-06-21 at 20.23.33.jpeg
+								</a>
+							
+								
+							</td>
+							<td class="td_ac">171946</td>
+							<td class="td_al">22.06.2026 111947</td>
+							<td class="td_ac">
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">5</td>
+							<td class="td_al">S/N Label</td>
+							<td class="td_al">Zip File</td>
+							<td class="td_ac">
+							
+								<a href="javascript:downFile(&#39;34735A9AC7441FD19BBFC847CF24A876&#39;,&#39;SN_WhatsApp Unknown 2026-06-22 at 11.19.59.zip&#39;,&#39;000000778053&#39;);">
+									SN_WhatsApp Unknown 2026-06-22 at 11.19.59.zip
+								</a>
+							
+								
+							</td>
+							<td class="td_ac">778053</td>
+							<td class="td_al">22.06.2026 112022</td>
+							<td class="td_ac">
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">6</td>
+							<td class="td_al">Official Document</td>
+							<td class="td_al">PDF File (Adobe Acrobat Exchan</td>
+							<td class="td_ac">
+							
+								<a href="javascript:downFile(&#39;34735A9AC7441FE19BC5038312148842&#39;,&#39;OFF_ESG20260528_AC Installation offer_Jun26 (1)12.pdf&#39;,&#39;000000357147&#39;);">
+									OFF_ESG20260528_AC Installation offer_Jun26 (1)12.pdf
+								</a>
+							
+								
+							</td>
+							<td class="td_ac">357147</td>
+							<td class="td_al">22.06.2026 161958</td>
+							<td class="td_ac">
+							</td>
+						</tr>
+						
+						</tbody>
+					</table>
+					<!-- Attachment table 끝 -->
+			</div>
+  <!-- 여백 테이블 시작 -->
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody><tr>
+			<td height="5"></td>
+		</tr>
+	</tbody></table>
+	<!-- 여백테이블 끝 -->
+
+		  </td>
+	  </tr> 
+
+		<tr>
+			<td>
+			<!-- Change Log -->
+			
+ 
+				<!-- 서브타이틀 시작 -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+						<td class="label02_left"></td>
+						<td class="label02" width="12">
+						<a href="javascript:moreOpenid(9);"><img src="./label_up02.gif" width="14" height="13" border="0" align="absmiddle" id="btnheadid9" style="display: none;"></a>
+						<a href="javascript:moreCloseid(9);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid9" style=""></a> </td>
+						<td class="label02">Change Log </td>
+						<td class="label02_right"></td>
+						</tr>
+
+				</tbody></table>
+				<!-- 서브타이틀 끝 -->
+
+				<div id="moretailid9" style="">
+					<!-- change log 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+						<tbody><tr>
+							<td width="30" class="tb_ti">No</td>
+							<td width="100" class="tb_ti">Changed Date </td>
+							<td class="tb_ti">Channel </td>
+							<td class="tb_ti">By</td>
+							<td class="tb_ti">Status</td>
+							<td class="tb_ti">Reason</td>
+							<td class="tb_ti">Service Type</td>
+							<td class="tb_ti">Wty Status</td>
+							<td class="tb_ti">Service Comment </td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000001</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 09:58:37</td>
+							
+							<td class="td_ac"></td>
+							
+							<td class="td_al">SIELN0613.ID</td>
+							<td class="td_ac">Assigned to Service Center</td>
+							<td class="td_ac"></td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al"></td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000002</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 10:21:29</td>
+							
+							<td class="td_ac"></td>
+							
+							<td class="td_al">SIELN0613.ID</td>
+							<td class="td_ac">Acknowledged (ASC)</td>
+							<td class="td_ac"></td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al"></td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000003</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 10:26:21</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">F1MONIKA2026</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Repair in progress</td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">CONF ON 9999312909 VISIT 21-06 APPT 12-13 ENG Anoop</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000004</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 11:53:50</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">8486237814</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Appointment Date is set</td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">CONF ON 9999312909 VISIT 21-06 APPT 12-13 ENG Anoop</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000005</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 11:55:26</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">8486237814</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Engineer Arrived(PDA)</td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">CONF ON 9999312909 VISIT 21-06 APPT 12-13 ENG Anoop</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000006</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 12:48:17</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">NISHANTDHARIWAL</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Engineer Arrived(PDA)</td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">CONF&nbsp;ON&nbsp;9999312909&nbsp;VISIT&nbsp;21-06&nbsp;APPT&nbsp;12-13&nbsp;ENG&nbsp;Anoop</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000007</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 12:55:07</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">NISHANTDHARIWAL</td>
+							<td class="td_ac">ASC Decline</td>
+							<td class="td_ac">Wrong Allocation from CCC</td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Decline to Telecell repeat case done by 8755818429</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000008</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 20:30:06</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">SIELM0174.ID</td>
+							<td class="td_ac">Assigned to Service Center</td>
+							<td class="td_ac"></td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Decline to Telecell repeat case done by 8755818429</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000009</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 20:39:48</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">SIELM0174.ID</td>
+							<td class="td_ac">Acknowledged (ASC)</td>
+							<td class="td_ac"></td>
+							<td class="td_ac">CC</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Decline to Telecell repeat case done by 8755818429</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000010</td>
+							<td nowrap="" class="td_al">
+							
+21.06.2026 20:40:42</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">SIELM0174.ID</td>
+							<td class="td_ac">Acknowledged (ASC)</td>
+							<td class="td_ac"></td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Decline to Telecell repeat case done by 8755818429</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000011</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 09:06:51</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Repair in progress</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Decline&nbsp;to&nbsp;Telecell&nbsp;repeat&nbsp;case&nbsp;done&nbsp;by&nbsp;8755818429</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000012</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 11:20:48</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Repair in progress</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">DEMO INSTALLATION DONE SET OK</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000013</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 11:36:38</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Engineer Assigned</td>
+							<td class="td_ac">Repair in progress</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Demo installation done set ok</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000014</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 16:16:56</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Repair Completed</td>
+							<td class="td_ac">Installation Done</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Demo&nbsp;installation&nbsp;done&nbsp;set&nbsp;ok</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000015</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 16:17:45</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Pending</td>
+							<td class="td_ac">Repair completed in field</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">LP</td>
+							<td class="td_al">Demo&nbsp;installation&nbsp;done&nbsp;set&nbsp;ok</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000016</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 16:18:46</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Pending</td>
+							<td class="td_ac">Repair completed in field</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">OW</td>
+							<td class="td_al">Demo&nbsp;installation&nbsp;done&nbsp;set&nbsp;ok</td>
+						</tr>
+						
+						<tr>
+							<td class="td_ac">000017</td>
+							<td nowrap="" class="td_al">
+							
+22.06.2026 16:19:02</td>
+							
+							<td class="td_ac">CIC</td>
+							
+							<td class="td_al">TES_SUMAN2025</td>
+							<td class="td_ac">Repair Completed</td>
+							<td class="td_ac">Installation Done</td>
+							<td class="td_ac">II</td>
+							<td class="td_ac">OW</td>
+							<td class="td_al">Demo&nbsp;installation&nbsp;done&nbsp;set&nbsp;ok</td>
+						</tr>
+						
+					</tbody></table>
+					<!-- change log 테이블 끝 -->
+			</div>
+			<!-- 여백 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr>
+							<td height="5"></td>
+						</tr>
+					</tbody></table>
+					<!-- 여백테이블 끝 -->
+
+			</td>
+		</tr>
+
+
+		<tr id="trRepairPartInfo">
+			<td>
+			<!-- Repair Part Information-->
+			
+
+				<!-- 서브타이틀 시작 -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+						<td class="label02_left"></td>
+						<td class="label02" width="12">
+						<a href="javascript:moreOpenid(10);"><img src="./label_up02.gif" width="14" height="13" border="0" align="absmiddle" id="btnheadid10" style="display: none;"></a>
+						<a href="javascript:moreCloseid(10);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid10" style=""></a></td>
+						<td class="label02" width="20%">Repair Part Information	
+							&nbsp;&nbsp;&nbsp;&nbsp;
+						</td>
+						<td class="label02">
+							<!-- 버튼 레이아웃 테이블 시작 -->
+							<table width="100%" border="0" cellspacing="0" cellpadding="0">
+								<tbody><tr>
+									<td width="100%" title="billing.getBILLING_DATE======00000000">&nbsp;</td>
+									<td id="tdPartList">
+
+									</td>
+									<td>&nbsp;&nbsp;</td>
+									
+
+								</tr>
+							</tbody></table>
+							<!-- 버튼 레이아웃 테이블 끝 -->
+						</td>
+						<td class="label02_right">
+						</td>
+					</tr>
+				</tbody></table>
+				<!-- 서브타이틀 끝 -->
+
+
+			
+				<div id="moretailid10" style="">
+					<!-- Related Document 테이블 시작 -->
+<!-- china version intergration 2016/08/03 js1.baek -->					
+	
+					<table id="partsTable" width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+						<thead>
+						<tr>
+							<td width="3%" class="tb_ti">No</td>
+							<td width="10%" class="tb_ti">Location</td>
+							
+							<td width="4%" class="tb_ti">Pending</td>
+
+							<td width="12%" class="tb_ti">Parts No </td>
+
+							<td class="tb_ti">Parts Description</td>
+							
+ 
+							<td width="4%" class="tb_ti">Qty</td>
+							
+							<td width="13%" class="tb_ti">Materal Request No </td>
+	<!-- 인도일때만 PO No 조회 가능하도록 보이게 처리함. --> 
+							<td width="10%" class="tb_ti">P/O No</td>	
+														
+							<td width="10%" class="tb_ti">Parts Serial</td>
+							
+							<td width="4%" class="tb_ti">In/Out</td>
+							
+							<td width="5%" class="tb_ti">Ship Date</td>
+							
+
+						</tr>
+						</thead>
+						<tbody id="partsTableBody">
+
+						</tbody>
+					</table>	
+					<!--   테이블 끝 -->
+					
+					
+					
+					
+					
+			</div>
+			<!-- 여백 테이블 시작 -->
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tbody><tr>
+					<td height="5"></td>
+				</tr>
+			</tbody></table>
+			<!-- 여백테이블 끝 -->
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+					<!-- Interaction History -->
+					
+				<!-- 서브타이틀 시작 -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+						<td class="label02_left"></td>
+						<td class="label02" width="12">
+						<a href="javascript:moreOpenid(11);"><img src="./label_up02.gif" width="14" height="13" border="0" align="absmiddle" id="btnheadid11" style="display: none;"></a>
+						<a href="javascript:moreCloseid(11);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid11" style=""></a> </td>
+						<td class="label02">Interaction History</td>
+						<td class="label02">
+						</td>
+						<td class="label02_right">
+
+						</td>
+					</tr>
+				</tbody></table>
+				<!-- 서브타이틀 끝 -->
+
+
+				<div id="moretailid11" style="">
+					<!-- Interaction history table 시작 -->
+					<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+						<thead>
+						<tr>
+							<td width="3%" class="tb_ti">No</td>
+							<td width="7%" class="tb_ti">Category</td>
+							<td width="7%" class="tb_ti">From</td>
+							<td width="15%" class="tb_ti">Interaction Code </td>
+							<td class="tb_ti">Detail Script / Feedback</td>
+							<td width="5%" class="tb_ti">channel</td>
+							<td width="9%" class="tb_ti">Status</td>
+							<td width="12%" class="tb_ti">Created</td>
+							<td width="9%" class="tb_ti">By</td>
+						</tr>
+						</thead>
+						<tbody id="messageTableBody">
+
+						
+
+						<tr id="messageTRObj">
+							<td class="td_ac">0001</td>
+							<td nowrap="" class="td_al">Inbound</td>
+							<td class="td_ac">Customer</td>
+							<td class="td_al">Customer Request</td>
+							<td class="td_al">
+
+										<span>◆ Ankit . [ 8484003196 ] 21.06.2026 09:58:36
+</span>
+										
+
+							</td>
+							<td class="td_ac">
+							
+							</td>
+							<td class="td_al">
+							Created
+							</td>
+							<td nowrap="" class="td_ac">
+
+21.06.2026 09:58:37
+							</td>
+							<td class="td_al">SIELN0613.ID</td>
+						</tr>
+						<tr id="msgComment0">
+							
+							<td class="td_al" valign="top" colspan="5">
+							&nbsp;◆ Ankit . [ 8484003196 ] 21.06.2026 09:58:36<br><br>Reason for SO Creation: OT<br>Dealer Mobile Number: 9999999999<br><br> Dealer shop Name: VIJAY SALES<br>------------------------------------------------------<br>A) Inquiry:<br>What: No Cooling<br>When:6/20/2026 6:02:33 PM<br><br>How: Case Received Under Dealer Portal<br>------------------------------------------------------<br>b) Steps taken:  Assigned To Service Center<br><br>------------------------------------------------------<br>c) Outcome<br>SO Made by<br>Name : Rajveer gaud<br>Emp Id: T327889<br>Dealer Adhoc Noida CCC<br>◆ R_IPAAS_CAP [ R_IPAAS_CAP ] 20.06.2026 18:07:05<br><br>No Cooling<br><br><br>[ HRM Result ]<br>No data exist in HRM<br>
+							</td>
+							<td class="td_al" valign="top" colspan="4" id="feedbackTD0">
+								&nbsp;
+							</td>
+						</tr>
+
+
+						</tbody>
+					</table>
+					<!-- Interaction historytable 끝 -->
+			</div>
+					<!-- 여백 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr>
+							<td height="5"></td>
+						</tr>
+					</tbody></table>
+					<!-- 여백테이블 끝 -->
+
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+					<!-- Related Document -->
+					
+ 
+
+				<!-- 서브타이틀 시작 -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+						<td class="label02_left"></td>
+						<td class="label02" width="12">
+						<a href="javascript:moreOpenid(12);"><img src="./label_up02.gif" width="14" height="13" border="0" align="absmiddle" id="btnheadid12" style="display: none;"></a>
+						<a href="javascript:moreCloseid(12);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid12" style=""></a></td>
+						<td class="label02">Related Document </td>
+						<td class="label02_right">
+						 </td>
+						</tr>
+				</tbody></table>
+				<!-- 서브타이틀 끝 -->
+				
+				<div id="moretailid12" style="">
+					<!-- Related Document 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+						<tbody><tr>
+							<td width="40" class="tb_ti">No</td>
+							<td width="110" class="tb_ti">Related Type </td>
+							<td class="tb_ti">Transaction No </td>
+							<td class="tb_ti">Doc Type </td>
+							<td class="tb_ti">Detail Type </td>
+							<td class="tb_ti">Status</td>
+							<td class="tb_ti">Date</td>
+							<td class="tb_ti">Created By </td>
+														
+						</tr>
+						
+						<tr>
+							<td class="td_ac">1</td>
+							<td class="td_ac">Preceding document</td>
+							<td class="td_ac">5222960448</td>
+							<td class="td_aC">Service Request</td>
+							<td class="td_ac"></td>
+							<td class="td_ac">Closed</td>
+							<td class="td_ac">
+21.06.2026</td>
+							<td class="td_ac">SIELN0613.ID</td>
+														
+						</tr>
+						
+						<tr>
+							<td class="td_ac">2</td>
+							<td class="td_ac">Preceding document</td>
+							<td class="td_ac"></td>
+							<td class="td_aC"></td>
+							<td class="td_ac"></td>
+							<td class="td_ac"></td>
+							<td class="td_ac">
+21.06.2026</td>
+							<td class="td_ac"></td>
+														
+						</tr>
+						
+						<tr>
+							<td class="td_ac">3</td>
+							<td class="td_ac">Current Document</td>
+							<td class="td_ac">4437544200</td>
+							<td class="td_aC">Service order</td>
+							<td class="td_ac">Repair</td>
+							<td class="td_ac">Repair Completed</td>
+							<td class="td_ac">
+21.06.2026</td>
+							<td class="td_ac">TES_SUMAN2025</td>
+														
+						</tr>
+						
+					</tbody></table>
+					<!-- Related Document  테이블 끝 -->
+			</div>
+					<!-- 여백 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr>
+							<td height="5"></td>
+						</tr>
+					</tbody></table>
+					<!-- 여백테이블 끝 -->
+
+			</td>
+		</tr>
+		
+		<tr>
+			<td>							
+					<!-- SAW -->
+					
+
+				<!-- 서브타이틀 시작 -->
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tbody><tr>
+						<td class="label02_left"></td>
+						<td class="label02" width="12">
+						<a href="javascript:moreOpenid(13);"><img src="./label_up02.gif" width="14" height="13" border="0" align="absmiddle" id="btnheadid13" style="display: none;"></a>
+						<a href="javascript:moreCloseid(13);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid13" style=""></a></td>
+						<td class="label02">SAW</td>
+						<td class="label02">
+						</td>
+						<td class="label02_right">
+						</td>
+					</tr>
+
+				</tbody></table>
+				<!-- 서브타이틀 끝 -->
+
+
+				<div id="moretailid13" style="">
+					<!-- Saw 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="1" cellpadding="0" class="tb_brdr2">
+						<tbody><tr>
+							<td width="30" class="tb_ti">No</td>
+							<td width="100" class="tb_ti">SAW ID </td>
+							<td class="tb_ti">Category</td>
+							<td class="tb_ti">Status</td>
+							
+							<td class="tb_ti">Request Date</td>
+							<td class="tb_ti">Requester</td>
+							<td class="tb_ti">Request Amt </td>
+							<td class="tb_ti">Confirm Date </td>
+							<td class="tb_ti">Confirmer</td>
+							<td class="tb_ti">Confirm Amt </td>
+
+						</tr>
+						
+						<tr>
+							<td class="td_ac">1</td>
+							<td class="td_ac">
+								4437544200_0001
+							</td>
+							<td class="td_al">ASC Retail Installation (SIEL)</td>
+							<td class="td_al" title="SS010">Approved</td>
+							
+							<td class="td_ac">22.06.2026</td>
+							<td class="td_al">Telecell &amp; Elect</td>
+							<td class="td_ar">901.00</td>
+							<td class="td_ac">24.06.2026</td>
+							<td class="td_al">8484011841</td>
+							<td class="td_ar">901.00</td>
+						</tr>
+						
+					</tbody></table>
+					<!-- Saw  테이블 끝 -->
+					</div>
+					<!-- 여백 테이블 시작 -->
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr>
+							<td class="td_pad"></td>
+						</tr>
+					</tbody></table>
+					<!-- 여백테이블 끝 -->
+		
+			</td>
+		</tr>		
+		
+		<tr>
+			<td>		
+			    <!-- Advanced Notification of Claim (ACN) -->
+				
+
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        			<tbody><tr>
+            			<td class="label02_left"></td>
+						<td width="12" class="label02">
+		  					<a href="javascript:moreOpenid(17);"><img src="./label_up02.gif" border="0" align="absmiddle" id="btnheadid17" style="display: none;"></a>
+		  					<a href="javascript:moreCloseid(17);"><img src="./label_down02.gif" border="0" align="absmiddle" id="btntailid17" style=""></a></td>
+         				<td class="label02">Advanced Notification of Claim (ANC)</td>
+						<td class="label02_right"></td>
+       			 	</tr>
+     			 </tbody></table>
+	 			 <!-- -->	  
+
+
+				<div id="moretailid17" style="">
+					<!-- Advanced Notification of Claim (ANC)  -->
+					<table width="100%" border="0" cellpadding="0" cellspacing="1" class="sertb_brdr">
+						<tbody><tr>
+							<td width="15%" nowrap="" class="ser_ti">Registered by</td>
+							<td width="15%" nowrap="" class="ser_td"></td>
+							<td width="15%" nowrap="" class="ser_ti">Reported by</td>
+							<td width="15%" nowrap="" class="ser_td">
+							</td>
+							<td width="15%" nowrap="" class="ser_ti">Reporter Information</td>
+							<td width="15%" nowrap="" class="ser_td">
+							</td>
+						</tr>
+						<tr>
+							<td class="ser_ti">Date</td>
+							<td class="ser_td">								
+										 &nbsp;
+										
+							</td>
+							<td class="ser_ti">Reason</td>
+							<td class="ser_td" nowrap="">
+							</td>
+						</tr>
+						<tr>
+							<td width="15%" class="ser_ti">Remark</td>
+							<td colspan="5" class="ser_td"></td>
+						</tr>				
+					</tbody></table>
+				</div>
+
+<!-- 여백 테이블 시작 -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr>
+		<td height="5"></td>
+	</tr>
+</tbody></table>
+<!-- 여백테이블 끝 -->  				
+				
+			</td>
+		</tr>	
+		
+
+		<tr>
+			<td>
+					<!--  Symptom Effectiveness Servey -->
+					
+			</td>
+		</tr>
+		
+
+  </tbody></table>
+	<!-- 아이템 전체 layout 테이블 끝 -->
+
+    <!-- 본문 레이아웃 삽입 끝 -->
+     
+     &nbsp;	
+  
+    
+    
+			<!-- copyright 시작 -->
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tbody><tr>
+				<td class="btn_top">
+					<a href="https://biz2.samsungcsportal.com/gspn/operate.do?cmd=ServiceOrderDetailLiteCmd&amp;objectID=4437544200#top">
+					Top
+					</a></td>
+			  </tr>
+			  <tr>
+				<td class="footer_bg"><img src="./footer_copyright.gif" width="373" height="36"></td>
+				<td width="80"><a href="https://biz2.samsungcsportal.com/gspn/operate.do?cmd=ServiceOrderDetailLiteCmd&amp;objectID=4437544200#"><img src="./verisign.gif" onclick="cfOpenBrWindow(&#39;https://sealinfo.verisign.com/splash?form_file=fdf/splash.fdf&amp;dn=samsungcsportal.com&amp;lang=en&#39;,&#39;VeriSignSecurelSeal&#39;,&#39;scrollbars=yes,resizable=yes,width=545,height=500&#39;)"></a></td>
+		      </tr>
+		    </tbody></table>
+			<!-- copyright 끝 -->
+	
+    
+
+</form>
+<form name="invoiceForm" id="invoiceForm" method="post">
+	<input type="hidden" name="cmd">	
+	<input type="hidden" name="claimno" value="">
+ </form>
+<form name="tempForm" id="tempForm" method="post">
+<input type="hidden" name="jspName" value="">
+<input type="hidden" name="dataChange" value="">
+<input type="hidden" name="p_listCall" value="X">
+
+<input type="hidden" name="objectID" id="objectID" value="4437544200">
+ </form>
+ <form name="bosForm" id="bosForm" method="post">
+	<input type="hidden" name="cmd">	
+	<input type="hidden" name="objectID" value="4437544200">
+	<input type="hidden" name="ascJobNo">
+	<input type="hidden" name="ascCode">
+	<input type="hidden" id="isReadOnly" name="isReadOnly">
+</form>
+<form name="frm" id="frm" method="post"></form>
+<!-- china version intergration 2016/08/03 js1.baek -->
+<form name="wtyCostCheckForm" id="wtyCostCheckForm" method="post">
+	<input type="hidden" id="cmd" name="cmd">
+	<input type="hidden" id="COST_TYPE" name="COST_TYPE">
+	<input type="hidden" id="SVC_TYPE" name="SVC_TYPE">
+	<input type="hidden" id="TF_SVC_PROD" name="TF_SVC_PROD">
+	<input type="hidden" id="DEALER_GUBUN" name="DEALER_GUBUN">
+	<input type="hidden" id="receiptNo" name="receiptNo">
+	<input type="hidden" id="PI_MODEL" name="PI_MODEL">
+	<input type="hidden" id="PI_SERIAL" name="PI_SERIAL">
+</form>
+ <form id="searchOrderForm" name="searchOrderForm" method="post">
+	<input type="hidden" name="cmd" value="">
+	<input type="hidden" name="objectID" value="">
+	<input type="hidden" name="ASCCODE" value="">
+	<input type="hidden" name="relatedTicketFlag" value="Y">
+</form>
+
+
+<script type="text/javascript" src="./dragtable.js.download"></script>
+<script type="text/javascript" src="./hashtable.js.download"></script>
+<script type="text/javascript" src="./json_sans_eval.js.download"></script>
+<script type="text/javascript" src="./paging.js.download"></script>
+<script type="text/javascript" src="./common.js.download"></script>
+<script type="text/javascript" src="./prototype.js.download"></script>
+<script type="text/javascript" src="./protoload.js.download"></script>
+<script type="text/javascript" src="./sorttable.js.download"></script>
+<script type="text/javascript" src="./jquery-1.7.1.min.js.download"></script>
+<script type="text/javascript" src="./jquery-ui-1.8.18.custom.min.js.download"></script>
+<script type="text/javascript" src="./jquery.timePicker.min.js.download"></script>
+<script type="text/javascript" src="./jquery.printElement.min.js.download"></script>
+<script type="text/javascript" src="./jquery.tablesorter.min.js.download"></script>
+<script type="text/javascript" src="./commonLite.js.download"></script>
+<script type="text/javascript" src="./ServiceOrderDetailLite.js.download"></script>
+<script type="text/javascript" src="./date.js.download"></script>
+<script type="text/javascript" src="./check.js.download"></script>
+<script type="text/javascript" src="./RepairLocationIRIS.js.download"></script>
+<script type="text/javascript" src="./bosAttachment.js.download"></script>
+<script type="text/javascript" src="./dtagent55_abxj3_5560.js.download" data-dtconfig="rid=RID_-607905824|rpid=-975994578|reportUrl=/dynatrace/dynaTraceMonitor|domain=samsungcsportal.com"></script>
+<script type="text/javascript" src="./dtagentApi.js.download"></script>
+<script type="text/javascript" src="./dtagentXhrApi.js.download"></script>
+<script type="text/javascript">
+
+if("0"=="1"){
+    alert("No Data Found.");
+	history.go(-1);
+
+}else{
+	initialDatePicker();
+	initialize();
+}
+
+
+</script>
+
+</body></html>

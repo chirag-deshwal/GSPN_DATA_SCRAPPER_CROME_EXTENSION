@@ -1,0 +1,124 @@
+@charset "utf-8";
+
+.loading {
+	background-position: center center;
+	text-align: center;
+	background-color: transparent;
+}
+
+#botton_top {
+	text-align: right;
+	height: 40px;
+	padding-right: 20px;
+	vertical-align: bottom;
+	background-repeat: no-repeat;
+	background-position: right bottom;
+	font-family: arial;
+	font-size: 10px;
+	font-weight: bold;
+	color: #336ebc;
+	padding-bottom: 6px;
+}
+
+.top_navi_al {
+	margin: 10px;
+	font-size: 12px;
+	font-weight: bold;
+	height: 22px;
+	padding: 5px 0 0 5px;
+	background-color: #ffead6;
+	border: #ff9dbe 1px solid;
+}
+
+.top_navi_al_yellow {
+	margin: 10px;
+	font-size: 12px;
+	font-weight: bold;
+	height: 22px;
+	padding: 5px 0 0 5px;
+	background-color: #ffffc6;
+	border: #ff9dbe 1px solid;
+}
+
+.offNode {
+	display: none;
+}
+
+.body_lt {
+	background-color: transparent;
+	height: 100%;
+	margin-right: 10px
+}
+
+#progressloading {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	background: #fff;
+	_background: none;
+	opacity: .75;
+	z-index: 1;
+	display: none;
+}
+
+#tblStatusReason {
+	width: 100%;
+	border: 0;
+	padding: 0;
+	border-spacing: 0;
+}
+
+#serviceDateTD3,#escalAscTd1,#engList_area,#escalAscTd2
+,#divGeneral,#divCustomer,#divProduct,#divScenario,#divJob,#divRepair,#divSAW,#divBilling,#divShipping,#divHistory,#divPendProcess,#divANC,#divSympEffSurvey
+,#divChangeLog,#divCreditInfo,#divEstimate
+ {
+	display: none;
+}
+
+#SERVICE_DATE {
+	width: 64;
+	text-align: center
+}
+
+#SERVICE_TIME {
+	width: 49;
+	text-align: center
+}
+
+#REMARK,#DEFECT_DESC,#REPAIR_DESC,#IRIS_CONDI,#IRIS_SYMPT,#IRIS_DEFECT,#IRIS_REPAIR
+	{
+	width: 100%
+}
+
+#tdPartButton {
+	background-image: none;
+}
+
+#ENGINEER {
+	width: 70;
+}
+
+#reasonCodeTD {
+	width: 80%;
+}
+
+#authForm {
+	display: inline;
+}
+
+#divTitle {
+	float: left
+}
+
+#divButtons,#divButtonsBottom {
+	float: right;
+	padding-bottom: 5px;
+}
+#tdGeneral,#tdCustomer,#tdProduct,#tdScenario,#tdJob,#tdRepair,#tdSAW,#tdBilling,#tdShipping,#tdHistory,#tdPendProcess,#tdANC,#tdSympEffSurvey
+,#tdCreditInfo,#tdEstimate,#tdChangeLog,#tdIqc,#tdOqc,#tdVipInfo,#tdExchangeRefundInfo,#tdDoaDapInfo,#tdAccInspInfo
+ {
+	cursor: pointer;
+}

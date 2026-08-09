@@ -1,0 +1,23 @@
+/* 
+  - Author(s): Dale Seo
+  - Date: 2011.07.27
+  - @(#)
+  - Description: Used in Ticket List only for SEA
+  *               Status               |     Color       | Bold
+  * ------------------------------------------------------------
+  * ST010 (Assigned to Service Center) | #585858 (black) | X
+  * ST015 (Acknowledged (ASC))         | #585858 (black) | O
+  * ST025 (Engineer Assigned)          | #FF3333 (red)   | X
+  * ST030 (Pending)                    | #FF3333 (red)   | O
+  * ST035 (Repair Completed)           | #0071BD (blue)  | X
+  * ST055 (Warranty Claimed)           | #0071bd (blue)  | O
+  * ST05X (Canceled)                   | #008000 (green) | X
+*/
+
+.ST010 {color: #333333; font-weight: normal;}
+.ST015 {color: #333333; font-weight: bold;}
+.ST025 {color: #FF3333; font-weight: normal;}
+.ST030 {color: #FF3333; font-weight: bold;}
+.ST035 {color: #0071BD; font-weight: normal;}
+.ST055 {color: #0071BD; font-weight: bold;}
+.ST050, .ST051, .ST052 {color: #008000; font-weight: normal;}

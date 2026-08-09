@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Manager - GSPN Data Scraper</title>
+  <link rel="stylesheet" href="profiles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="back-button">
+          <button id="btnBack" class="btn-icon" title="Go back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+        </div>
+        <h1>Profile Manager</h1>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Create Profile Section -->
+      <section class="create-profile-section">
+        <h2>Create New Profile</h2>
+        <div class="create-form">
+          <input 
+            type="text" 
+            id="newProfileName" 
+            placeholder="Enter profile name" 
+            class="input-field"
+            maxlength="50"
+          >
+          <button id="btnCreateProfile" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Profile
+          </button>
+        </div>
+      </section>
+
+      <!-- Login System Section -->
+      <section class="login-system-section">
+        <h2>Login Check</h2>
+        <div class="login-form">
+          <input 
+            type="text" 
+            id="loginUserId" 
+            class="input-field"
+            placeholder="Enter user ID"
+            maxlength="50"
+          >
+          <input 
+            type="password" 
+            id="loginPassword" 
+            class="input-field"
+            placeholder="Enter password"
+            maxlength="50"
+          >
+          <button id="btnVerifyLogin" class="btn btn-primary">Verify Login</button>
+        </div>
+        <div id="loginStatus" class="login-status">Ready to verify your credentials.</div>
+      </section>
+
+      <!-- Profiles List Section -->
+      <section class="profiles-section">
+        <h2>Your Profiles</h2>
+        <div id="profilesList" class="profiles-list">
+          <div class="empty-state">
+            <p>No profiles created yet. Create one to get started!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Import/Export Section -->
+      <section class="import-export-section">
+        <h2>Import / Export</h2>
+        <div class="import-export-actions">
+          <button id="btnImportProfile" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Import Profile
+          </button>
+          <input type="file" id="importFile" accept=".json" class="hidden-file-input" title="Import profile" aria-label="Import profile">
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal: Profile Details -->
+    <div id="profileModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Profile Settings</h2>
+          <button id="btnCloseModal" class="btn-icon" title="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Profile Name Edit -->
+          <div class="form-group">
+            <label for="modalProfileName">Profile Name</label>
+            <input type="text" id="modalProfileName" class="input-field" maxlength="50">
+          </div>
+
+          <!-- Settings -->
+          <div class="settings-container">
+            <h3>Settings</h3>
+            
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="modalCloserHelper">Closer Helper</label>
+              </div>
+              <input type="checkbox" id="modalCloserHelper" class="checkbox">
+              <span class="setting-desc">Enable Closer Helper by default when this profile is loaded</span>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="modalAutoExport">Auto Export</label>
+              </div>
+              <input type="checkbox" id="modalAutoExport" class="checkbox">
+              <span class="setting-desc">Automatically export data when scraping completes</span>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="modalAutoExportFormat">Export Format</label>
+              </div>
+              <select id="modalAutoExportFormat" class="select-field">
+                <option value="xls">Excel (.xls)</option>
+                <option value="csv">CSV (.csv)</option>
+              </select>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="modalTheme">Theme</label>
+              </div>
+              <select id="modalTheme" class="select-field">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Profile Info -->
+          <div class="profile-info">
+            <p id="profileCreatedAt" class="info-text"></p>
+            <p id="profileUpdatedAt" class="info-text"></p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btnDeleteProfile" class="btn btn-danger">Delete Profile</button>
+          <div class="footer-right">
+            <button id="btnExportProfile" class="btn btn-secondary">Export</button>
+            <button id="btnSaveProfile" class="btn btn-primary">Save Changes</button>
+            <button id="btnLoadProfile" class="btn btn-success">Load Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Confirmation -->
+    <div id="confirmModal" class="modal hidden">
+      <div class="modal-content confirm-content">
+        <div class="modal-header">
+          <h2 id="confirmTitle">Confirm Action</h2>
+        </div>
+        <div class="modal-body">
+          <p id="confirmMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelConfirm" class="btn btn-secondary">Cancel</button>
+          <button id="btnConfirmAction" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="profileManager.js"></script>
+  <script src="profiles.js"></script>
+</body>
+</html>

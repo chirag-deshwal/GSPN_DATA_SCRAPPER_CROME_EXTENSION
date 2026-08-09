@@ -1,0 +1,2566 @@
+var dtAction = null;
+	/** Onload */
+	$j(start);
+	if (loginUserCorpCode == 'C310') $j(initializeC310);
+
+	/** SEA Exclusive */
+	function initializeC310() {
+		$j('#trCollectionCenter').hide();
+		if($('asc_code').value==""){// Ship-to-Branch : --ALL-- 일때  화면로드 시 getEngineerList() 호출 
+			getEngineerList();
+		}
+	}
+
+//china version intergration 2016/07/14 pcs73.
+function initializeC6(){
+	moreCloseid(1); //for china, hide the detail search options.	
+	$j("[name=A_SUM]").live('click', function(){
+		
+		var idx = $j("[name=A_SUM]").index($j(this));
+		
+		if($j("[name=LIST_SUM]").eq(idx).val().length == 0 ){
+			
+			return false;
+		}
+		var hiDiv = $("hiddenDiv");
+		var input = null;
+		var arySoNum = $j("[name=LIST_SUM]").eq(idx).val().split(":");
+		for(var i=0;i<arySoNum.length;i++){
+			input = new Element("input",{"type":"hidden","name":"OBJECT_LIST_ID","value":arySoNum[i]})
+			hiDiv.appendChild(input);
+		}
+		displaySummary(0,0);
+		$j("#hiddenDiv").empty();
+	});	
+	$j('select option').each(function(index){
+		this.title = this.value;
+	});
+	$j('[type=text],select').each(function(index){
+		this.title = this.name;
+	});
+	
+	//***** status Initialize Logic  ************************
+	//"  ST010 ST015 ST025 ST030 ST035"
+	if(_l.soDetailType==''||_l.soDetailType=='DET001'){
+		$j('select[name="status1"] option').each(function(index){
+			var val = this.value;
+			if(!(val=='ALL'||val=='ST010'||val=='ST015'||val=='ST025'||val=='ST030'||val=='ST035')){
+				$j(this).remove();
+			}
+		});
+	}	
+
+	$j('select[name="TRSTATUS_BACK"] option').each(function(index){
+		var val = this.value;
+		if(!(val=='ALL'||val=='ST010'||val=='ST015'||val=='ST025'||val=='ST030'||val=='ST035')){
+			$j(this).remove();
+		}
+	});
+
+	$j('[name=soDetailType1],[name=soDetailType2]').change(function(){
+		if(searchOption == 1){
+			$j('[name=soDetailType2]').val($j('[name=soDetailType1]').val());
+		}else{
+			$j('[name=soDetailType1]').val($j('[name=soDetailType2]').val());
+		}
+		$('status1').length=0;
+		$('reason1').length=1;
+		$('status2').length=1;
+		$('reason2').length=1;
+		var codeGroup = getDetailTypeGroup(this.value);
+
+		if(codeGroup=='')return;
+		
+		if(codeGroup=='TRSTATUS'){
+			$j('#TRSTATUS_BACK option').clone().appendTo('#status1');
+// 			$j('#status1 option[value=ALL]').attr('selected',true);
+			setReason1();
+		}else if(codeGroup=='RFSTATUS' || codeGroup=='EXSTATUS'){
+			reason1_CodeGroupSearch();
+		}
+		//status2 Setting
+		statusCodeGroupSearch(codeGroup);
+	});
+	//***** status Initialize Logic  ************************ 	
+}
+
+/* Page Loading Intialize!!*/
+function start(){
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		initializeC6();
+	}
+    /* Calendar Set init st */
+	initialDatePicker();
+	var elementId="#req_date_from1,#req_date_to1,#appt_date_from,#appt_date_to";
+	if(_l.u.c == 'C310'){
+		elementId = elementId + ",#CUST_REQ_DATE_FROM,#CUST_REQ_DATE_TO"; 
+	} 
+	if(isChinaRegion){//china version intergration 2016/07/14 pcs73.
+		elementId = elementId + ",#CC_APP_DT_FROM, #CC_APP_DT_TO";
+	}
+	
+	/*
+	 * 미주 통합
+	- RT-007
+	- C370일 경우 appointment,posting,complete date 선택 기능 추가
+	- #dateType_from,#dateType_to 추가					
+	- 2015-09-30
+	 */		
+	if(_l.u.c == 'C370'){
+		elementId = elementId + ",#dateType_from,#dateType_to"; 
+		
+		var sdt = $j("#SODETAILTYPE1").val();
+		if(sdt != "DET001"){
+			$j("#dateTitle").hide();
+			$j("#dateValue").hide();
+			
+			$j("#date370Title").show();
+			$j("#date370Value").show();
+		}
+	} 
+	$j(elementId).datepicker( {dateFormat: _l.pickerFormat } ).css('margin-right','3px');
+	$j('.hasDatepicker').keypress(validateDate);
+    /* Calendar Set init ed */
+
+
+    //ServiceOrderDetail.jsp history.back() ì¼ë¡ ì¤ë ê²½ì° ì¡°íê²°ê³¼ ë³µì...
+    //try{
+    //    if(parent.backForward){ jsonObj=parent.jsonGlobalTemp; gridDraw(0, 0); setTimeout('setReason1();',300);  }
+    //}catch(e){}
+
+    if(_l.dataChange =="X"){//after udpate on the ticket edit screen, go back to the list
+		searchFlag=true;
+		loadCondition();
+    }
+    else if(_l.p_listCall=="X"){//no matter if update or not on the ticket edit screen, go back to the list
+		searchFlag=false;
+		loadCondition();		
+        jsonObj=parent.jsonGlobalTemp;
+		if (jsonObj!=null && jsonObj.success) gridDraw(0, 0);
+    }
+
+
+    if ($('asc_code').value != ''){
+        //collectionPointSearch();
+        getEngineerList();
+    }
+	
+    setReason1();
+    if(!isChinaRegion){//china version intergration 2016/07/14 pcs73.
+    	statusCodeGroupSearch();
+    }
+    if(isEuUser || isLaUser){
+    	svcLevelSearch();
+    }
+
+	localProdGroupSearch();
+	
+	if(isChinaRegion){//china version intergration 2016/07/14 pcs73.
+		//ASC의 본점확인 권한 여부를 판단하기 위해 펑션 호출 SBSC법인 전용
+		//ASC변경시 펑션 호출, 전체검색일때는 호출하지 않는다.
+		if(isNewChina){
+			checkSoFlag();
+		}
+		
+		//ASC JOB No입력란에 focus on/out시 대문자로 변경하여준다 2013-08-05 수정
+		$j("#asc_job_no").focusout(function(){
+			$j(this).val($j(this).val().toUpperCase());
+		});
+	}
+	
+	//CC타입추가
+	//if(!isCanSelectCC){
+	//	$j("#service_type").find("option[value='CC']").remove();
+	//	
+	//}
+	
+	//C720 - 9개 수리점에 대해서 SVC Type 'IS' activation
+	if(_l.u.c == 'C720' && !limitTypeSSA){
+		$j("#service_type").find("option[value='IS']").remove();
+	}
+	
+	toggleSubServicetype($j("#service_type").val());
+	
+	getVanId();
+
+}
+
+function getDetailTypeGroup(DetailType){//china version intergration 2016/07/14 pcs73.
+	var codeGroup='TRSTATUS';
+	if(DetailType =='') codeGroup='TRSTATUS';
+	else if(DetailType =='DET001') codeGroup='TRSTATUS';
+	else if(DetailType =='DET002') codeGroup='EXSTATUS';//교환
+	else if(DetailType =='DET003') codeGroup='RFSTATUS';//환불
+	else if(DetailType =='DET005') codeGroup='CPSTATUS';//보상
+	else if(DetailType =='DET006') codeGroup='EXSTATUS';//교환+보상
+	else if(DetailType =='DET007') codeGroup='RFSTATUS';//환불+보상
+	else codeGroup='';
+	
+	return codeGroup;
+}
+
+function setReason1(){
+    var statusCode = $("status1").value;
+    var strHTML = "";
+	
+	if (_l.r.AscDepotUser && (statusCode == "ST030" || statusCode == "ST034")) {	//ASC Depot User ì´ê³  Pending ëë , Ready for shipping.ì´ë©´
+		$("td_reason").innerHTML = _l.r.c.DEPOT_REASON1;
+	} else {
+	
+	    if(statusCode == "ST015") {// "ACKREASON"; //ack
+	        //strHTML = "<%//=resource.getCodeComboBoxRender("ACKREASON","reason1", "","","- - - -", "class='selectSN'")%>";
+	    }else if(statusCode == "ST025") {// "ENGASSIGN"; //assign
+	        //strHTML = "<%//=resource.getCodeComboBoxRender("ENGASSIGN","reason1", "","","- - - -", "class='selectSN'")%>";
+	    }else if(statusCode == "ST030"){ // "PENREASON"; //pending
+	        //strHTML = "<%//=resource.getCodeComboBoxRender("PENREASON","reason1", "","","- - - -", "class='selectSN'")%>";
+	    }else if(statusCode == "ST035"){ // "COMREASON"; //completed
+	        //strHTML = "<%//=resource.getCodeComboBoxRender("COMREASON","reason1", "","","- - - -", "class='selectSN'")%>";
+	    }
+	    else if(statusCode == "ST033") {// "DECREASON"; //decline
+	        //strHTML = "<%//=resource.getCodeComboBoxRender("DECREASON","reason1", "","","- - - -", "class='selectSN'")%>";
+	    }else if(statusCode == "ST052") {// "CANREASON"; //cancel
+	        //strHTML = "<%//=resource.getCodeComboBoxRender("CANREASON","reason1", "","","- - - -", "class='selectSN'")%>";
+	    }else{
+			strHTML ="<select id='reason1' name=\"reason1\" class=\"selectSN\"><option value=''>- None -</option></select>";
+	    }
+	
+	    //$("td_reason").innerHTML = strHTML;
+	    if($j('[name=soDetailType1]').val() == 'DET002' || $j('[name=soDetailType1]').val() == 'DET003'){
+	    	return;
+	    }
+		$('reason1').length=1;//ì´ê¸°í
+		if(statusCode=='ALL') return;
+		reason1_CodeGroupSearch();
+	}
+}
+
+/* reason code group. */
+function reason1_CodeGroupSearch() {
+
+	$('frmReason').cmd.value = 'CICCodeSearchCmd';
+	$('frmReason').CODE_GROUP.value = '';
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		var upperGroup = getDetailTypeGroup($j('[name=soDetailType1]').val());
+		$('frmReason').UPPER_GROUP.value = upperGroup;
+		$('frmReason').CODE_GROUP.value = 'RMASTATUS';
+	}else{
+		$('frmReason').UPPER_GROUP .value = 'TRSTATUS';	
+	}
+	$('frmReason').UPPER_VALUE .value = $('status1').value;
+
+	AjaxRequest(urlPatternGZIP,'frmReason', setReason1_CodeCombo);
+}
+function setReason1_CodeCombo(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	/** Select ë°ì¤ ID */
+	var selectObj = $('reason1');
+
+	var length = jsonObjC.EtCodeInfo.length;//alert(length);
+	//if (jsonObjC.success) {
+	for (var i=0; i < length; i++) {
+		var obj = jsonObjC.EtCodeInfo[i];
+		jcode = obj.CODE_VALUE;
+		jtitle = obj.CODE_TEXT;
+
+		var newOption = document.createElement('option');
+		newOption.appendChild(document.
+				createTextNode(jtitle+"["+jcode+"]" ) );//+"["+jcode+"]"
+		newOption.setAttribute("value", jcode);
+		selectObj.appendChild(newOption);
+	}
+	//}
+}
+
+/* local product code group. */
+function localProdGroupSearch() {
+	$('frmStatus').cmd.value = 'LocalProductGroupCmd';
+	AjaxRequest(urlPatternGZIP,'frmStatus', setLocalProdGroup);
+}
+function setLocalProdGroup(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	/** Select ë°ì¤ ID */
+	var selectObj = $('LOCAL_PRODUCT');
+
+	var length = jsonObjC.etInfoList.length;
+	//if (jsonObjC.success) {
+	for (var i=0; i < length; i++) {
+		var obj = jsonObjC.etInfoList[i];
+		jcode = obj.LOCAL_PROD_GRP;
+		jtitle = obj.LOCAL_PROD_GRP_DESC;
+
+		var newOption = document.createElement('option');
+		newOption.appendChild(document.
+				createTextNode(jtitle+"    ["+jcode+"]" ) );//+"["+jcode+"]"
+		newOption.setAttribute("value", jcode);
+		selectObj.appendChild(newOption);
+	}
+	//}
+}
+
+/* status code group. */
+function statusCodeGroupSearch(codeGroup) {
+	$('status2').length=1;//ì´ê¸°í
+
+	$('frmStatus').cmd.value = 'CICCodeSearchCmd';
+
+	//china version intergration 2016/07/14 pcs73.
+	if(codeGroup == null) codeGroup = "TRSTATUS";
+	$('frmStatus').CODE_GROUP .value = codeGroup;
+
+	AjaxRequest(urlPatternGZIP,'frmStatus', setStatusCodeCombo);
+}
+function setStatusCodeCombo(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	/** Select ë°ì¤ ID */
+	var selectObj = $('status2');
+
+	var length = jsonObjC.EtCodeInfo.length;
+	if (jsonObjC.success) {
+		for (var i=0; i < length; i++) {
+			var obj = jsonObjC.EtCodeInfo[i];
+			jcode = obj.CODE_VALUE;
+			jtitle = obj.CODE_TEXT;
+
+			var newOption = document.createElement('option');
+			newOption.appendChild(document.
+					createTextNode(jtitle+"["+jcode+"]" ) );//+"["+jcode+"]"
+			newOption.setAttribute("value", jcode);
+			selectObj.appendChild(newOption);
+		}
+	}
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		//Detail Type: REPAIR 가 아닌 경우만 카피...
+		if($j('[name=soDetailType1]').val()!='' && $j('[name=soDetailType1]').val()!='DET001'){			
+			$j('#status2 option').clone().appendTo('#status1');
+		}
+		reasonCodeGroupSearch();		
+	}else{
+		if(inputRestored) {
+			loadComplete=true;
+			//loadCondition();
+			if(selectObj.value!='')reasonCodeGroupSearch();
+		}	
+	}
+}
+
+/* reason code group. */
+function reasonCodeGroupSearch() {
+	$('reason2').length=1;//ì´ê¸°í
+	if($('status2').value =="") return;
+	
+	$('frmReason').cmd.value = 'CICCodeSearchCmd';
+	$('frmReason').CODE_GROUP .value = '';
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		var upperGroup = getDetailTypeGroup($j('[name=soDetailType2]').val());
+		$('frmReason').UPPER_GROUP .value = upperGroup;
+	}else{
+		$('frmReason').UPPER_GROUP .value = 'TRSTATUS';	
+	}
+	$('frmReason').UPPER_VALUE .value = $('status2').value;
+
+	AjaxRequest(urlPatternGZIP,'frmReason', setReasonCodeCombo);
+}
+function setReasonCodeCombo(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	/** Select ë°ì¤ ID */
+	var selectObj = $('reason2');
+    $('reason2').length=1;//ì´ê¸°í
+
+	var length = jsonObjC.EtCodeInfo.length;//alert(length);
+	//if (jsonObjC.success) {
+	for (var i=0; i < length; i++) {
+		var obj = jsonObjC.EtCodeInfo[i];
+		jcode = obj.CODE_VALUE;
+		jtitle = obj.CODE_TEXT;
+
+		var newOption = document.createElement('option');
+		newOption.appendChild(document.
+				createTextNode(jtitle+"["+jcode+"]" ) );//+"["+jcode+"]"
+		newOption.setAttribute("value", jcode);
+		selectObj.appendChild(newOption);
+	}
+	//}
+}
+
+/* service level */
+function svcLevelSearch() {
+	$('ZSVC_LEVEL').length=1;
+	
+	$('frmStatus').cmd.value = 'CICCodeSearchCmd';
+	$('frmStatus').CODE_GROUP.value = 'SLA_CODE';
+
+	AjaxRequest(urlPatternGZIP,'frmStatus', setSvcLevelCodeCombo);
+}
+function setSvcLevelCodeCombo(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	var selectObj = $('ZSVC_LEVEL');
+    $('ZSVC_LEVEL').length=1;
+    
+	var length = jsonObjC.EtCodeInfo.length;//alert(length);
+	//if (jsonObjC.success) {
+	for (var i=0; i < length; i++) {
+		var obj = jsonObjC.EtCodeInfo[i];
+		jcode = obj.CODE_VALUE;
+		jtitle = obj.CODE_TEXT;
+
+		var newOption = document.createElement('option');
+		newOption.appendChild(document.createTextNode(jtitle+"["+jcode+"]" ) );//+"["+jcode+"]"
+		newOption.setAttribute("value", jcode);
+		selectObj.appendChild(newOption);
+	}
+	//}
+}
+
+function setReason2(){
+	var statusCode = $("status2").value;
+    
+	if (_l.r.AscDepotUser && (statusCode == "ST030" || statusCode == "ST034")) {	//ASC Depot User ì´ê³  Pending ëë , Ready for shipping.ì´ë©´
+		$("td_reason2").innerHTML = _l.r.c.DEPOT_REASON2;
+	} else {
+    	reasonCodeGroupSearch();
+    }
+}
+
+function download(){
+    if(!gridDrawExcel()) return;
+    $j("#ReportDisplay").val( $j("<div>")
+            .append($j("#ReportTable").eq(0).clone()).html());
+    $("excelForm").excelFileName.value = "ServiceOrderList_" + _l.today;
+    $("excelForm").submit();
+}
+
+
+function changeASC(){
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		if(isNewChina){
+			checkSoFlag();
+		}
+	}else{
+		collectionPointSearch();
+		
+		if($('VANID').style.display == '')
+			getVanId();
+	}	
+	getEngineerList();
+}
+
+
+function getEngineerList(){
+	var branchCode = $('asc_code').value;
+	$('engineer').length=1;//ì´ê¸°í
+
+	//C310의 경우 EngineerSearchD3Cmd[RFC] 호출
+	if(_l.u.c_SEA == "C310"){
+		$('searchFormE').cmd.value = 'EngineerSearchD3Cmd';
+	}else if (branchCode == ''){
+		return;
+	}else{
+		$('searchFormE').cmd.value = 'EngineerSearchCmd';
+	}
+	 
+	$('searchFormE').ascCode.value = branchCode;
+	AjaxRequest(urlPatternGZIP+'?IV_F4_FLAG=X','searchFormE', setEngineerList);		
+}
+/**
+ * collection point list.
+ */
+function collectionPointSearch() {
+	$('cc_code').focus();
+	$('cc_code').length=1;//ì´ê¸°í
+	//$('cc_code').innerHTML='';//ì´ê¸°í
+	if ($('asc_code').value == '') {
+		return;
+	}
+	/**
+	 * íë¡ê·¸ëë°ë¥¼ ì§íìí¨ë¤.
+	 */
+	//$('pagingProcess').startWaiting();
+
+	$('searchFormC').cmd.value = 'collectPntListCmd';
+	$('searchFormC').ascCode .value = $('asc_code').value;
+	$('searchFormC').assignedFlag .value = 'X';//collection point list ëì
+
+	AjaxRequest(urlPatternGZIP+'?IV_F4_FLAG=X','searchFormC', setCollectPointCombo);	
+}
+function setCollectPointCombo(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	/** Select ë°ì¤ ID */
+	var selectObj = $('cc_code');
+
+	/** ì ì²´ìµìì ë§¨ ìë¨ì ìì¹ ìí¨ë¤.
+	var firstOption = document.createElement('option');
+	firstOption.appendChild(document.createTextNode("- - - -"));
+	firstOption.setAttribute("value", jcode);
+	selectObj.appendChild(firstOption); */
+
+	var length = jsonObjC.etCCInfoList.length;
+	if (jsonObjC.success) {
+		for (var i=0; i < length; i++) {
+			var obj = jsonObjC.etCCInfoList[i];
+			jcode = obj.SHOP_CODE;
+			jtitle = obj.SHOP_NAME;
+
+			var newOption = document.createElement('option');
+			newOption.appendChild(document.
+					createTextNode(jcode + " - [" + jtitle + "]"));
+			newOption.setAttribute("value", jcode);
+			selectObj.appendChild(newOption);
+		}
+	}
+}
+
+function setEngineerList(response){
+	var jsonObjC = eval('('+response.responseText+')');
+	var jcode = "";
+	var jtitle = "";
+
+	/** Select ë°ì¤ ID */
+	var selectObj = $('engineer');
+	
+	// Engineer Not Assigned 추가
+	if(_l.u.c_SEA == "C310"){
+		var notAssigned = document.createElement('option');
+		notAssigned.appendChild(document.createTextNode('-- Engineer Not Assigned --'));
+		notAssigned.setAttribute("value", 'NONE');
+		selectObj.appendChild(notAssigned);
+	}
+
+	var length = jsonObjC.EtEngineerInfo.length;
+	if (jsonObjC.success) {
+		for (var i=0; i < length; i++) {
+			var obj = jsonObjC.EtEngineerInfo[i];
+			jcode = obj.ENGINEER;
+			jtitle = obj.ENGINEER + " | " + obj.ASC_ENGINEER + " | " + obj.ENGINEER_NAME ;
+
+			var newOption = document.createElement('option');
+			newOption.appendChild(document.createTextNode(jtitle));
+			newOption.setAttribute("value", jcode);
+			selectObj.appendChild(newOption);
+		}
+	}
+}
+
+function searchOrderNo(){
+	if ($('old_service_order_no').value.strip() == '') return;
+
+	$('searchFormD').cmd.value = 'SvcOrdNoSearchCmd';
+	$('searchFormD').IV_OBJECT_ID.value = $('old_service_order_no').value;
+	AjaxRequest(urlPatternGZIP,'searchFormD', setOrderNo);
+	$('progressloading').startWaiting();
+}
+function setOrderNo(response){
+    $('progressloading').stopWaiting();
+	var jsonObjC = eval('('+response.responseText+')');
+    if (jsonObjC.error) {
+        cfExceptionPop(jsonObjC);
+        return;
+    }
+    if (jsonObjC.success) {
+        $('service_order_no').value = jsonObjC.EV_OBJECT_ID;
+    } else {
+        alert(jsonObjC.returnMessage);
+    }
+}
+
+
+
+
+function checkValidDate(obj){
+    if(obj.value=="") return false;
+    if( !checkDate(obj.value, _l.u.DateFormat) ){
+        alert(_l.r.m.CHK_DATE);
+        return false;
+    } else return true;
+}
+
+function checkReqDt(obj){
+
+    if( !checkValidDate(obj) ) { obj.select(); return;}
+
+    var frdt=$('req_date_from1').value;
+    var todt=$('req_date_to1').value;
+    if( frdt !="" && todt!="" )
+        checkReqDtInteval();
+}
+function checkReqDtInteval(){
+
+    if( !checkValidDate($('req_date_from1')) ) {$('req_date_from1').select();return false;}
+    if( !checkValidDate($('req_date_to1')) )   {$('req_date_to1')  .select();return false;}
+
+    var format=_l.u.DateFormat;
+    var frdt=$('req_date_from1').value;
+    var todt=$('req_date_to1').value;	
+	var maxdate ;
+	
+	if(_l.u.c == "C550" || _l.u.c == "C820"){ //SIEL & SEDA Brasil
+		maxdate = 10;
+	}else if(_l.u.c == "C310"){
+		maxdate = 61;
+	}else {
+		maxdate = 31;
+	}
+
+    if(cfGetDateDiff(cfGetDate(frdt, format), cfGetDate(todt, format))>maxdate){
+        alert("Adjust search condition : Request Date must be shorter than "+maxdate+" days");
+        $('req_date_from1').focus();
+        return false;
+    }
+    return true;
+}
+function checkNullSvc(obj, msg){
+    if(obj.value.strip() == ""){//strip = trim -- prototype.js
+        alert(msg);
+        obj.focus();
+        return false;
+    }
+    return true;
+}
+
+function setCondition(){
+	parent.svcInput={};
+	parent.svcInput.searchOption=searchOption;
+
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+
+		$j('#tablemain01 input[type=text],#tablemain01 select').each(function() {
+			parent.svcInput[this.name] = this.value;
+		});
+		
+		$j('#tablemain02 input[type=text],#tablemain02 select').each(function() {
+			parent.svcInput[this.name] = this.value;
+		});
+
+		$j('#table01 input[type=text],#table01 select').each(function() {
+			parent.svcInput[this.name] = this.value;
+		});
+		$j('#table02 input[type=text],#table02 select').each(function() {
+			parent.svcInput[this.name] = this.value;
+		});
+		
+		$j('#table03 input, #table03 select').each(function() {
+			parent.svcInput[this.name] = this.value;
+		});
+		//Mobile Flag Set
+		$j('#table01 input[type=checkbox]').each(function() {
+			if($j(this).is(':checked')){
+				parent.svcInput[this.name] = this.value;			
+			}
+		});	
+		$j('#table02 input[type=checkbox]').each(function() {
+			if($j(this).is(':checked')){
+				parent.svcInput[this.name] = this.value;			
+			}			
+		});			
+		
+	}else{//if(isChinaRegion){
+		
+	parent.svcInput.asc_code=$('asc_code').value;
+	parent.svcInput.cc_code=$('cc_code').value;
+	parent.svcInput.status1=$('status1').value;
+	//parent.svcInput.reason1=$('reason1').value;
+	parent.svcInput.status2=$('status2').value;
+	//parent.svcInput.reason2=$('reason2').value;
+	parent.svcInput.req_date_from1=$('req_date_from1').value;
+	parent.svcInput.req_date_to1  =$('req_date_to1').value;
+	parent.svcInput.service_type=$('service_type').value;
+	parent.svcInput.model  =$('model').value;
+	parent.svcInput.serial_no  =$('serial_no').value;
+
+	//parent.svcInput.CONSUMER=$('CONSUMER').value;
+	parent.svcInput.appt_date_from=$('appt_date_from').value;
+	parent.svcInput.appt_date_to  =$('appt_date_to').value;
+	parent.svcInput.voc_flag=$('voc_flag').value;
+	parent.svcInput.b2b_flag=$('b2b_flag').value;
+	//parent.svcInput.product=$('product').value;
+	parent.svcInput.wty_flag=$('wty_flag').value;
+	parent.svcInput.wty_type=$('wty_type').value;
+	parent.svcInput.high_risk_flag=$('high_risk_flag').value;
+	parent.svcInput.OBJECT_ID_FROM=$('OBJECT_ID_FROM').value;
+	parent.svcInput.OBJECT_ID_TO  =$('OBJECT_ID_TO').value;
+
+	
+	parent.svcInput.dateType_from  = $j('#dateType_from').val();
+	parent.svcInput.dateType_to    = $j('#dateType_to').val();
+	parent.svcInput.SODETAILTYPE   = $j('#SODETAILTYPE').val();
+	
+	parent.svcInput.service_order_no   = $j('#service_order_no').val();
+	
+	try{
+		parent.svcInput.billing_flag  =$('billing_flag').value;
+		parent.svcInput.cust_return_dt_flag  =$('cust_return_dt_flag').value;
+	}catch(e){}
+	
+	}//if(isChinaRegion){
+}
+var inputRestored=false;
+var loadComplete=false;
+var searchFlag=false;
+function loadCondition(){
+
+	if(!parent.svcInput) return;
+	inputRestored=true;
+	searchOption = parent.svcInput.searchOption; 
+	setTab(searchOption);
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		
+		$j('#tablemain01 input[type=text],#tablemain01 select').each(function() {
+			$j(this).val(parent.svcInput[this.name]);
+		});
+		
+		$j('#tablemain02 input[type=text],#tablemain02 select').each(function() {
+			$j(this).val(parent.svcInput[this.name]);
+		});
+
+		$j('#table01 input[type=text],#table01 select').each(function() {
+			$j(this).val(parent.svcInput[this.name]);
+		});
+		$j('#table02 input[type=text],#table02 select').each(function() {
+			$j(this).val(parent.svcInput[this.name]);
+		});
+		//Mobile Flag Load
+		$j('#table01 input[type=checkbox]').each(function() {
+			if(parent.svcInput[this.name]){
+				$j(this).attr("checked", true);							
+			}							
+		});
+		$j('#table02 input[type=checkbox]').each(function() {
+			if(parent.svcInput[this.name]){
+				$j(this).attr("checked", true);							
+			}
+		});
+		
+		//상세조건 입력하고 조회한 경우 리스트로 돌아올때 테이블 영역을 보여준다...
+		var detailCondInput = false;
+		$j('#table03 input, #table03 select').each(function() {
+			$j(this).val(parent.svcInput[this.name]);
+			if(this.value !='') detailCondInput = true;
+		});
+		if(detailCondInput) moreOpenid(1);		
+		
+	}else{//if(isChinaRegion){
+		
+	setComboValue($('asc_code'),parent.svcInput.asc_code);
+	setComboValue($('cc_code'),parent.svcInput.cc_code);
+	setComboValue($('status1'),parent.svcInput.status1);
+	//setComboValue($('reason1'),parent.svcInput.reason1);
+	setComboValue($('status2'),parent.svcInput.status2);
+	//setComboValue($('reason2'),parent.svcInput.reason2);
+	$('req_date_from1').value=parent.svcInput.req_date_from1;
+	$('req_date_to1').value=parent.svcInput.req_date_to1;
+	setComboValue($('service_type'),parent.svcInput.service_type);
+	$('model').value=parent.svcInput.model;
+	$('serial_no').value=parent.svcInput.serial_no;
+
+	//$('CONSUMER').value=parent.svcInput.CONSUMER;
+	$('appt_date_from').value=parent.svcInput.appt_date_from;
+	$('appt_date_to').value=parent.svcInput.appt_date_to;
+	setComboValue($('voc_flag'),parent.svcInput.voc_flag);
+	setComboValue($('b2b_flag'),parent.svcInput.b2b_flag);
+	//setComboValue($('product'),parent.svcInput.product);
+	//engineer..  LOCAL_PRODUCT..
+	setComboValue($('wty_flag'),parent.svcInput.wty_flag);
+	setComboValue($('wty_type'),parent.svcInput.wty_type);
+	setComboValue($('high_risk_flag'),parent.svcInput.high_risk_flag);
+	$('OBJECT_ID_FROM').value=parent.svcInput.OBJECT_ID_FROM;
+	$('OBJECT_ID_TO').value=parent.svcInput.OBJECT_ID_TO;
+
+	if(_l.u.c == "C370"){
+		$j('#dateType_from').val( parent.svcInput.dateType_from );
+		$j('#dateType_to').val( parent.svcInput.dateType_to );
+		$j('#SODETAILTYPE'+searchOption).val( parent.svcInput.SODETAILTYPE ) ;
+		
+	}
+	
+	$j('#service_order_no').val(parent.svcInput.service_order_no);
+	
+	try{
+		setComboValue($('billing_flag'),parent.svcInput.billing_flag);
+		setComboValue($('cust_return_dt_flag'),parent.svcInput.cust_return_dt_flag);
+	}catch(e){}
+
+	
+	}//if(isChinaRegion){
+	
+	//china version intergration 2016/07/14 pcs73.
+	//중국은 아래의 displaySearch() 호출안함..
+	if(isChinaRegion){
+		return;
+	}
+	
+	if(searchFlag){
+		if(parent.svcInput.service_order_no == ""){
+			if(searchOption==1){
+				displaySearch(0,0);
+			}else if(searchOption==2){
+				if(loadComplete) displaySearch(0,0);
+			}
+		}else{
+			$j('#service_order_no').val(parent.svcInput.service_order_no);
+			serviceOrderDetailSearch();
+		}
+	}
+}
+
+function setComboValue(selectObj,def){
+    for (var i=0; i<selectObj.length; i++){
+        if(def==selectObj[i].value){
+            selectObj[i].selected=true;
+            break;
+        }
+    }
+}
+
+/**
+ * Json Object(ê·¸ë¦¬ë ë°ì´í°) ê°ì²´
+ */
+var jsonObj = null;
+/**
+ * íë©´ ê²ì ë©ìë
+ */
+function displaySearch(currPage, currBlock) {
+	
+	if(searchOption==1){
+        $('status').value=$('status1').value;
+        $('reason').value=$('reason1').value;
+        $('req_date_from').value="";
+        $('req_date_to').value="";
+        
+        if(_l.u.c == "C370"){
+        	$('soDetailType').value=$('soDetailType1').value;
+        	if($('soDetailType').value == "DET002"){
+        		var dateType_from = $j("#dateType_from").val();
+            	var dateType_to = $j("#dateType_to").val();
+            	
+        		$j("#req_date_from").val(dateType_from);
+            	$j("#req_date_to").val(dateType_to);
+            	
+            	if(!checkNullSvc($('dateType_from'), _l.r.m.MAND_XVALUE_00699 ) ){return}
+            	if(!checkNullSvc($('dateType_to'), _l.r.m.MAND_XVALUE_00699 ) ){return}
+            	
+            	if(!checkDateInteval()) {
+            		return;
+            	}   
+        	}
+        }
+        if(_l.u.c == "C310" && $('status').value == "ST035"){
+        	$j("#req_date_from").val(_l.oneMonthAgoDate);
+        	$j("#req_date_to").val(_l.today);
+        }
+        //china version intergration 2016/07/14 pcs73.
+        if(isChinaRegion){
+        	$('soDetailType').value=$('soDetailType1').value;
+        	if($j('#MOBILE_FLAG1').is(':checked')){
+		        $('MOBILE_FLAG').value = $('MOBILE_FLAG1').value;
+	        }
+        }//if(isChinaRegion){
+    }else {
+        $('status').value=$('status2').value;
+        $('reason').value=$('reason2').value;
+
+    	$('req_date_from').value =$('req_date_from1').value;
+    	$('req_date_to').value   =$('req_date_to1').value;
+    	
+    	if(!checkNullSvc($('req_date_from1'), _l.r.m.MAND_XVALUE_00699) ){return}
+    	if(!checkNullSvc($('req_date_to1'), _l.r.m.MAND_XVALUE_00699) ){return}
+    	
+    	if(!checkReqDtInteval()) {
+    		return;
+    	}
+    	if(_l.u.c == "C370"){
+    		$('soDetailType').value=$('soDetailType2').value;
+    	}
+        //china version intergration 2016/07/14 pcs73.
+        if(isChinaRegion){
+        	$('soDetailType').value=$('soDetailType2').value;
+        	if($j('#MOBILE_FLAG2').is(':checked')){
+		        $('MOBILE_FLAG').value = $('MOBILE_FLAG2').value;
+	        }
+        }//if(isChinaRegion){
+    }
+    
+    
+    /*
+    * if serial is not empty, model have to exist
+    */
+    if(!checkModelSerial()) {
+        return;
+    }    
+    
+	searchPageNo = currPage;
+	searchBlckNo = currBlock;
+	
+    /** TBody  ê°ì²´ ID */
+    var tbodyObj = $('searchContentTableBody');
+    /** ì´ì  Grid ê°ì²´ì ë¸ëê° ìë ê²½ì° ìë¡ ê°±ì íê¸° ìí´ ì­ì íë¤. */
+    clearGridJsonObject(tbodyObj);
+    $('datacnt').innerHTML='';//data count display.
+
+    if(_l.useDynatrace) {
+    	dtAction = dynaTrace.enterAction('SOListSearch();'+_l.dtADKCode, 'Click SOListSearch');
+    }
+    
+    if($j("#SUB_SVC_TYPE3").length && $j("#SUB_SVC_TYPE3").val() != ""){
+    	$j("#SUB_SVC_TYPE").append("<option value='" + $('SUB_SVC_TYPE3').value + "' selected>");
+    }
+    
+    //china version intergration 2016/07/14 pcs73.
+    if(isChinaRegion){
+		// 이전 설치관련 노트가 있는 경우 삭제
+	    if($j("[name=toggle]").length > 0){
+			$j("[name=toggle]").parent().remove();        	
+	    }			
+		$j("#installPrintTd").hide();
+    }//if(isChinaRegion){
+	/**
+	 * íë¡ê·¸ëë°ë¥¼ ì§íìí¨ë¤.
+	 */
+	$('progressloading').startWaiting();
+
+	$('searchFormMain').cmd.value = 'SvcOrderArkListCmd';
+
+	AjaxRequest(urlPatternGZIP,'searchFormMain', setGridJsonObject);
+	setCondition();
+}
+//china version intergration 2016/07/14 pcs73.
+function displaySummary(currPage, currBlock){
+	
+	searchPageNo = currPage;
+	searchBlckNo = currBlock;
+
+    /** TBody  객체 ID */
+    var tbodyObj = $('searchContentTableBody');
+    /** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+    clearGridJsonObject(tbodyObj);
+    $('datacnt').innerHTML='';//data count display.
+    
+	$('progressloading').startWaiting();
+    
+    var length = $j("[name=OBJECT_LIST_ID]").length;
+    for(var i=length-1;i>-1;i--){
+    	if($j("[name=OBJECT_LIST_ID]").eq(i).val().length == 0){
+    		$j("[name=OBJECT_LIST_ID]").eq(i).remove();
+    	}
+    	
+    }	
+    
+	$('summaryForm').cmd.value = 'SvcOrderArkListCmd';
+	
+	AjaxRequest(urlPatternGZIP,'summaryForm', setGridJsonObject);
+	setCondition();
+}
+function checkDateInteval(){
+
+    if( !checkValidDate($('dateType_from')) ) {$('dateType_from').select();return false;}
+    if( !checkValidDate($('dateType_to')) )   {$('dateType_to')  .select();return false;}
+
+    var format=_l.u.DateFormat;
+    var frdt=$('dateType_from').value;
+    var todt=$('dateType_to').value;	
+	
+    var maxdate = 31;
+
+    if(cfGetDateDiff(cfGetDate(frdt, format), cfGetDate(todt, format))>maxdate){
+        alert("Adjust search condition : Request Date must be shorter than "+maxdate+" days");
+        $('req_date_from1').focus();
+        return false;
+    }
+    return true;
+}
+
+
+
+
+
+
+function checkModelSerial(){
+	var isOk = false;
+	var serial = $("searchFormMain").serial_no.value.strip();
+	var model = $("searchFormMain").model.value.strip();
+	
+	if(serial != "" && model == ""){
+		alert(_l.r.m.MAND_XVALUE_00457);
+		$("searchFormMain").model.focus();
+	}else{
+		isOk = true;
+	}
+	
+	return isOk;
+}
+/**
+ * 
+ */
+function setGridJsonObject(response) {//alert(response.responseText);
+    $('progressloading').stopWaiting();
+	try {
+		jsonObj = eval('('+response.responseText+')');
+
+		if (jsonObj.error) {
+			cfExceptionPop(jsonObj);
+			return;
+		}
+		if (jsonObj.success) {
+            //
+            try{
+                parent.jsonGlobalTemp=jsonObj;
+            }catch(e){}
+
+			gridDraw(searchPageNo, searchBlckNo);
+			
+			
+		} else {
+			appendGridNoObjectDisplay('searchContentTableBody', '17',dataNotFoundMsg, 'pagingProcess');
+		}
+	} catch (e) {}
+	finally	{		
+		if(_l.useDynatrace) {
+			dynaTrace.leaveAction(dtAction);
+		}		
+	}
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		colorDraw();
+	}//if(isChinaRegion){
+}
+
+//china version intergration 2016/07/14 pcs73.
+function colorDraw(){
+	
+	if(jsonObj != null){
+	
+		if(jsonObj.etSvcSummary.length > 0){
+	
+			var obj = jsonObj.etSvcSummary[0];
+	
+			$('NO_ENGR_2').update(obj.NO_ENGR_2);			
+			$('NO_ENGR_3').update(obj.NO_ENGR_3); 		
+			$('NO_ENGR_5').update(obj.NO_ENGR_5);
+						
+			$('NO_APPOINT_10').update(obj.NO_APPOINT_10);			
+			$('NO_APPOINT_30').update(obj.NO_APPOINT_30); 			 
+			$('NO_APPOINT_60').update(obj.NO_APPOINT_60); 
+			 			
+			$('NO_COMP_1').update(obj.NO_COMP_1);			
+			$('NO_COMP_3').update(obj.NO_COMP_3); 			 
+			$('NO_COMP_7').update(obj.NO_COMP_7); 
+			 			
+			$('NO_DELI_1').update(obj.NO_DELI_1); 			 
+			$('NO_DELI_3').update(obj.NO_DELI_3); 			 
+			$('NO_DELI_5').update(obj.NO_DELI_5); 
+			 			
+			$j("[name=LIST_SUM]").eq(0).val(obj.LIST_ENGR_2);
+			$j("[name=LIST_SUM]").eq(1).val(obj.LIST_ENGR_3);
+			$j("[name=LIST_SUM]").eq(2).val(obj.LIST_ENGR_5);
+			$j("[name=LIST_SUM]").eq(3).val(obj.LIST_APPOINT_10);
+			$j("[name=LIST_SUM]").eq(4).val(obj.LIST_APPOINT_30);
+			$j("[name=LIST_SUM]").eq(5).val(obj.LIST_APPOINT_60);
+			$j("[name=LIST_SUM]").eq(6).val(obj.LIST_COMP_1);
+			$j("[name=LIST_SUM]").eq(7).val(obj.LIST_COMP_3);
+			$j("[name=LIST_SUM]").eq(8).val(obj.LIST_COMP_7);
+			$j("[name=LIST_SUM]").eq(9).val(obj.LIST_DELI_1);
+			$j("[name=LIST_SUM]").eq(10).val(obj.LIST_DELI_3);
+			$j("[name=LIST_SUM]").eq(11).val(obj.LIST_DELI_5);
+		}else{
+	
+			$('NO_ENGR_2').update("0");			
+			$('NO_ENGR_3').update("0"); 		
+			$('NO_ENGR_5').update("0");
+						
+			$('NO_APPOINT_10').update("0");			
+			$('NO_APPOINT_30').update("0"); 			 
+			$('NO_APPOINT_60').update("0"); 
+			 			
+			$('NO_COMP_1').update("0");			
+			$('NO_COMP_3').update("0"); 			 
+			$('NO_COMP_7').update("0"); 
+			 			
+			$('NO_DELI_1').update("0"); 			 
+			$('NO_DELI_3').update("0"); 			 
+			$('NO_DELI_5').update("0"); 
+			
+			$j("[name=LIST_SUM]").each(function(i){
+				$j(this).val("");
+			});				
+		}
+	}
+}
+
+
+/**
+ * SAP ë°ì´í°ì ê·¸ë¦¬ë ì¶ë ¥ í¨ì.
+ */
+function gridDraw(currPage, currBlock) {
+	if (jsonObj != null) {
+		/** TBody  ê°ì²´ ID */
+		var tbodyObj = $('searchContentTableBody');
+					
+		/*  íë¡ê·¸ëë°ë¥¼ ì§íìí¨ë¤. */
+		//$('pagingProcess').startWaiting();
+		
+		/** ì´ì  Grid ê°ì²´ì ë¸ëê° ìë ê²½ì° ìë¡ ê°±ì íê¸° ìí´ ì­ì íë¤. */
+		clearGridJsonObject(tbodyObj);
+
+		/**
+		 * íì´ì§ : SAP ë°ì´í°ë¥¼ ê·¸ë¦¬ëì íì´ì§ ì²ë¦¬ë¥¼ ìí ìì ë°ì´í°ì ë§ì§ë§ ë°ì´í°ì ì²ë¦¬í¨ìí¸ì¶.
+		 */
+		searchPageNo = currPage;
+		searchBlckNo = currBlock;
+		setDisplayRow();
+		
+
+		/**
+		 * DAOê²°ê³¼ë¥¼ íë©´ì ì¶ë ¥
+		 */
+		var tdTag = null;
+		var aTag = null;
+		var length = jsonObj.etSvcInfo.length;
+		
+		//검색 결과가 한개이고 Update 화면에서 List버튼으로 오지 않았을경우 바로 수정화면으로 전환, //exchange/refund ticket : DET002,003 / exclude SEA Walk in Service
+		var onlyOneObj = jsonObj.etSvcInfo[0];
+		if(length==1 && _l.fromListButton!='Y' && _l.u.c_SEA == "C310" && _l.dataChange != "X"){
+			svcOrderLinkLiteEdit(onlyOneObj.service_order_no);
+			return;			
+		}else{	
+			_l.fromListButton = '';
+			_l.dataChange="";
+		}
+		
+		totRow = length;  
+        $('datacnt').innerHTML=length;//data count display.
+		for (var i = displayBeginRow; i < length; i++) {
+			
+			/** paging : ë§ì§ë§ ì¶ë ¥ ë°ì´í° ì¬ë¶ */
+			if (i >= displayFinishRow) {
+				break;
+			}
+        
+			/**
+			 * SAPê²°ê³¼ë¥¼ íë©´ì ì¶ë ¥
+			 */
+			var obj = jsonObj.etSvcInfo[i];
+        
+			var tdAtt = {};
+        	if (i % 2 == 1) tdAtt = {'style' : 'background-color : #F4F4F4'};
+			
+        	var style = obj.status;
+        		
+        	if (obj.WARRANTY_STATUS) style = 'ST055';
+        	
+			var trTag = document.createElement("tr");
+
+			/** NO */
+			tdTag = new Element("td", tdAtt);
+			tdTag.rowSpan = "2";
+			tdTag.className = "td_ac";
+			tdTag.addClassName(style);
+			tdTag.appendChild(document.createTextNode(i+1));
+			trTag.appendChild(tdTag);
+
+			/** Service Order No */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_al";
+			
+			if(_l.u.c == "C550"){ //SIEL %>
+				var checkBox= new Element("input", {'type':'checkBox','name':'print_id','id':'print_id','value':obj.service_order_no});
+				tdTag.appendChild(checkBox);
+				tdTag.appendChild(document.createTextNode(' '));
+			}
+			//aTag = document.createElement("a");
+			//aTag.href='javascript:svcOrderLink("'+obj.service_order_no+'")';//'javascript:void(0)';
+			//aTag.appendChild(document.createTextNode(obj.service_order_no));
+			
+			
+			
+			
+			if(_l.u.c_SEA == "C310"){
+				tdTag.insert("<a href=javascript:svcOrderLinkLitePop('"+obj.service_order_no+"')>" + obj.service_order_no + "</a>&nbsp;&nbsp;");
+			}else{
+				tdTag.insert("<a href=javascript:svcOrderLinkLite('"+obj.service_order_no+"')>" + obj.service_order_no + "</a>&nbsp;&nbsp;");
+			}
+			
+			if(isChinaRegion || ( (obj.detail_type != "DET002" || _l.u.c == "C370") && obj.detail_type != "DET003")){//exchange/refund ticket : DET002,003 / exclude SEA Walk in Service
+				tdTag.insert("<a href=javascript:svcOrderLinkLiteEdit('"+obj.service_order_no+"')>"+_l.r.c.EDIT+"</a>");
+			}
+									
+			//tdTag.appendChild(aTag);
+			trTag.appendChild(tdTag);
+
+			
+			/** asc_job_no */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. asc_job_no));
+			trTag.appendChild(tdTag);
+			if(_l.u.c == "C310"){
+				/** Posting */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. posting_date));
+				trTag.appendChild(tdTag);				
+				/** Call Received Date */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CALL_RCV_DT));
+				trTag.appendChild(tdTag);				
+				/** Call Received Time */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CALL_RCV_TM));
+				trTag.appendChild(tdTag);								
+			}else{			
+				/** Created */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. request_date));
+				trTag.appendChild(tdTag);
+				/** Assigned */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				if(obj.otbFlag == "X"){
+					tdTag.addClassName("ST030");
+				}
+				tdTag.appendChild(document.createTextNode(obj. assigned_date));
+				trTag.appendChild(tdTag);
+				
+				/** Assigned Time*/
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. assigned_time));
+				trTag.appendChild(tdTag);
+			}
+			//china version intergration 2016/07/14 pcs73.
+			if(isChinaRegion){
+				/** COMPLETE_DT(완료일) */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.COMPLETE_DT));
+				trTag.appendChild(tdTag);
+			}//if(isChinaRegion){
+
+			/** Model */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. model));
+			trTag.appendChild(tdTag);
+
+			/** Serial No */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. serial_no));
+			trTag.appendChild(tdTag);
+
+			/** Wty */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. wty_type));
+			trTag.appendChild(tdTag);
+			/** VOC */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. voc_flag));
+			trTag.appendChild(tdTag);
+			
+			/** REDO */
+			tdTag = new Element("td", tdAtt);
+			if(!(isChinaRegion || _l.u.c == "C9E0" || _l.u.c == "C941" || loginUserCorpCode == "C310")){		// SRSC 법인 통합  		
+				tdTag.rowSpan = "2";
+			}
+			tdTag.className = "td_ac";
+			if(_l.u.c == "C550"){ //SIEL C550%>
+			   if(obj. redo_flag =='Y'){
+			  	aTag = document.createElement("a");
+				aTag.href='javascript:svcSerialCheck("'+obj. model+'","'+obj. serial_no+'")';//'javascript:void(0)';
+				aTag.appendChild(document.createTextNode(obj. redo_flag));
+				tdTag.appendChild(aTag);
+				}else{
+				tdTag.appendChild(document.createTextNode(obj. redo_flag));
+				}
+			}else{
+				tdTag.appendChild(document.createTextNode(obj. redo_flag));				
+			}
+			/** Waiting to be confirmed by the subsidiary. */
+			/** [SEA] Shows a color imgae according to the redo grade */
+			/** SEA : redo_grade / ETC : redo_flag */
+			/*
+			if (loginUserCorpCode == 'C310') {
+				if (obj.REDO_GRADE == 'R') {
+					tdTag.appendChild(new Element("img", {"src":"/img/contact_info_darkRed.gif"}));
+				} else if (obj.REDO_GRADE == 'Y') {
+					tdTag.appendChild(new Element("img", {"src":"/img/contact_info_darkYellow.gif"}));
+				} else if (obj.REDO_GRADE == 'G') {
+					tdTag.appendChild(new Element("img", {"src":"/img/contact_info_Green.gif"}));
+				} else {
+					tdTag.appendChild(document.createTextNode(''));
+				}			
+			}
+			else {
+				tdTag.appendChild(document.createTextNode(obj. redo_flag));
+			}
+			*/
+						
+			trTag.appendChild(tdTag);
+
+			//china version intergration 2016/07/14 pcs73.
+			if(isChinaRegion){
+				/** IMEI */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(markIMEI(obj. imei)));
+				trTag.appendChild(tdTag);
+								
+				/** 독촉 */
+				tdTag = new Element("td", tdAtt);
+				tdTag.rowSpan = "2";
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. remind_cnt));
+				trTag.appendChild(tdTag);
+				/** 본점확인 */
+				tdTag = new Element("td", tdAtt);
+				tdTag.rowSpan = "2";
+				tdTag.className = "td_ac";
+				if(isNeeedHqConfirmBranch){
+					tdTag.appendChild(document.createTextNode(obj.hq_conf_flag=='X'?_l.r.c.Y:_l.r.c.NO));
+				}				
+				trTag.appendChild(tdTag);
+			}//if(isChinaRegion){
+			
+			/** Rist Sensing */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			if(obj. risk_grade_desc !=''){
+			tdTag.appendChild(document.createTextNode(obj. sen_dt));
+			}else{
+			tdTag.appendChild(document.createTextNode(''));
+			}
+			trTag.appendChild(tdTag);	
+						
+			if(_l.u.c == "C550"){ 
+			
+				tdTag = new Element("td", tdAtt);
+				tdTag.rowSpan = "2";
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. redFlag));
+				trTag.appendChild(tdTag);
+			} 
+			
+			if(_l.u.c == "C310" || _l.u.c == "C370"){
+				tdTag = new Element("td", tdAtt);
+				if(_l.u.c == "C370"){
+					tdTag.rowSpan = "2";
+				}
+				tdTag.className = "td_ac";
+				tdTag.addClassName(style);
+				tdTag.appendChild(document.createTextNode(obj.TRIAGE_FLAG));
+				trTag.appendChild(tdTag);
+				
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.BUILDER_FLAG));
+				trTag.appendChild(tdTag);
+			}else{
+				tdTag = new Element("td", tdAtt);
+				tdTag.rowSpan = "2";
+				tdTag.className = "td_ac";			    
+				tdTag.appendChild(document.createTextNode(obj.high_risk=='H'?_l.r.c.Y:_l.r.c.N));
+				trTag.appendChild(tdTag);
+			}
+			
+			tbodyObj.appendChild(trTag);
+
+			trTag = document.createElement("tr");
+
+
+			if(_l.u.c == "C4A0"){ //Italy SEI 
+			/** Customer Name */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj. customer_name));
+			trTag.appendChild(tdTag);
+			
+			/** Data Origin */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.call_category));
+			trTag.appendChild(tdTag);
+
+			}else if(loginUserCorpCode == "C310"){ //USA SEa
+
+			/** Customer Name */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj. customer_name));
+			trTag.appendChild(tdTag);
+			
+			/** asc code */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.ASC_CODE));
+			trTag.appendChild(tdTag);							
+
+			}else if(isChinaRegion){ //if(isChinaRegion){
+				//china version intergration 2016/07/14 pcs73.
+				/** Customer grade */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(obj. customer_grade));
+				trTag.appendChild(tdTag);
+				
+				/** cust name */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.customer_name));
+				trTag.appendChild(tdTag);	
+				
+			} else{  
+
+			/** Customer Name */
+			tdTag = new Element("td", tdAtt);
+			tdTag.colSpan = "2";
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj. customer_name));
+			trTag.appendChild(tdTag);
+
+			} 
+
+			
+			/** City */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. city_name));
+			trTag.appendChild(tdTag);
+			//china version intergration 2016/07/14 pcs73.
+			if(isChinaRegion){
+				/** CC App Date */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CC_APP_DT));
+				trTag.appendChild(tdTag);
+			}//if(isChinaRegion){
+			
+			if(_l.u.c == "C310"){				
+				/** Preferred Date */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CUST_REQ_DT));
+				trTag.appendChild(tdTag);		
+				
+				/** App Date */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. anticipated_date));
+				trTag.appendChild(tdTag);				
+			}else{
+				/** App Date */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. anticipated_date));
+				trTag.appendChild(tdTag);
+				
+				/** App Time */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. anticipated_time));
+				trTag.appendChild(tdTag);
+			}
+
+			/** Service Type */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. service_type_desc));
+			trTag.appendChild(tdTag);
+
+			/** Status */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.addClassName(style);
+			tdTag.appendChild(document.createTextNode(obj. status_desc));
+			trTag.appendChild(tdTag);
+
+			/** Reason */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.addClassName(style);
+			tdTag.appendChild(document.createTextNode(obj. reason_desc));
+			trTag.appendChild(tdTag);
+
+			/** B2B */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			if(isChinaRegion){
+				tdTag.appendChild(document.createTextNode(obj.b2b_svc=='Y'?_l.r.c.Y:''));				
+			}else{
+				tdTag.appendChild(document.createTextNode(obj.b2b_svc=='Y'?'Y':''));
+			}
+			trTag.appendChild(tdTag);
+			
+			//china version intergration 2016/07/14 pcs73.
+			if(isChinaRegion){
+				/** Risk Grade */
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.risk_grade));
+				trTag.appendChild(tdTag);
+				
+				/** Detail Type */
+				tdTag = new Element("td", tdAtt);				
+				tdTag.className = "td_ac";
+				for(var k=0;k< _l.aryDetailType.length;k++){
+					if(_l.aryDetailType[k].codeId == obj. detail_type){
+						tdTag.appendChild(document.createTextNode(_l.aryDetailType[k].codeName));
+						break;
+					}
+				}
+				trTag.appendChild(tdTag);
+			}//if(isChinaRegion){
+			
+			
+			if(_l.u.c == "C9E0" || _l.u.c == "C941" || _l.u.c == "C310" || _l.u.c == "C370"){   
+			/** VIP */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.SVC_LEVEL));
+			trTag.appendChild(tdTag);
+			}
+
+			/** Rist Sensing */
+			tdTag = new Element("td", tdAtt);
+			tdTag.className = "td_ac";
+			if(obj. risk_grade_desc !=''){
+			tdTag.appendChild(document.createTextNode(obj. risk_name+' - '+obj. risk_grade_desc));
+			}else{
+			tdTag.appendChild(document.createTextNode(''));
+			}
+			trTag.appendChild(tdTag);
+			
+			if(_l.u.c == "C310"){
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";			    
+				tdTag.appendChild(document.createTextNode(obj.NOCOOL_FLAG));
+				trTag.appendChild(tdTag);
+				
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";			    
+				tdTag.appendChild(document.createTextNode(obj.high_risk=='H'?_l.r.c.Y:_l.r.c.N));
+				trTag.appendChild(tdTag);
+			}
+			
+			if(_l.u.c == "C370"){
+				tdTag = new Element("td", tdAtt);
+				tdTag.className = "td_ac";			    
+				tdTag.appendChild(document.createTextNode(obj.high_risk=='H'?_l.r.c.Y:_l.r.c.N));
+				trTag.appendChild(tdTag);
+			}
+			
+			//china version intergration 2016/07/14 pcs73.
+			if(isChinaRegion){
+				var hidInput = new Element("input",{"type":"hidden","id":"hidcustomer_name","name":"hidcustomer_name","value": obj.customer_name});
+				trTag.appendChild(hidInput);
+				hidInput = new Element("input",{"type":"hidden","id":"hidserial_no","name":"hidserial_no","value": obj.serial_no});
+				trTag.appendChild(hidInput);
+				hidInput = new Element("input",{"type":"hidden","id":"hidmodel","name":"hidmodel","value": obj.model});
+				trTag.appendChild(hidInput);			
+			}//if(isChinaRegion){
+			
+			tbodyObj.appendChild(trTag);
+		}
+
+		if (length == 0) {
+			appendGridNoObjectDisplay('searchContentTableBody', '17',dataNotFoundMsg);
+		}
+		
+		loadingComplete(searchPageNo, searchBlckNo, totRow, 'gridDraw', 'SAP');
+	
+		/**
+		* after searching, the user have to move the cursor to see the result, because the search condition is lot of
+		* therefor, automatically move the screen to "search result panal"
+		*/
+		document.location.href="#searchResult";
+		
+		
+		//china version intergration 2016/07/14 pcs73.
+		if(isChinaRegion){
+			//서비스타입이 'II'(설치건)일때 프린트&체크박스 보이기
+			if(length > 0 && $j("#service_type").val() == "II"){
+				if($j('[name=installChkTD]')){					
+					$j('[name=installChkTD]').remove();
+				}
+				$j("#installPrintTd").show();				
+				$j("#searchContentTableHead").prepend("<td rowspan=\"2\" name=\"installChkTD\" class=\"tb_ti\"><input type=\"checkbox\" id=\"toggle\" name=\"toggle\" onClick=\"javascript:cfSelectDeselectAll('toggle','chk')\" /></td>");				
+				$j("#searchContentTableBody tr:even").each(function(i){
+					$j(this).prepend("<td rowspan=\"2\" class=\"td_ac\"><input type=\"checkbox\" id=\"chk\" name=\"chk\"/></td>");
+				});
+			}		
+		}//if(isChinaRegion){
+		
+	}
+}
+
+function gridDrawExcel() {
+    if(jsonObj==null)return false;
+    if(jsonObj.etSvcInfo==null)return false;
+	if (jsonObj != null) {
+		/** TBody  ê°ì²´ ID */
+		var tbodyObj = $('reportTableBody');
+		
+		/** ì´ì  Grid ê°ì²´ì ë¸ëê° ìë ê²½ì° ìë¡ ê°±ì íê¸° ìí´ ì­ì íë¤. */
+		clearGridJsonObject(tbodyObj);
+
+		var tdTag = null;
+		var aTag = null;
+		var length = jsonObj.etSvcInfo.length;
+		for (var i = 0; i < length; i++) {
+			var obj = jsonObj.etSvcInfo[i];
+			var trTag = document.createElement("tr");
+
+			/** NO */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(i+1));
+			trTag.appendChild(tdTag);
+
+			/** Service Order No */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj.service_order_no));
+			trTag.appendChild(tdTag);
+
+			/** asc_job_no */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. asc_job_no));
+			trTag.appendChild(tdTag);
+			if(_l.u.c == "C310"){
+				/** Posting */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. posting_date));
+				trTag.appendChild(tdTag);
+				
+				/** Call Received Date */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CALL_RCV_DT));
+				trTag.appendChild(tdTag);
+				
+				/** Call Received Time */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CALL_RCV_TM));
+				trTag.appendChild(tdTag);
+				
+			}else{
+				
+				/** Created */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. request_date));
+				trTag.appendChild(tdTag);
+				
+				/** Assigned */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. assigned_date));
+				trTag.appendChild(tdTag);
+				
+				/** Assigned Time*/
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. assigned_time));
+				trTag.appendChild(tdTag);
+			}
+
+			/** Model */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. model));
+			trTag.appendChild(tdTag);
+
+			/** Serial No */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. serial_no));
+			trTag.appendChild(tdTag);
+
+			/** Wty */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. wty_type));
+			trTag.appendChild(tdTag);
+			
+			/** VOC */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. voc_flag));
+			trTag.appendChild(tdTag);
+			
+			/** REDO */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. redo_flag));
+			trTag.appendChild(tdTag);
+
+
+			if(_l.u.c == "C4A0"){ //Italy SEI 
+				/** Customer Name */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_al";
+				tdTag.appendChild(document.createTextNode(obj. customer_name));
+				trTag.appendChild(tdTag);
+				
+				/** Data Origin */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.call_category));
+				trTag.appendChild(tdTag);				
+
+			}else if(loginUserCorpCode == "C310"){ //USA SEa
+
+			/** Customer Name */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj. customer_name));
+			trTag.appendChild(tdTag);
+			
+			/** asc code */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.ASC_CODE));
+			trTag.appendChild(tdTag);								
+
+			} else{  
+
+			/** Customer Name */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj. customer_name));
+			trTag.appendChild(tdTag);
+
+			} 
+
+			
+			/** City */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. city_name));
+			trTag.appendChild(tdTag);
+			if(_l.u.c == "C310"){
+				/** Preferred Date */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. CUST_REQ_DT));
+				trTag.appendChild(tdTag);
+				
+				/** App Date */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. anticipated_date));
+				trTag.appendChild(tdTag);
+				
+			}else{
+				
+				/** App Date */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. anticipated_date));
+				trTag.appendChild(tdTag);
+				
+				/** App Time */
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj. anticipated_time));
+				trTag.appendChild(tdTag);
+			}
+
+			/** Service Type */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. service_type_desc));
+			trTag.appendChild(tdTag);
+
+			/** Status */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. status_desc));
+			trTag.appendChild(tdTag);
+
+			/** Reason */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. reason_desc));
+			trTag.appendChild(tdTag);
+
+			/** B2B */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.b2b_svc=='Y'?'Y':''));
+			trTag.appendChild(tdTag);
+			
+			if(_l.u.c == "C9E0" || _l.u.c == "C941" ){ //Russia 9E0%> // SRSC 법인 통합 
+			/** VIP */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.SVC_LEVEL));
+			trTag.appendChild(tdTag);
+			}
+			
+			/** Risk Sensiong */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. sen_dt));
+			trTag.appendChild(tdTag);
+
+			/** Risk Reason */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. risk_name+'-'+obj. risk_grade_desc));
+			trTag.appendChild(tdTag);
+			
+			if(_l.u.c == "C550"){ 
+
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.redFlag));
+			trTag.appendChild(tdTag);
+			}
+			
+			if(loginUserCorpCode == "C310"){
+
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.TRIAGE_FLAG));
+				trTag.appendChild(tdTag);
+				
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.BUILDER_FLAG));
+				trTag.appendChild(tdTag);
+			}
+			
+			if(_l.u.c == "C310"){
+
+				tdTag = document.createElement("td");
+				tdTag.className = "td_ac";
+				tdTag.appendChild(document.createTextNode(obj.NOCOOL_FLAG));
+				trTag.appendChild(tdTag);
+			}
+			
+			
+			tbodyObj.appendChild(trTag);
+		}
+        return true;
+	}
+}
+
+//china version intergration 2016/07/14 pcs73.
+function gridDrawExcelC6() {
+    if(jsonObj==null)return false;
+    if(jsonObj.etSvcInfo==null)return false;
+	if (jsonObj != null) {
+		/** TBody  객체 ID */
+		var tbodyObj = $('reportTableBody');
+		
+		/** 이전 Grid 객체에 노드가 있는 경우 새로 갱신하기 위해 삭제한다. */
+		clearGridJsonObject(tbodyObj);
+
+		var tdTag = null;
+		var aTag = null;
+		var length = jsonObj.etSvcInfo.length;
+		for (var i = 0; i < length; i++) {
+			var obj = jsonObj.etSvcInfo[i];
+			var trTag = document.createElement("tr");
+
+			/** NO */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(i+1));
+			trTag.appendChild(tdTag);
+
+			/** Service Order No */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_al";
+			tdTag.appendChild(document.createTextNode(obj.service_order_no));
+			trTag.appendChild(tdTag);
+
+			/** asc_job_no */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. asc_job_no));
+			trTag.appendChild(tdTag);
+
+			/** Created */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. request_date));
+			trTag.appendChild(tdTag);
+							
+			/** CC App Date */
+			tdTag = new Element("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. CC_APP_DT));
+			trTag.appendChild(tdTag);
+		
+			/** Assigned */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. assigned_date));
+			trTag.appendChild(tdTag);
+			
+			/** Assigned Time*/
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. assigned_time));
+			trTag.appendChild(tdTag);
+			
+			/** COMPLETE_DT(완료일) */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.COMPLETE_DT));
+			trTag.appendChild(tdTag);
+			
+			/** Model */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. model));
+			trTag.appendChild(tdTag);
+
+			/** Serial No */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. serial_no));
+			trTag.appendChild(tdTag);
+			
+			/** IMEI */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(markIMEI(obj. imei)));
+			trTag.appendChild(tdTag);
+
+			/** Wty */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. wty_type));
+			trTag.appendChild(tdTag);
+			
+			/** VOC */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. voc_flag));
+			trTag.appendChild(tdTag);
+			
+			/** REDO */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. redo_flag));
+			trTag.appendChild(tdTag);
+			/** Detail Type */
+			tdTag = document.createElement("td");				
+			tdTag.className = "td_ac";
+			for(var k=0;k< _l.aryDetailType.length;k++){
+				if(_l.aryDetailType[k].codeId == obj. detail_type){
+					tdTag.appendChild(document.createTextNode(_l.aryDetailType[k].codeName));
+					break;
+				}
+			}
+			trTag.appendChild(tdTag);
+			/** Remind Cnt (독촉) */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. remind_cnt));
+			trTag.appendChild(tdTag);
+			
+			/** HQ CONF */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			if(isNeeedHqConfirmBranch){
+				tdTag.appendChild(document.createTextNode(obj.hq_conf_flag=='X'?_l.r.c.Y:_l.r.c.NO));
+			}
+			trTag.appendChild(tdTag);
+			/** 고객등급 (VIP)*/
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. customer_grade));
+			trTag.appendChild(tdTag);
+			 
+			/** Customer Name */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. customer_name));
+			trTag.appendChild(tdTag);
+				
+			/** City */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. city_name));
+			trTag.appendChild(tdTag);
+
+			/** App Date */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. anticipated_date));
+			trTag.appendChild(tdTag);
+			
+			
+			/** App Time */
+			tdTag = document.createElement("td");
+			tdTag.colSpan = "2";
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. anticipated_time));
+			trTag.appendChild(tdTag);
+
+			/** Service Type */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. service_type_desc));
+			trTag.appendChild(tdTag);
+
+			/** Status */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. status_desc));
+			trTag.appendChild(tdTag);
+
+			/** Reason */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. reason_desc));
+			trTag.appendChild(tdTag);
+
+			/** B2B */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.b2b_svc=='Y'?_l.r.c.Y:''));
+			trTag.appendChild(tdTag);
+							
+			/** Risk Grade */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj.risk_grade));
+			trTag.appendChild(tdTag);
+				
+			/** Risk Sensiong */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. sen_dt));
+			trTag.appendChild(tdTag);
+
+			/** Risk Reason */
+			tdTag = document.createElement("td");
+			tdTag.className = "td_ac";
+			tdTag.appendChild(document.createTextNode(obj. risk_name+'-'+obj. risk_grade_desc));
+			trTag.appendChild(tdTag);
+
+			tbodyObj.appendChild(trTag);
+		}
+        return true;
+	}
+}
+
+//unique search..
+function serviceOrderDetailSearch() {
+	/* token_no 검색조건 추가로 체크로직 변경 jiw 2015.01.06 */
+	//china version intergration 2016/07/14 pcs73.
+	var must_soNo_jobNo = false;
+	if(isChinaRegion){
+		must_soNo_jobNo = ($('service_order_no').value == '' && $('asc_job_no').value == '');
+	}else{
+		must_soNo_jobNo = ($('service_order_no').value == '' && $('asc_job_no').value == '' && $('token_no').value == '');
+	}
+	if (must_soNo_jobNo) {
+        alert(_l.r.m.EXT_0004);
+        $('service_order_no').focus();
+		return;
+	}
+    
+
+	if(!_l.seeDetailWithoutAscCode){
+		  //if only one ship-to  exist except All, skip below check logic
+	    if ($('asc_code').options.length > 2 && $('asc_code').value == '' ) {
+	        alert(_l.r.m.MAND_XVALUE_00790);
+	        $('asc_code').focus();
+			return;
+		}
+	}
+
+    $j('#searchContentTableBody').empty();
+    $('datacnt').innerHTML='';//data count display.
+	
+	
+    var formObj=$('searchFormMain');
+	formObj.cmd.value = 'SvcOrderArkListCmd';
+	formObj.objectID.value = $('service_order_no').value;
+	formObj.ascJobNo.value = $('asc_job_no').value;
+	formObj.tokenNo.value = $('token_no').value;
+	formObj.ascCode.value = $('asc_code').value;
+	
+	searchPageNo = 0;
+	searchBlckNo = 0;	
+	AjaxRequest(urlPatternGZIP+'?Quick=QUICK','searchFormMain', setGridJsonObject);
+	setCondition();
+	
+	$('progressloading').startWaiting();
+	$('progressloading').style.height=self.document.body.scrollHeight;
+    self.scrollTo(0,document.body.scrollHeight/3);
+}
+
+
+function svcOrderLinkLite(orderNo) {
+	if(_l.useDynatrace) {
+		dynaTrace.setAutomaticActionDetection(false);
+		dynaTrace.enterAction('SO Detail();'+_l.dtADKCode, 'Click SO Detail');	
+	}
+	
+	document.location.href = urlPatternGZIP + "?cmd=ServiceOrderDetailLiteCmd&objectID="+orderNo;
+    $('progressloading').startWaiting();
+	
+}
+
+function svcOrderLinkLitePop(orderNo) {
+    var url = "";
+    w = window.open(url,"SO_popup"+orderNo,	'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=1024,height=600');
+    w.focus();
+    var formObj=$('searchFormMain');
+    formObj.objectID.value = orderNo;
+	formObj.ascJobNo.value = "";//$('asc_job_no').value;
+	formObj.ascCode.value =  "";//$('asc_code').value;	    
+    formObj.action=urlPatternGZIP;
+    formObj.cmd.value = 'ServiceOrderDetailLiteCmd';
+    formObj.target='SO_popup'+orderNo;
+    formObj.submit();
+}	
+
+
+function svcOrderLinkLiteEdit(orderNo) {
+	if(_l.useDynatrace) {
+		dynaTrace.setAutomaticActionDetection(false);
+		dynaTrace.enterAction('SO Edit();'+_l.dtADKCode, 'Click SO Edit');	
+	}
+	
+	document.location.href = urlPatternGZIP + "?cmd=ZifGspnSvcMainLDCmd&objectID="+orderNo;
+    $('progressloading').startWaiting();	
+}
+
+//EHN	pcs73 for the QA test about the checklogic Master.
+function svcOrderLinkLiteEditEhn(orderNo) {
+	if(_l.useDynatrace) {
+		dynaTrace.setAutomaticActionDetection(false);
+		dynaTrace.enterAction('SO Edit();'+_l.dtADKCode, 'Click SO Edit');	
+	}
+    document.location.href = urlPatternGZIP + "?cmd=ZifGspnSvcMainLDCmd&objectID="+orderNo+"&UI=TOBE";
+    $('progressloading').startWaiting();
+}
+
+function svcSerialCheck(model,serialNo) {
+
+	    var searchGubun = "serialNumberCheck";
+		var url = "/wty/wtyclaim/SearchSerial.jsp";
+		url = url + "?i_model=" + model;
+		url = url + "&i_serno=" + serialNo;
+		url = url + "&i_searchGubun=" + searchGubun;
+
+		w = window.open(url, "serial_popup", 'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');
+	}
+
+function checkAll(){
+	var sheetNo  = document.getElementsByName('print_id');
+	for(var i=0; i<sheetNo.length; i++){
+		if(i==0)
+			sheetNo[0].checked = !sheetNo[0].checked;
+		else
+			sheetNo[i].checked = sheetNo[0].checked;
+	}
+}
+function siel_eng_print_new_tab(){
+	var sheetNo  = document.getElementsByName('print_id');
+	var paramSoNo = ""; 
+	for(var i=0; i<sheetNo.length; i++){
+		if(sheetNo[i].checked)
+			paramSoNo += "&objectId=" + sheetNo[i].value;
+	}
+	openSvcRequestPrintNewTab(paramSoNo);
+}
+
+function openSvcRequestPrintNewTab(paramSoNo){
+	var url = "";
+	var targetId = "_blank";
+	var print_type="SIEL_ENG";
+	url = urlPatternGZIP+"?print_type="+print_type+"&ascCode="+$('asc_code').value;
+	url += "&cmd=ServiceRequestMultiPrintCmd";
+	url += paramSoNo;
+
+	w = window.open(url, targetId);
+	if(w) w.focus();
+}
+
+function siel_eng_print(){
+	var sheetNo  = document.getElementsByName('print_id');
+	var paramSoNo = ""; 
+	for(var i=0; i<sheetNo.length; i++){
+		if(sheetNo[i].checked)
+			paramSoNo += "&objectId=" + sheetNo[i].value;
+			//openSvcRequestPrintPop(sheetNo[i].value ,i);
+	}
+	openSvcRequestPrintPop(paramSoNo);
+}
+
+function openSvcRequestPrintPop(paramSoNo){
+	var url = "";
+	var targetId = "PrintPop_";//,top=50,left=200
+	var print_type="SIEL_ENG";
+	url = urlPatternGZIP+"?print_type="+print_type+"&ascCode="+$('asc_code').value;
+	url += "&cmd=ServiceRequestMultiPrintCmd";
+	url += paramSoNo;
+
+	w = window.open(url,targetId,
+'width=800,height=730,toolbar=no,location=no,directories=no,status=yes,menubar=yes,resizable=yes,copyhistory=no,scrollbars=yes');
+	w.focus();
+	
+}
+
+var searchOption=1;
+function setTab( val){
+	
+	if( val == "1"){ 
+        searchOption=1; 
+		document.getElementById("table01").style.display = "block";
+		document.getElementById("td1_01").className = "tab_left_ov";
+		document.getElementById("td1_02").className = "tab_ov";
+		document.getElementById("td1_03").className = "tab_right_ov";
+		
+		if(!isAsiaRegion){
+		
+		document.getElementById("table02").style.display = "none";
+		document.getElementById("td2_01").className = "tab_left";
+		document.getElementById("td2_02").className = "tab";
+		document.getElementById("td2_03").className = "tab_right";
+		document.getElementById("excelButtonTable").style.display = "none";
+		
+		}
+	
+		//china version intergration 2016/07/14 pcs73.
+		if(!isChinaRegion){
+		var ticketType = $j("#SODETAILTYPE1").val();
+		showDateType(ticketType);
+		}//if(!isChinaRegion){
+		
+	}else if( val == "2" ){
+        searchOption=2;
+		document.getElementById("table01").style.display = "none";
+		document.getElementById("td1_01").className = "tab_left";
+		document.getElementById("td1_02").className = "tab";
+		document.getElementById("td1_03").className = "tab_right";
+		
+		document.getElementById("table02").style.display = "block";
+		document.getElementById("td2_01").className = "tab_left_ov";
+		document.getElementById("td2_02").className = "tab_ov";
+		document.getElementById("td2_03").className = "tab_right_ov";
+		document.getElementById("excelButtonTable").style.display = "block";
+		//china version intergration 2016/07/14 pcs73.
+		if(!isChinaRegion){
+		var ticketType = $j("#SODETAILTYPE2").val();
+		showDateType(ticketType);
+		}//if(!isChinaRegion){
+		
+	}
+
+}
+
+function showDateType(ticketType){
+	if(searchOption == 2){
+		$j("#dateTitle").show();
+		$j("#dateValue").show();
+		
+		$j("#date370Title").hide();
+		$j("#date370Value").hide();
+		
+	}else if(_l.u.c == "C370" && ticketType == "DET002"){
+		$j("#dateTitle").hide();
+		$j("#dateValue").hide();
+		
+		$j("#date370Title").show();
+		$j("#date370Value").show();
+	}
+	
+}
+
+
+function searchPopCustomer() {
+    var url = "";
+    var w;
+    w = window.open(url,"customer_popup",
+'toolbar=no,location=no,directories=no,status=yes,menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=800,height=530');
+    w.focus();
+
+    url = "/svctracking/common/SVCPopCustomerNew.jsp";
+
+    var formObj=$('searchFormMain');
+    formObj.action=url;
+    formObj.target='customer_popup';
+    formObj.submit();
+}
+
+function downloadList() {
+	//china version intergration 2016/07/14 pcs73.
+	if(isChinaRegion){
+		(new ExcelDown("listReportTable", "SvcOrderList", gridDrawExcelC6)).download();
+	}else{//if(isChinaRegion){
+		(new ExcelDown("listReportTable", "SvcOrderList", gridDrawExcel)).download();	
+	}//if(isChinaRegion){
+}
+
+function quickSearchEnter(obj, ev){
+
+	var KeyID = (window.event) ? event.keyCode : ev.keyCode;
+	try {
+		if( KeyID == 13 ) {
+			if(obj.value != '') {
+				serviceOrderDetailSearch();
+			}else {
+				return;
+			}
+		}
+	}
+	catch(e) { 
+	}
+}
+
+function changeTicketType(type,seq){
+	
+	var select1 = $j("#searchFormMain").find("#status"+seq);
+	select1.empty();
+		
+	if (type == "DET001") {
+		if(seq == 1){//open data
+			$j("<option/>").text("- Pending (NOT include Repair Completed) -").val("ALL").appendTo(select1);
+			$j.each(trstatus, function(key, value) {
+				if("ST010 ST015 ST025 ST030 ST035".indexOf(trstatus[key].codeId) < 0) return true;
+				$j("<option/>").text(trstatus[key].codeId + " " + trstatus[key].codeName)
+				.prop("selected", trstatus[key].codeId == "ST030")
+				.val(trstatus[key].codeId).appendTo(select1);
+			});
+		}else{//all data
+			$j("<option/>").text("- - - -").val("").appendTo(select1);
+			statusCodeGroupSearch();			
+		}
+		
+		
+        /* 미주 통합
+		- RT-007
+		- C370일 경우 appointment,posting,complete date 선택 기능 추가
+		- #dateType_from,#dateType_to 추가					
+		- 2015-09-30
+		 */									
+		if(seq == 1 && _l.u.c == "C370"){
+			$j("#dateTitle").show();
+			$j("#dateValue").show();
+			
+			$j("#date370Title").hide();
+			$j("#date370Value").hide();
+		}
+		
+	} else {
+		$j("<option/>").text("ALL").val("ALL").appendTo(select1);
+		$j.each(exStatusList, function(key, value) {
+			$j("<option/>").text(exStatusList[key].codeName)
+			.val(exStatusList[key].codeId).appendTo(select1);
+		});
+		
+		if(seq == 1){
+			$('reason1').length=1;			
+		}else{
+			$('reason2').length=1;
+		}
+        /* 미주 통합
+		- RT-007
+		- C370일 경우 appointment,posting,complete date 선택 기능 추가
+		- #dateType_from,#dateType_to 추가					
+		- 2015-09-30
+		 */	
+		if(seq == 1 && _l.u.c == "C370"){
+			$j("#dateTitle").hide();
+			$j("#dateValue").hide();
+			
+			$j("#date370Title").show();
+			$j("#date370Value").show();
+			
+		}
+		
+		
+	}
+}
+
+
+//china version intergration 2016/07/14 pcs73.
+function openInsPrintPop(){
+	if(!insPrintVerify()){
+		return;		
+	}
+	var url = "/svctracking/print/ServiceOrderInsBillPrint.jsp";
+	w = window.open(url, "svcIns_popup", 'toolbar=no,location=no,directories=no,status=yes,'
+			+'menubar=no,resizable=yes,copyhistory=no,scrollbars=yes,top=150,left=200,width=900,height=530');
+}
+function insPrintVerify(){
+	var aryCusName = [];
+	var aryModel = [];	
+	if($j("[name=chk]:checked").length == 1){
+		return true;
+	}
+	if($j("[name=chk]:checked").length > 12){
+		alert(_l.r.m.MSG_0116);
+		return false;
+	}
+	$j("[name=chk]").each(function(i){
+		if($j(this).is(":checked")){			
+			aryCusName.push($j("[name=hidcustomer_name]").eq(i).val());
+			aryModel.push($j("[name=hidmodel]").eq(i).val());
+		}		
+	});
+	
+	for(var i=0;i<aryCusName.length;i++){
+		if(aryCusName[0] != aryCusName[i]){			
+			alert(_l.r.m.MSG_0114);
+			return false;
+		}
+		if(aryModel[0] != aryModel[i]){
+			alert(_l.r.m.MSG_0115);	
+			return false;
+		}
+	}
+	return true;
+}
+var isNeeedHqConfirmBranch = null;
+function checkSoFlag(){
+	if($j("#searchFormMain [name=asc_code]").val() == ""){
+		isNeeedHqConfirmBranch = false;			
+		return;
+	}
+	$j("#checkSoForm [name=cmd]").val("ZNWNETWORKPROFILEDISPLAYCNCMD");
+	$j("#checkSoForm [name=ascCode]").val($j("#searchFormMain [name=asc_code]").val());
+	AjaxRequest(urlPatternGZIP,'checkSoForm', setCheckSoResult);
+}
+function setCheckSoResult(response){
+	try {
+		var jsonCheckSoObj = eval('('+response.responseText+')');
+		if (jsonCheckSoObj != null) {
+			if(jsonCheckSoObj.eS_CENTER_ATTR.chk_so.length > 0){
+				isNeeedHqConfirmBranch = true;
+			}else{
+				isNeeedHqConfirmBranch = false;
+			}
+		} 
+	}catch (e){
+		alert(e);
+	}
+}
+
+function toggleSubServicetype(svctype){
+	$j('#SUB_SVC_TYPE,#SUB_SVC_TYPE3').hide();
+
+
+	if(_l.u.c == 'C820' || _l.u.c == 'C390') { 
+		if (svctype == 'II'){
+			$j('#SUB_SVC_TYPE').show();
+			$j('#SUB_SVC_TYPE3').val("");
+		}else if("AD" == svctype || "IH" == svctype || "CI" == svctype || "PS" == svctype){
+			$j('#SUB_SVC_TYPE').val("");
+			$j('#SUB_SVC_TYPE3').show();
+		}else{
+			$j('#SUB_SVC_TYPE').val("");
+			$j('#SUB_SVC_TYPE3').val("");
+		}	
+	}else if(_l.u.c == 'C430') { 
+		$j('#SUB_SVC_TYPE').show();
+		$j('#SUB_SVC_TYPE3').val("");
+	}else if(useScPlusSubSvcType && !isNaUser){
+		$j('#SUB_SVC_TYPE').val("");
+		$j('#SUB_SVC_TYPE3').show();
+	}
+}
+
+function moreOpenid(val){
+	$j('#btnheadid'+val).hide();
+	$j('#btntailid'+val).show();
+	$j('#moretailid'+val).show();
+}
+	
+function moreCloseid(val){
+	$j('#btnheadid'+val).show();
+	$j('#btntailid'+val).hide();
+	$j('#moretailid'+val).hide();
+}
+
+function getVanId() {
+	 
+ 	if(_l.u.c != "C550")
+	{
+ 		return;
+	}
+ 	
+	var url = urlPatternGZIP;
+
+	var data = "cmd=ZifGspnSryVanMappingCmd&IV_COMPANY=" + _l.u.c + "&IV_ASC_CODE="+$('asc_code').value;
+
+	$j.ajax({
+		type : "POST",
+		async : false, /* 동기 */
+		url : url,
+		data : data,
+		success : function(data) {
+			
+			for(var i= $j("#VANID")[0].options.length-1; i>=2 ; i--){
+		    	 $j("#VANID")[0].removeChild( $j("#VANID")[0].options[i]);
+			}
+			$("VANID").value = "";
+			
+			if (data.success) {
+				if(data.EtList != null && data.EtList.length > 0){
+					
+					// 데이터 넣기
+					$('vanIdTr').style.display = '';
+					
+					var objSelect = $('VANID');
+					var objOption;
+					for(var z =0 ; z < data.EtList.length; z++){
+						objOption = document.createElement('option');
+						objOption.appendChild(document.createTextNode(data.EtList[z].VANID));
+						objOption.setAttribute("value", data.EtList[z].VANID);
+						if(_l.vanId == data.EtList[z].VANID)
+							objOption.selected = true;
+						
+						objSelect.appendChild(objOption);
+					}
+				}else
+				{
+					// 숨김
+					$('vanIdTr').style.display = 'none';
+				}
+			} else {
+				$('vanIdTr').style.display = 'none';
+			}
+		},
+		dataType : 'json'
+	});
+}

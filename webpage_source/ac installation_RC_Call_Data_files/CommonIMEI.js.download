@@ -1,0 +1,56 @@
+
+	/**
+	 	G-SPN IMEI FILED MASKING START 2019.11.26
+	*/
+
+	 function markIMEI(str) {
+		if(typeof str == "undefined"){
+			return;
+		}
+		if(str.length>7){	
+			str = "********"+str.substring(8,str.length);
+		}else{
+			var tempStr = "";
+			for(var i=0;i<str.length;i++){
+				tempStr += "*";
+			}
+			str = tempStr;
+		}
+		return str;
+	} 
+
+	 /**
+	  * imei 변조 시도에 따라 작용
+	  */
+	 function handleImeiManipulateIMEI($text, $imei){
+	 	if(confirm("If you try to modify IMEI data, current IMEI no will be removed.")){
+	 		swapFrontFieldIMEI($text, $imei);
+	 		$imei.value = "";
+	 		$imei.focus();
+	 	} else{
+	 		$text.blur();
+	 	}
+	 }
+
+	 /**
+	  * imei 수정 완료시 작용
+	  */
+	 function handleImeiUpdateIMEI($imei, $text){
+	 	$imei.blur();
+	 	$text.value = markIMEI($imei.value);
+	 	swapFrontFieldIMEI($imei, $text);		
+	 }
+
+	 /**
+	  * 숨길 input tag와 드러낼 input tag를 각자 숨기고 드러냄
+	  */
+	 function swapFrontFieldIMEI($toBack, $toFront){
+	 	$toBack.setAttribute("type","hidden");
+	 	$toFront.setAttribute("type","text");
+	 }
+
+
+	
+	/**
+ 		G-SPN IMEI FILED MASKING END 2019.11.26
+	*/

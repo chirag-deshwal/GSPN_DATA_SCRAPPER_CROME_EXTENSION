@@ -1,0 +1,38 @@
+/**
+ * 엑셀다운로드 : table name, file name, draw function
+ * (new ExcelDown("listReportTable", "GenPartInfo2",gridDrawExcel)).download();
+ */
+
+var ExcelDown = Class.create({   
+	initialize: function(divTable, filename, drawExcel){     
+		this.divTable = divTable;
+		this.filename = filename;
+		if(drawExcel){
+			this.drawExcel = drawExcel;
+		}
+	} ,
+	drawExcel: function(){		
+	},
+	hasRow: function(){
+		var childs = $(this.divTable).childNodes;
+		if(childs.length < 2) return false;
+		var tbody = childs[1];
+		return (tbody.childNodes.length > 0);
+	},
+	download: function(){		
+		
+		$('progressloading').startWaiting();
+		try {
+			this.drawExcel();
+			if(this.hasRow()){				
+			    $j("#ReportDisplay").val( $j("<div>").append($j("#" + this.divTable).eq(0).clone()).html());
+			    $("excelForm").excelFileName.value = this.filename + "_" + cfToday();
+			    $("excelForm").submit();
+			}
+	    } catch (e) {
+	    	alert("Error downloading >> " + e);
+	    }
+	    $('progressloading').stopWaiting();
+	}	
+});
+

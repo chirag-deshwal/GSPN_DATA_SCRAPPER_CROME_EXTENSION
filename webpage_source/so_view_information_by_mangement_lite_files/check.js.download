@@ -1,0 +1,3318 @@
+
+/*
+ * for china :  해당class항목에 대해, 숫자만 입력된다.
+ */
+$j(".c_numeric").live('keyup', function(event) {
+	this.value = this.value.replace(/[^0-9]/g,''); 
+});
+
+/*
+ * 해당class항목에 대해, 숫자 및 소수점만 입력된다.
+ */
+$j(".c_price2").live('keyup', function(event) {
+	this.value = this.value.replace(/[^0-9\.]/g,''); 
+});
+
+$j(".c_price2").live('blur', function(event) {
+	this.value = Number(this.value.replace(/[^0-9\.]/g,'')).toFixed(2); 
+});
+
+/*
+ * 해당class항목에 대해, 숫자 및 소수점만 입력된다.
+ */
+$j(".c_price1").live('keyup', function(event) {
+	this.value = this.value.replace(/[^0-9\.]/g,'');
+});
+
+$j(".c_price1").live('blur', function(event) {
+	this.value = Number(this.value.replace(/[^0-9\.]/g,'')).toFixed(1); 
+});
+
+/*
+ * 해당class항목에 대해, 숫자 및영문자만 입력된다.
+ */
+$j(".c_numalpha").live('keyup', function(event) {
+		this.value = this.value.replace(/[^a-z^A-Z^0-9]/g, '');
+});
+
+/*
+ * 소문자를 대문자로 변환한다.
+ */
+$j(".c_upper").live('keyup', function(event) {
+		this.value = this.value.toUpperCase();
+});
+
+
+/*
+ * 해당class항목에 대해, 숫자 및 소수점만 입력된다.(소수점이하 자리수 제한없음)
+ */
+$j(".c_price").live('keyup', function(event) {
+	this.value = this.value.replace(/[^0-9\.]/g,''); 
+});
+
+/*
+ * 해당class항목에 대해, 포커스 out일때, 숫자만 입력된다.
+ */
+$j(".c_numeric_blur").live('blur', function(event) {
+	this.value = this.value.replace(/[^0-9]/g,''); 
+});
+
+// 주어진 날자와 오늘 날자가 같은지를 확인한다.
+function checkEqualToday(_checkDay) {
+	var _toDay = getToday();
+	var _tgDay = trimSlash(_checkDay);
+
+	if(_toDay == _tgDay) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+// 오늘 날자 구하기
+function getToday() {
+	date = new Date();
+	var year = date.getYear();
+	var month = date.getMonth()+1;
+ 	var day = date.getDate();
+
+	if (month < 10) month = "0" + month;
+	if (day < 10) day = "0" + day;
+
+	return year + "" + month + "" + day;
+}
+
+
+// 오늘 날자 구하기2
+function getToday2() {
+	date = new Date();
+	var year = date.getYear();
+	var month = date.getMonth()+1;
+ 	var day = date.getDate();
+
+	if (month < 10) month = "0" + month;
+	if (day < 10) day = "0" + day;
+
+	return year + "." + month + "." + day;
+}
+
+// 오늘 날자 구하기3
+function getToday3(str) {
+	date = new Date();
+	var year = date.getYear();
+	var month = date.getMonth()+1;
+ 	var day = date.getDate();
+
+	if (month < 10) month = "0" + month;
+	if (day < 10) day = "0" + day;
+
+	return year + str + month + str + day;
+}
+
+// 해당 년/월에 해당하는 가장 첫번째 날짜를 구한다
+function getFirstDay(str) {
+	date = new Date();
+	var year = date.getYear();
+	var month = date.getMonth()+1;
+
+	if (month < 10) month = "0" + month;
+
+	var total_days = year + str + month + str + '01';
+
+	return total_days
+}
+
+// 빠른 SUM 계산 처리
+var sumValueF = 0;
+
+function sumFocusField(formName, obj) {
+	sumValueF = obj.value;
+}
+
+function sumBlurField(formName, obj, targetName) {
+	var targetObj = document[formName].elements[targetName];
+	var oldValue = targetObj.value;
+	var newValue = oldValue - sumValueF;
+
+	targetObj.value = eval(newValue) + eval(obj.value);
+	//targetObj.value = eval(targetObj.value) - sumValueF;
+	//targetObj.value = eval(targetObj.value) + eval(obj.value);
+}
+
+function sumBlurFieldOther(formName, objValue, targetName) {
+	var targetObj = document[formName].elements[targetName];
+	targetObj.value = eval(targetObj.value) - eval(objValue);
+}
+
+// 삭제 한번으로 2개의 필드에 영향을 준다.
+function sumBlurFieldOtherTwo(formName, objValue1, targetName1, objValue2, targetName2) {
+	var targetObj1 = document[formName].elements[targetName1];
+	    targetObj2 = document[formName].elements[targetName2];
+	targetObj1.value = eval(targetObj1.value) - eval(objValue1);
+	targetObj2.value = eval(targetObj2.value) - eval(objValue2);
+}
+
+// 몇번째 필드인가를 확인한다.
+// EX. abc.def[0].gh 라는 필드명에서 0을 리턴해준다.
+function thisFieldLine(_str) {
+	var str="";
+	    isStart = "";
+
+	for(i=0; i<_str.length; i++) {
+		var c=_str.charAt(i);
+		if(c=="[" || isStart=="T") {
+			if(c=="]") return removeChar(str,"[");
+			isStart="T";
+			str += c;
+		}
+	}
+	return _str;
+}
+
+
+// 날짜에서 얼마간을 더한 값을 세팅해준다
+// _targetObj : 날짜값을 받아오고 세팅해줄 object
+// _plusDay : 더할 일수
+// _type : 날짜를 구분할 캐릭터(-, /)
+function plusDay(_targetObj, _plusDay, _type){
+	var inputDay = removeChar(_targetObj.value, _type);
+	var date = new Date(inputDay.substring(0,4), inputDay.substring(4,6)-1, inputDay.substring(6,8));
+	date.setDate(date.getDate() + parseInt(_plusDay));
+
+	var month = date.getMonth()+1;
+	var day = date.getDate();
+
+	if (month < 10) month = "0" + month;
+	if (day < 10) day = "0" + day;
+
+	_targetObj.value = date.getYear()+ _type + month + _type + day;
+
+	_targetObj.fireEvent("onchange");
+
+}
+
+// 날짜에서 얼마간을 더한 값을 리턴해준다.
+// _targetObj : 날짜값을 받아오는 object
+// _plusDay : 더할 일수
+// _type : 날짜를 구분할 캐릭터(-, /)
+function rtnPlusDay(_targetObj, _plusDay, _type){
+	var inputDay = removeChar(_targetObj.value, _type);
+	var date = new Date(inputDay.substring(0,4), inputDay.substring(4,6)-1, inputDay.substring(6,8));
+	date.setDate(date.getDate() + parseInt(_plusDay));
+
+	var month = date.getMonth()+1;
+	var day = date.getDate();
+
+	if (month < 10) month = "0" + month;
+	if (day < 10) day = "0" + day;
+
+	var newDay = date.getYear()+ _type + month + _type + day;
+
+	return newDay;
+}
+
+
+// 날짜에서 달수를 더해준다.
+// _targetObj : 날짜값을 받아오고 세팅해줄 object
+// _plusMonth : 더할 달수
+// _type : 날짜를 구분할 캐릭터(-, /)
+function plusMonth(_targetObj, _plusMonth, _type){
+	var inputDay = removeChar(_targetObj.value, _type);
+	var date = new Date(inputDay.substring(0,4), inputDay.substring(4,6)-1, 1);
+	date.setMonth(date.getMonth() + parseInt(_plusMonth));
+
+	var month = date.getMonth()+1;
+
+	if (month < 10) month = "0" + month;
+	_targetObj.value = date.getYear()+ _type + month;
+	_targetObj.fireEvent("onchange");
+}
+
+// 두 날짜간 실제 일수 구하기
+function daysBetween(sdate1, sdate2)
+{
+  var date1 = new Date(parseInt(sdate1.substr(0,4), 10),
+                       parseInt(sdate1.substr(4,2), 10)-1,
+                       parseInt(sdate1.substr(6,2), 10));
+  var date2 = new Date(parseInt(sdate2.substr(0,4), 10),
+                       parseInt(sdate2.substr(4,2), 10)-1,
+                       parseInt(sdate2.substr(6,2), 10));
+  // constants used for our calculations below
+  var oneDay = 1000 * 60 * 60 * 24;
+  var diff =date2.getTime() - date1.getTime();
+
+  return Math.ceil(diff/oneDay);
+}
+
+/**
+ *
+ * @param dateType(숫자형식) from~to를 계산하는 형태를 나타낸다
+ *					1 : 당일
+ *					2 : 해당 주
+ *					3 : 해당월
+ *					4 : 해당년
+ *					5 : 특정일(period) 전
+					6 : 당월(1일 ~ 현재일)
+ * @param period from ~ to 계산시에 며칠 전으로 세팅할지를 넣어준다
+ * @param stDateObj from 에 해당하는 날짜 input textfield object 를 넣어준다
+ * @param endDateObj to 에 해당하는 날짜 input textfield object 를 넣어준다.
+ * @param today 오늘 날짜 8자리를 얻어온다(서버에서 얻어와야 한다. 클라이언트 날짜 설정이 틀릴수도 있으므로)
+ * @param delimeter / 혹은 - 등을 설정한다
+ */
+function setPeriod(dateType, period, stDateObj, endDateObj, today, delimeter){
+
+	var st, end, date, day;
+	var stYear, stMonth, stDate, sDay, endYear, endMonth, endDate, endDay;
+
+	today = removeChar(today, delimeter);
+
+	// 오늘에 해당하는 날짜객체 구하기
+	date = new Date(today.substring(0,4), parseInt(today.substring(4,6),10)-1, today.substring(6,8));
+
+	switch(dateType){
+		case 1:
+			stYear=date.getYear();endYear=date.getYear();
+			stMonth=date.getMonth()+1;endMonth=date.getMonth()+1;
+			stDate=date.getDate();endDate=date.getDate();
+			break;
+		case 2:
+			// 오늘이 무슨 요일인지를 구한다
+			day = date.getDay();
+
+			// 해당 주의 월요일에 해당하는 날짜 구하기
+			st = new Date(date);
+			st.setDate(st.getDate() - (day - 1));
+
+			// 해당 주의 일요일에 해당하는 날짜 구하기
+			end = new Date(date);
+			end.setDate(end.getDate() + (7 - day));
+
+			stYear = st.getYear(); stMonth = st.getMonth() + 1; stDate = st.getDate();
+			endYear = end.getYear(); endMonth = end.getMonth() + 1; endDate = end.getDate();
+			break;
+		case 3:
+			stYear = date.getYear(); stMonth = date.getMonth() + 1; stDate = 1;
+			endYear = date.getYear(); endMonth = date.getMonth() + 1; endDate = getLastDay(date.getYear(), date.getMonth()+1);
+			break;
+		case 4:
+			stYear = date.getYear(); stMonth = 1; stDate = 1;
+			endYear = date.getYear(); endMonth = 12; endDate = 31;
+			break;
+		case 5:
+			st = new Date(date);
+			st.setDate(st.getDate() + parseInt(period));
+			stYear = st.getYear(); stMonth = st.getMonth()+1; stDate = st.getDate();
+			endYear = date.getYear(); endMonth = date.getMonth()+1; endDate = date.getDate();
+			break;
+		case 6:
+			stYear = date.getYear(); stMonth = date.getMonth() + 1; stDate = 1;
+			endYear = date.getYear(); endMonth = date.getMonth() + 1; endDate = date.getDate();
+			break;
+		default: break;
+	}
+
+
+	if (stMonth < 10) stMonth = "0" + stMonth;
+	if (stDate < 10) stDate = "0" + stDate;
+	if (endMonth < 10) endMonth = "0" + endMonth;
+	if (endDate < 10) endDate = "0" + endDate;
+
+	stDateObj.value = stYear + delimeter + stMonth + delimeter + stDate;
+	endDateObj.value = endYear + delimeter + endMonth + delimeter + endDate;
+}
+
+
+
+// 해당 년/월에 해당하는 가장 마지막 날짜를 구한다
+function getLastDay(year, month) {
+	var total_days
+
+	// 각 달의 총 날수를 구한다.
+	if(month == 1) total_days = 31
+	else if(month == 2) {
+		// 윤년 조사
+		if(((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
+			total_days = 29
+		}
+		else {
+			total_days = 28
+		}
+	}
+	else if(month == 3) { total_days = 31 }
+	else if(month == 4) { total_days = 30 }
+	else if(month == 5) { total_days = 31 }
+	else if(month == 6) { total_days = 30 }
+	else if(month == 7) { total_days = 31 }
+	else if(month == 8) { total_days = 31 }
+	else if(month == 9) { total_days = 30 }
+	else if(month == 10) { total_days = 31 }
+	else if(month == 11) { total_days = 30 }
+	else if(month == 12) { total_days = 31 }
+
+	return total_days
+}
+
+
+//반드시 하나의 체크박스를 선택하였는지를 검사하여
+//단하나만 선택되었을 경우 선택된 키값을 넘겨준다.
+function getCheckKey(formName){
+	var checkCnt = 0;
+	var selectKey;
+
+	for( var i=0; i<document[formName].length && checkCnt < 2 ; i++) {
+		var ele = document[formName][i];
+
+		if (ele.type=='checkbox') {
+			if(ele.name == 'selectKey'){
+				if(ele.checked==true){
+					checkCnt ++ ;
+					selectKey = ele.value;
+				}
+			}
+		}
+	}
+	if( checkCnt == 1 ){
+		return selectKey;
+	}else if( checkCnt == 0 ){
+		alert('작업할 대상을 선택하십시오.');
+		return null;
+	}else{
+		alert('하나의 대상만 선택하십시오.');
+		return null;
+	}
+}
+
+//리스트에서 삭제 체크박스을 모두 non check로 만든다.(Nothing)
+function checkNothing(formName, checkElemName){
+	if(checkElemName == null || checkElemName == "")
+	{
+		checkElemName = 'selectKey';
+	}
+
+	for( var i=0; i<document[formName].length; i++) {
+		var ele = document[formName][i];
+
+		if (ele.type=='checkbox') {
+			if(ele.name == checkElemName){
+				ele.checked=false;
+			}
+		}
+	}
+	return;
+}
+
+//리스트에서 삭제 체크박스 반전(ALL or Nothing)
+//2005.06.08 modified by simple
+function checkAllNothing(formName, checkElemName, isFireEvent){
+	var fCh = null;
+
+/*
+   if(checkElemName == null || checkElemName == "")
+	{
+		checkElemName = 'selectKey';
+	}
+*/
+	for( var i=0; i<document[formName].length; i++) {
+		var ele = document[formName][i];
+
+		if (ele.type=='checkbox') {
+			if(ele.name == checkElemName){
+				/*
+				if(fCh == null) {
+					if(ele.checked==false){
+						fCh = true;
+					}else if(ele.checked==true){
+						fCh = false;
+					}
+				}
+				*/
+				if(isFireEvent){
+					ele.checked = true;
+				}else{
+					ele.checked = false;
+				}
+				//if( isFireEvent == true ) ele.fireEvent("onclick");
+			}
+		}
+	}
+	return;
+}
+
+//리스트에서 삭제 체크박스 반전(ALL or Nothing)(Hidden으로 되어있는것은 제외)
+function checkAllNothingView(formName, checkElemName, rowId, maxRow){
+	_idx = 0;
+	var fCh = null;
+	_maxRow = 0;
+	var _form = document[formName];
+
+	if(checkElemName == null || checkElemName == ""){
+		checkElemName = 'selectKey';
+	}
+
+	if(rowId == null || rowId == ""){
+		rowId = 'row_no';
+	}
+
+	if(maxRow == null || maxRow  == ''){
+		_maxRow = 0;
+	}else{
+		_maxRow = maxRow;
+	}
+
+	var rowObj = eval('document.all.' + rowId);
+
+	if( _form[checkElemName] == null ){
+		return;
+	}else if(_form[checkElemName].type == 'checkbox'){
+		ele = _form[checkElemName];
+
+		if(rowObj[0].style.display=="none") {
+				return;
+		}
+
+		if(fCh == null) {
+			if(ele.checked==false){
+				fCh = true;
+			}else if(ele.checked==true){
+				fCh = false;
+			}
+		}
+		if(fCh){
+			ele.checked = true;
+		}else {
+			ele.checked=false;
+		}
+	}else{
+		for( i=0; i< _form[checkElemName].length; i++) {
+			ele = _form[checkElemName][i];
+
+			if(rowObj[i].style.display=="none") {
+				if ( _maxRow > i )
+				{
+					continue;
+				}else{
+					return;
+				}
+			}
+
+			if(fCh == null) {
+				if(ele.checked==false){
+					fCh = true;
+				}else if(ele.checked==true){
+					fCh = false;
+				}
+			}
+			if(fCh){
+				ele.checked = true;
+			}else {
+				ele.checked=false;
+			}
+		}
+	}
+	return;
+}
+
+//리스트에서 삭제 체크박스 반전(토글기능)
+function checkAll(formName){
+
+	for( var i=0; i<document[formName].length; i++) {
+		var ele = document[formName][i];
+
+		if (ele.type=='checkbox') {
+			if(ele.name == 'selectKey'){
+				if(ele.checked==false){
+					ele.checked = true;
+				}else{
+					ele.checked=false;
+				}
+			}
+		}
+	}
+	return;
+}
+
+//리스트에서 삭제 체크박스 반전(토글기능)(Hidden으로 되어있는것은 제외)
+function checkAllView(formName){
+	var _idx = 0;
+	for( var i=0; i<document[formName].length; i++) {
+		var ele = document[formName][i];
+
+		if (ele.type=='checkbox') {
+			if(ele.name == 'selectKey'){
+				if(document.all.row_no[_idx++].style.display=="none") return;
+
+				if(ele.checked==false){
+					ele.checked = true;
+				}else{
+					ele.checked=false;
+				}
+			}
+		}
+	}
+	return;
+}
+
+//리스트에서 삭제하기 전 삭제항목 체크 확인
+function delCheck(formName, checkElemName ){
+
+	if(checkElemName == null || checkElemName == "")
+	{
+		checkElemName = 'selectKey';
+	}
+
+	for( var i=0; i<document[formName].length; i++) {
+		var ele = document[formName][i];
+
+		if (ele.type=='checkbox') {
+			if(ele.name == checkElemName){
+				if(ele.checked==true){
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+/*
+* 리스트에서 삭제하기
+* _form : 삭제 대상 ListForm 이름
+* _action : 삭제 대상 ListAction mapping 이름
+*/
+function delList(_form, _action){
+		if(!delCheck(_form)) {
+			alert("선택한 항목이 없습니다.");
+		} else {
+			if(confirm("선택한 항목을 삭제하시겠습니까?")){
+				document.forms[_form].action=_action+"?method=delete";
+				document.forms[_form].submit();
+				return true;
+			}
+		}
+		return false;
+}
+
+// onblur 시 콤마를 넣자
+// 금액 필드에 컴마를 찍어 표시한다.
+// _target: 해당 필드의 객체
+function displayComma(_target){
+	var str = _target.value;
+
+	str = trimComma(str);
+
+	if (str.length > 3) {
+		var mod = str.length % 3;
+		var output = (mod > 0 ? (str.substring(0,mod)) : '');
+
+		for (i=0 ; i < Math.floor(str.length / 3); i++) {
+			if ((mod == 0) && (i == 0))
+			output += str.substring(mod+ 3 * i, mod + 3 * i + 3);
+			else
+			output+= ',' + str.substring(mod + 3 * i, mod + 3 * i + 3);
+		}
+		_target.value = output;
+
+	}
+}
+
+//숫자에 3 자리마다 콤마찍어 준다. -(음수) 금액처리
+function commaSplit(_target) {
+	srcNumber = _target.value;
+
+	//콤마를 제거 한다.
+	srcNumber = trimComma(srcNumber);
+
+	// - 만 입력했을 때는 강제로 0을 셋팅한다.
+	if(srcNumber == "-") {
+		srcNumber = "0";
+	}
+
+	// 0000 식의 입력값을 0으로 처리한다.
+	if(parseInt(srcNumber) == 0) {
+		srcNumber = "0";
+	}
+
+	// 세자리마다 콤마를 넣어준다.
+    var txtNumber = '' + srcNumber;
+
+	var rxSplit = new RegExp('([0-9])([0-9][0-9][0-9][,.])');
+	var arrNumber = txtNumber.split('.');
+	arrNumber[0] += '.';
+
+	do {
+		arrNumber[0] = arrNumber[0].replace(rxSplit, '$1,$2');
+	} while (rxSplit.test(arrNumber[0]));
+
+	if (arrNumber.length > 1) {
+		_target.value = arrNumber.join('');
+	}
+	else {
+		_target.value = arrNumber[0].split('.')[0];
+	}
+
+}
+
+// onfocus 시 콤마를 없애자
+// _target: 해당 필드의 객체
+function deleteComma(_target)
+{
+
+	_target.value = trimComma(_target.value);
+	_target.select();
+}
+
+
+// 스트링값에서 Comma( ,)를 제외
+function trimComma(_str)
+{
+	var un_str = "";
+	str = String(_str);
+
+	for(j=0; j<str.length; j++) {
+		if(str.charAt(j) != "," ){
+			un_str = un_str + str.charAt(j);
+		}
+	}
+
+	return un_str;
+}
+
+// 스트링값에서 "/"를 제외
+function trimSlash(str)
+{
+	var un_str = "";
+
+	for(j=0; j<str.length; j++) {
+		if(str.charAt(j) != "/" ){
+			un_str = un_str + str.charAt(j);
+		}
+	}
+
+	return un_str;
+}
+
+// 스트링값에 다시 컴마 넣기
+function inComma(str)
+{
+//	str = trimComma(String(str));
+//    uncomm_str = String(str);
+//    comm_str = "";
+//    loop_j = uncomm_str.length - 3;
+//        for(j=loop_j; j>=1 ; j=j-3)
+//        {
+//                comm_str=","+uncomm_str.substring(j,j+3)+comm_str;
+//        }
+//        comm_str = uncomm_str.substring(0,j+3)+comm_str;
+//        return comm_str;
+
+	return inCommaMinus(str);
+}
+
+function inCommaMinus(str)
+{
+	str = trimComma(String(str));
+    uncomm_str = String(str);
+    comm_str = "";
+    loop_j = uncomm_str.length - 3;
+        for(j=loop_j; j>=1 ; j=j-3){
+			if(str.charAt(j-1) == "-" ){
+				comm_str = uncomm_str.substring(j,j+3)+comm_str;
+			}else{
+				comm_str=","+uncomm_str.substring(j,j+3)+comm_str;
+			}
+		}
+		comm_str = uncomm_str.substring(0,j+3)+comm_str;
+        return comm_str;
+}
+
+
+// onkeyup 이벤트가 있는 폼의 모든 text field에서 Comma 제거
+function trimAllComma(_form) {
+		if(_form == null) _form = document.forms[0];
+		_cnt = _form.elements.length;	//폼 객체의 갯수
+		for(i=0; i<_cnt; i++) {
+			_ele = _form.elements[i];
+			if( (_ele.type=="text" && _ele.onkeyup != null) || _ele.id=='Int' || _ele.id=='NeedInt') {
+				str = trimComma(_ele.value);
+				_ele.value = str;
+			}
+		}
+}
+
+// onkeyup 이벤트가 있는 폼의 모든 text field에 Comma 넣음
+function displayAllComma(_form) {
+		if(_form == null) _form = document.forms[0];
+		_cnt = _form.elements.length;	//폼 객체의 갯수
+		for(i=0; i<_cnt; i++) {
+			_ele = _form.elements[i];
+			if(_ele.type=="text" && _ele.onkeyup != null) {
+				str = inComma(_ele.value);
+				_ele.value = str;
+			}
+		}
+}
+
+function checkYYYYMM(_str, _name) {
+	if(_name == null || _name =="")
+		_name = "해당 년월";
+	//alert(_str);
+
+	if (_str.length>=7) {
+		if (_str.charAt(4) == "/") {
+			temp = _str.split("/");
+			year = temp[0];
+			month = temp[1];
+			if ( year >="1000" && year <= "9999") {
+				if(month > "0" && month <= "12"){
+					if(year <"1900" || year > "2100") {
+						if(confirm("입력하신 연도는 "+year+"년으로, 1900~2100년 사이가 아닙니다.\n\n              그래도 입력하시겠습니까?"))
+							return true;
+						else return false;
+					}
+					return true;
+				}
+			}
+		}
+	}
+	if(_str.length==0) return true;
+	alert(_name + " - 날짜가 유효하지 않거나 입력형식(예, 2003/06 )과 다릅니다.\n\n          날짜 찾기를 이용하여 입력하기를 권장합니다.");
+	return false;
+}
+
+
+
+// trim : input field의 값에서 공백을 제거한다
+function Jtrim(str) {
+	var temp=""
+	for(var i=0;i<str.length;++i) {
+      		var c=str.charAt(i)
+      		if(c!=" ") temp += c
+   	}
+   	return temp
+}
+
+function removeChar(str, _del) {
+	var temp=""
+	for(var i=0;i<str.length;++i) {
+      		var c=str.charAt(i)
+      		if(c!=_del) temp += c
+   	}
+   	return temp
+}
+
+function removeComma(str) {
+	var temp=""
+	for(var i=0;i<str.length;++i) {
+      		var c=str.charAt(i)
+      		if(c!=",") temp += c
+   	}
+   	return temp
+}
+
+function removeDot(str) {
+	var temp=""
+	for(var i=0;i<str.length;++i) {
+      		var c=str.charAt(i)
+      		if(c!=".") temp += c
+   	}
+   	return temp
+}
+function removeDash(str) {
+	var temp=""
+	for(var i=0;i<str.length;++i) {
+      		var c=str.charAt(i)
+      		if(c!="-") temp += c
+   	}
+   	return temp
+}
+
+
+// 필드의 내용이 있는가를 체크한다.
+function JfieldIsEmpty(_target, _content) {
+	var str = Jtrim(_target.value);
+		if ( str == null || str == "" ) {
+			/***********************************************
+			* 다국어 처리를 위해 한글은 우선 영문으로 대체한다
+			************************************************/
+			// Case : Korean
+			alert("["+_content + "] 은(는) 필수 입력항목 입니다.");
+			// Case : English
+			//alert(_content + " item should be filled up");
+			return false;
+		}
+	return true;
+}
+
+// 반드시 숫자가 들어와야 하는 field를 메세지 박스로 알린다
+function Jcheck_number(_target, _content, _isReplace){
+	var str = _target.value;
+	    str = removeComma(str);
+		str = removeDot(str);
+		str = Jtrim(str);
+	if(_isReplace == "1" && (str == null || str == '')){
+		str = '0';
+	}
+	   _target.value = str;
+
+	for (var i=0 ; i<str.length;i++) {
+		if (str.charAt(i) < "0" || str.charAt(i) > "9"){
+			/***********************************************
+			* 다국어 처리를 위해 한글은 우선 영문으로 대체한다
+			************************************************/
+			// Case : Korean
+			alert("["+_content + "] 항목에 숫자가 아닌 값이 들어왔습니다");
+			// Case : English
+			//alert(_content + " item has non-numeric value");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// 반드시 숫자(소숫점포함)가 들어와야 하는 field를 메세지 박스로 알린다
+function Jcheck_number_dot(_target, _content, _isReplace){
+	var str = _target.value;
+	    str = removeComma(str);
+		str = removeDot(str);
+		str = Jtrim(str);
+	if(str.substring(0,1) == "-"){
+		str = str.substring(1,str.length);
+	}
+	if(_isReplace == "1" && (str == null || str == '')){
+		str = '0';
+	}
+	for (var i=0 ; i<str.length;i++) {
+		if (str.charAt(i) < "0" || str.charAt(i) > "9"){
+			/***********************************************
+			* 다국어 처리를 위해 한글은 우선 영문으로 대체한다
+			************************************************/
+			// Case : Korean
+			alert("["+_content + "] 항목에 숫자가 아닌 값이 들어왔습니다");
+			// Case : English
+			//alert(_content + " item has non-numeric value");
+			return false;
+		}
+	}
+
+	return true;
+}
+// 반드시 숫자(-값 포함)가 들어와야 하는 field를 메세지 박스로 알린다
+function Jcheck_num_dash(_target, _content){
+
+	var str = _target.value;
+	    str = removeComma(str);
+		str = removeDot(str);
+		str = Jtrim(str);
+	if(str == null || str == ''){
+		str = '0';
+	}
+	   _target.value = str;
+
+	if(str.charAt(0) < "0" || str.charAt(0) > "9"){
+		if(str.charAt(0) != "-"){
+			alert("["+_content + "] 항목에 숫자가 아닌 값이 들어왔습니다");
+
+			return false;
+		}
+	}
+	for (var i=1 ; i<str.length;i++) {
+		if (str.charAt(i) < "0" || str.charAt(i) > "9"){
+
+			alert("["+_content + "] 항목에 숫자가 아닌 값이 들어왔습니다");
+
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// 반드시 숫자가 들어와야 하는 값을 메세지 박스로 알린다(값 비교)
+function Jcheck_number_val(_target, _content){
+	var str = _target;
+	    str = removeComma(str);
+		str = removeDot(str);
+		str = Jtrim(str);
+	    _target.value = str;
+
+	for (var i=0 ; i<str.length;i++) {
+		if (str.charAt(i) < "0" || str.charAt(i) > "9"){
+			/***********************************************
+			* 다국어 처리를 위해 한글은 우선 영문으로 대체한다
+			************************************************/
+			// Case : Korean
+	    	//alert("["+_content + "] 항목에 숫자가 아닌 값이 들어왔습니다");
+			// Case : English
+	    	alert(_content + " item has non-numeric value");
+			return false;
+		}
+	}
+	return true;
+}
+
+//시간을 표현하는 형태인지 메세지 박스로 알린다.
+function Jcheck_time(_target, _content){
+	var str = _target.value;
+	    str = removeChar(str, ":");
+		str = Jtrim(str);
+		if(str.length>0 && str.length<4){
+			alert("["+_content+"] 항목은 시간형태(12:00)가 아닙니다.");
+			return false;
+		}
+		for(var i=0 ; i<str.length; i++){
+			if(str.charAt(i)<"0" || str.charAt(i)>"9"){
+				alert("["+_content+"] 항목은 시간형태(12:00)가 아닙니다.");
+				return false;
+			}
+		}
+		return true;
+}
+
+// 길이를 체크하기 위한 함수
+function Jcheck_length(_target, _maxlen, _content){
+	var str = _target.value;
+	var len = 0;
+
+	for(i=0; i<str.length; i++) {
+	//alert(escape(str.charAt(i)));
+		if(escape(str.charAt(i)).length>4) len+=2; else len++;
+	}
+
+	if( len > _maxlen){
+		/***********************************************
+		* 다국어 처리를 위해 한글은 우선 영문으로 대체한다
+		************************************************/
+		// Case : Korean
+		alert("["+_content + "] 항목이 길이 " + _maxlen + "를(을) 넘었습니다");
+		// Case : English
+		//alert(_content + "'s length exceeds " + _maxlen + " charactres");
+		return false;
+	}
+	return true;
+}
+
+// 폼의 text field에서 특수문자( &, ", <, >)를 제외하고 메세지 박스로 알린다
+function Jtrim_char(formName, _content)
+{
+	var str = "";
+	var istrim = false;
+
+	// form field 갯수 만큼 loop를 수행
+	for ( var i = 0 ; i < window.document[formName].length ; i++ )
+	{
+		str = "";
+		if ( (window.document[formName][i].type == "text")
+				&& (Jtrim(window.document[formName][i].value) != "") ) {
+					for(j=0; j<window.document[formName][i].value.length; j++) {
+
+						if( ( window.document[formName][i].value.charAt(j) != "\"" )
+							&& ( window.document[formName][i].value.charAt(j) != "\'" )
+							&& (window.document[formName][i].value.charAt(j) != "&")
+							&& (window.document[formName][i].value.charAt(j) != ">")
+							&& (window.document[formName][i].value.charAt(j) != "<") ) {
+								str = str + window.document[formName][i].value.charAt(j);
+							}else istrim = true;
+
+					}
+					window.document[formName][i].value = str;
+		}
+	}
+
+	if(istrim){
+//		alert(_content);
+	}
+
+}
+
+function actConfirm(_method) {
+		if (_method == 'delete'){
+			if (!confirm('삭제 하시겠습니까 ?'))
+				return false;
+		} else if (_method == 'update'){
+			if (!confirm('수정 하시겠습니까 ?'))
+				return false;
+		} else {
+			if (!confirm('저장 하시겠습니까 ?'))
+				return false;
+		}
+	return true;
+}
+
+
+function numCheck(_str){
+	for (var i=0 ; i<_str.length;i++) {
+		if (_str.charAt(i) < "0" || _str.charAt(i) > "9"){
+			return false;
+		}
+	}
+	return true;
+}
+
+
+//숫자에 콜론(:)빼고 다시 넣어주기
+function CheckTime(obj){
+	var str = obj.value;
+
+	if(Jcheck_time(obj, obj.title)){
+		a = removeChar(str, ":");
+		b = a.substring(0,2);
+		c = a.substring(2,4);
+
+		obj.value = b+":"+c;
+	}else{
+		obj.value="";
+		obj.focus();
+	}
+}
+
+
+// 숫자에 컴마빼고 다시 계산후 컴마찍기.
+function CheckMoney(obj){
+        a=out_comma(obj.value);
+        obj.value=in_comma(a);
+}
+
+
+//컴마 빼기
+function out_comma(str)	{
+	comm_str = String(str);
+
+	var index = comm_str.indexOf('.',0);
+	var num1,num2;
+
+	uncomm_str="";
+
+	if(index != -1)	{
+		num1 = comm_str.substring(0,index);
+		num2 = comm_str.substring(index+1);
+	}else{
+		num1 = comm_str;
+		num2 = '';
+	}
+
+
+	for(i=0; i<num1.length; i++)	{
+		substr = num1.substring(i,i+1);
+		if(substr!=",")
+			uncomm_str += substr;
+	}
+
+	if(num2 == '')
+		return uncomm_str;
+	else
+		return uncomm_str + '.' + num2;
+}
+
+	//컴마 넣기
+function in_comma(str){
+		uncomm_str = String(str);
+
+		var index = uncomm_str.indexOf('.',0);
+		var num1, num2;
+
+		if(index != -1)	{
+
+			num1 = uncomm_str.substring(0,index);
+			num2 = uncomm_str.substring(index+1);
+		}else{
+
+			num1 = uncomm_str;
+			num2 = '';
+		}
+
+		comm_str = "";
+		loop_j = num1.length - 3;
+		for(j=loop_j; j>=1 ; j=j-3)	{
+			comm_str=","+num1.substring(j,j+3)+comm_str;
+		}
+
+		comm_str = num1.substring(0,j+3)+comm_str;
+        var size = comm_str.length;
+		if(num2 == ''){
+			if(size>2 && comm_str.substring(0,1) == "-" && comm_str.substring(1,2) == ","){
+				comm_str = comm_str.substring(0,1) + comm_str.substring(2,size);
+			}
+			return comm_str;
+		}else{
+			if(size>2 && comm_str.substring(0,1) == "-" && comm_str.substring(1,2) == ","){
+				comm_str = comm_str.substring(0,1) + comm_str.substring(2,size);
+			}
+			return comm_str + '.' + num2;
+		}
+}
+
+function resetForm(_formName){
+	var _obj = document[_formName];
+	_obj.reset();
+}
+
+//Radio Object의 선택된 값을 반환
+function getCheckedValue( _obj ){
+	for(i=0 ; i < _obj.length ; i++){
+		if( _obj[i].checked ){
+			return _obj[i].value;
+		}
+	}
+	return '';
+}
+
+//Radio Object 에 값을 셋팅
+function setRadioValue( _obj, _newValue ){
+	for(i=0 ; i < _obj.length ; i++){
+		if( _obj[i].value == _newValue ){
+			_obj[i].checked = true;
+			break;
+		}
+	}
+}
+
+
+
+
+
+
+
+/**
+ * 입력값에 특정 문자(chars)가 있는지 체크
+ * 특정 문자를 허용하지 않으려 할 때 사용
+ * ex) if (containsChars(form.name,"!,*&^%$#@~;")) {
+ *         alert("이름 필드에는 특수 문자를 사용할 수 없습니다.");
+ *     }
+ */
+function containsChars(input,chars) {
+    for (var inx = 0; inx < input.value.length; inx++) {
+       if (chars.indexOf(input.value.charAt(inx)) != -1)
+           return true;
+    }
+    return false;
+}
+
+/**
+ * 입력값이 특정 문자(chars)만으로 되어있는지 체크
+ * 특정 문자만 허용하려 할 때 사용
+ * ex) if (!containsCharsOnly(form.blood,"ABO")) {
+ *         alert("혈액형 필드에는 A,B,O 문자만 사용할 수 있습니다.");
+ *     }
+ */
+function containsCharsOnly(input,chars) {
+    for (var inx = 0; inx < input.value.length; inx++) {
+       if (chars.indexOf(input.value.charAt(inx)) == -1)
+           return true;
+    }
+    return false;
+}
+
+function containsCharsOnlyByValue(value,chars) {
+	if (chars.indexOf(value) == -1){
+    	return true;
+    }else{
+    	return false;
+    }
+}
+
+/**
+ * 입력값이 알파벳인지 체크
+ * 아래 isAlphabet() 부터 isNumComma()까지의 메소드가
+ * 자주 쓰이는 경우에는 var chars 변수를
+ * global 변수로 선언하고 사용하도록 한다.
+ * ex) var uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+ *     var lowercase = "abcdefghijklmnopqrstuvwxyz";
+ *     var number    = "0123456789";
+ *     function isAlphaNum(input) {
+ *         var chars = uppercase + lowercase + number;
+ *         return containsCharsOnly(input,chars);
+ *     }
+ */
+function isAlphabet(input, msg) {
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] 은(는) 영문만 가능합니다.");
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 알파벳 대문자인지 체크
+ */
+function isUpperCase(input, msg) {
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] 은(는) 영문 대문자만 가능합니다.");
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 알파벳 소문자인지 체크
+ */
+function isLowerCase(input, msg) {
+    var chars = "abcdefghijklmnopqrstuvwxyz";
+
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] 은(는) 영문 소문자만 가능합니다.");
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 알파벳,숫자로 되어있는지 체크
+ */
+function isAlphaNum(input, msg) {
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] 은(는) 영문, 숫자만 가능합니다.");
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 숫자로만 되어있는지 체크
+ */
+function isNum(input, msg) {
+    var chars = "0123456789";
+
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] item has non-numeric value");
+    	input.value = "";
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 숫자,대시(-)로 되어있는지 체크
+ */
+function isNumDash(input, _content) {
+    var chars = "-0123456789";
+
+    if(input.value == "-0" || input.value == "-") {
+    	alert("[" + _content + "] 은(는) 정상적인 숫자가 아닙니다.");
+    	input.value = "0";
+    	return false;
+    }
+
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + _content + "] 은(는) 숫자,대시(-)만 가능합니다.");
+    	return false;
+    }
+    else	return true;
+
+}
+
+/**
+ * 입력값이 숫자,콤마(,)로 되어있는지 체크
+ */
+function isNumComma(input, msg) {
+    var chars = ",0123456789";
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] 은(는) 숫자,콤마(,)만 가능합니다.");
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 숫자,콤마(,)로 되어있는지 체크 한 후 첫자리가 0이 아닌 것
+ * 통화 체크
+ */
+function isCurrency(input, msg) {
+	if(!isNumComma(input, msg))	{input.focus(); return false;}			//숫자, 콤마만 체크
+
+	//한자리면 숫자여야 한다.
+	if(input.value.length == 1)
+	{
+		if(input.value == ",")
+		{
+			alert(msg+"는(은) 한자리 금액이면 ','이 아닌 숫자여야 합니다.");
+			input.focus();
+			return false;
+		}
+
+	}
+	//두자리이상
+	else
+	{
+		if(input.value.substring(0, 1) == "0" || input.value.substring(0, 1) == ",")
+		{
+			alert(msg+"는(은) 첫자리가 ',' , '0'이 아닌 숫자여야 합니다.");
+			input.focus();
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * 입력값이 숫자,콤마(,)로 되어있는지 체크
+ */
+function isNumPeriod(input, msg) {
+    var chars = ".0123456789";
+    if(containsCharsOnly(input,chars))
+    {
+    	alert("[" + msg + "] item has non-numeric value.");
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 사용자가 정의한 포맷 형식인지 체크
+ * 자세한 format 형식은 자바스크립트의 'regular expression'을 참조
+ */
+function isValidFormat(input,format) {
+    if (input.value.search(format) != -1) {
+        return false; //올바른 포맷 형식
+    }
+    return true;
+}
+
+/**
+ * 입력값이 이메일 형식인지 체크
+ * ex) if (!isValidEmail(form.email)) {
+ *         alert("올바른 이메일 주소가 아닙니다.");
+ *     }
+ */
+function isValidEmail(input, msg) {
+//    var format = /^(\S+)@(\S+)\.([A-Za-z]+)$/;
+    var format = /^((\w|[\-\.])+)@((\w|[\-\.])+)\.([A-Za-z]+)$/;
+
+    if(isValidFormat(input,format))
+    {
+    	alert(msg);
+    	return false;
+    }
+    else	return true;
+}
+
+/**
+ * 입력값이 전화번호 형식(숫자-숫자-숫자)인지 체크
+ */
+function isValidPhone(input, msg) {
+    var format = /^(\d+)-(\d+)-(\d+)$/;
+
+    if(isValidFormat(input,format))
+    {
+    	alert("[" + msg + "] 은(는) 올바른 전화번호가 아닙니다.");
+    	return false;
+    }
+    else	return true;
+}
+function isValidPhoneAmerica(input, msg) {
+    var format = /[2-9][0-9]{2}-[0-9]{3}-[0-9]{4}/;
+  //  "[2-9][0-9]{2}-[0-9]{3}-[0-9]{4}";
+
+    if(isValidFormat(input,format))
+    {
+    	alert("Wrong Number format.");
+    	if(event.preventDefault){
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    	return false;
+    }
+    else	return true;
+}
+
+
+/**
+ * 글자 수가 같은지 체크한다(한글처리 안되어 있음).
+ */
+function isLengthCheck(input, len, msg) {
+
+	var val = input.value;
+
+	if(val.length != len)
+	{
+    	alert("[" + msg + "] 은(는) "+len+"글자만 가능합니다.");
+    	return false;
+	}
+	else	return true;
+}
+
+/**
+ * firstDate : 시작일
+ * secondDate : 종료일
+ * 시작일 <= 종료일 일때 true를 반환
+ */
+function compare_date(strFirstDate, strSecondDate) {
+
+	iFirstDate = eval(strFirstDate);
+	iSecondDate = eval(strSecondDate);
+
+	if(iFirstDate > iSecondDate) {
+		return false;
+	} else if(iFirstDate == iSecondDate) {
+		return true;
+	} else {
+		return true;
+	}
+}
+
+/**
+* 검색기간 지정이 올바른지 체크
+* @param _form : form 객체 명
+* @param _sDate : 조회 시작일 element명
+* @param _eDate : 조회 종료일 element명
+*/
+function checkSearchDate(_form, _sDate, _eDate) {
+	var form = eval('document.'+ _form);
+	var sDate = form[_sDate].value.replace(/\//g,"");
+	var eDate = form[_eDate].value.replace(/\//g,"");
+	//alert(sDate+":"+eDate);
+	if(sDate=="" && eDate!=""){
+		alert("조회 기간이 입력되지 않았습니다.");
+		form[_sDate].focus();
+		return false;
+	}else if(sDate!="" && eDate==""){
+		alert("조회 기간이 입력되지 않았습니다.");
+		form[_eDate].focus();
+		return false;
+	}
+	if (sDate > eDate) {
+		alert("조회 시작일이 종료일보다 뒤입니다.\n\n조회기간을 다시선택해주십시오");
+		form[_sDate].focus();
+		return false;
+	} else
+		return true;
+}
+
+/**
+* 올바른 날짜 표현식인지 체크
+* @param _form : form 객체 명
+* @param _date : 날짜 입력 element명
+*/
+function isValidDate(_form, _date) {
+	var form = eval('document.'+ _form);
+	var date = form[_date].value.replace(/\//g,"");
+	var format = /\d{8}/;
+
+	if (date.length==8 && date.search(format) != -1) {
+		var yyyy = parseInt(date.substring(0,4),10);
+		var mm = parseInt(date.substring(4,6),10);
+		var dd = parseInt(date.substring(6,8),10);
+
+    	var end = new Array(31,28,31,30,31,30,31,31,30,31,30,31);
+    	if ((yyyy % 4 == 0 && yyyy % 100 != 0) || yyyy % 400 == 0) {
+	        end[1] = 29;
+    	}
+
+		if ((mm >= 1 && mm <= 12) && (dd >= 1 && dd <= end[mm-1]))
+			return true;
+	}
+	alert("유효한 날짜 또는 유형(YYYY/MM/DD)이 아닙니다. 날짜 찾기 버튼을 권장합니다.");
+	form[_date].focus();
+	form[_date].select();
+	return false;
+}
+
+/**
+* YYYY/MM/DD형식인지 체크
+* @param _form : form 객체 명
+* @param _date : 날짜 입력 element명
+*/
+function isValidSlashDate(_form, _date) {
+	var form = eval('document.'+ _form);
+	var format = /\d{4}\/\d{2}\/\d{2}/;
+
+	if (form[_date].value.search(format) != -1) {
+		return isValidDate(_form, _date);
+	}
+	alert("유효한 날짜 또는 유형(YYYY/MM/DD)이 아닙니다. 날짜 찾기 버튼을 권장합니다.");
+	form[_date].focus();
+	form[_date].select();
+	return false;
+}
+
+// 날짜 형식을 YYYY/MM/DD 형으로 맞춰준다.
+function inSlash(obj, delemiter) {
+	date = removeChar(obj.value, delemiter);
+	if(date == "" || date.length != 8)
+		obj.value = date;
+
+	if(date.length == 8) {
+		obj.value = date.substring(0,4) + delemiter + date.substring(4,6) + delemiter + date.substring(6,8);
+	}
+}
+
+// 날짜 형식을 YYYY/MM 형으로 맞춰준다.
+function inSlashMnth(obj, delemiter) {
+	date = removeChar(obj.value, delemiter);
+	if(date == "" || date.length != 6)
+		obj.value = date;
+
+	if(date.length == 6) {
+		obj.value = date.substring(0,4) + delemiter + date.substring(4,6);
+	}
+}
+
+//년월일 체크
+//format : 20030707
+function chkYYYYMMDD(obj, msg)
+{
+	//1. null 체크
+	if(!JfieldIsEmpty(obj, msg))	{return false;}				//null체크
+
+	//2. 8자리 체크
+	if(!isLengthCheck(obj, '8', msg)){return false;}		//최대길이만 가능
+
+	//3. 숫자 체크
+	if(!Jcheck_number(obj, msg))	{return false;}			//숫자만 체크
+
+	//4. 날짜 유효성 체크
+	if(!isDateValue(obj, msg)) {return false;}
+
+	return true;
+}
+
+/********************************************************************
+*  Function Name : isDateValue()                                        *
+*  Description   : Input Data가 정확한 년월일로 구성되었는지 Check  *
+*                  (윤년check포함)                                  *
+*  Input Data    : obj -> (yyyymmdd)                            *
+*  Output Data   : true/false                                       *
+*  사용되는 Function : None                                         *
+********************************************************************/
+function isDateValue(obj, msg)
+{
+	var str = obj.value;
+
+	yy = parseInt(str.substring(0,4),10);
+	mm = parseInt(str.substring(4,6),10);
+	dd = parseInt(str.substring(6,8),10);
+
+	if (mm == 1)
+	{
+		max_days = 31
+	}
+	else if (mm == 2)
+	{
+		if ((( yy % 4 == 0) && (yy % 100 != 0)) || (yy % 400 == 0))
+			max_days = 29;
+		else
+			max_days = 28;
+	}
+	else if (mm == 3)   max_days = 31;
+	else if (mm == 4)   max_days = 30;
+	else if (mm == 5)   max_days = 31;
+	else if (mm == 6)   max_days = 30;
+	else if (mm == 7)   max_days = 31;
+	else if (mm == 8)   max_days = 31;
+	else if (mm == 9)   max_days = 30;
+	else if (mm == 10)  max_days = 31;
+	else if (mm == 11)  max_days = 30;
+	else if (mm == 12)  max_days = 31;
+	else
+	{
+		alert(msg + "에 입력한 월이 틀립니다..");
+		obj.select();
+		return false;
+	}
+	if(dd < 1 || dd > max_days)
+	{
+		alert(msg + "에 입력한 일이 틀립니다..");
+		obj.select();
+		return false;
+	}
+
+	return true;
+}
+
+
+
+
+/*
+ *	입력한 달의 지난달을 리턴
+ */
+function beforeMonth(obj){
+	if(obj.value == '' || obj.value == ""){
+		alert("YYYYMM 형식으로 년월을 입력하세요");
+		return;
+	}
+	var msg = '년월';
+	if(!Jcheck_number(obj, msg))	{obj.focus(); return;}				//숫자만 체크
+	if(!isLengthCheck(obj, obj.maxLength, msg)){obj.focus(); return;}	//최대길이만 가능
+
+	var beforeCheck;
+	var beforeCheckTwo;
+	var beforeYear;
+	var beforeMonth;
+	var returnYear;
+	var returnMonth;
+
+	beforeCheck = Number(obj.value.substring(4,6));
+	if(beforeCheck > 12){
+		alert("잘못된 날짜를 입력하셨습니다");
+		return;
+	}
+	beforeCheck = Number(obj.value.substring(4,5));
+	beforeCheckTwo = Number(obj.value.substring(5,6));
+	if(beforeCheck == 0 && beforeCheckTwo == 0){
+		alert("잘못된 날짜를 입력하셨습니다");
+		return;
+	}
+
+	beforeCheck = Number(obj.value.substring(4,5));
+	beforeYear = Number(obj.value.substring(0,4));
+	if(beforeCheck > 0){
+		beforeMonth = Number(obj.value.substring(4,6));
+	}else{
+		beforeMonth = Number(obj.value.substring(5,6));
+	}
+	if(beforeMonth == 1){
+		beforeMonth = 12;
+		beforeYear = beforeYear-1;
+	}else{
+		beforeMonth = beforeMonth-1;
+	}
+	if(beforeMonth < 10){
+		returnMonth = '0' + beforeMonth.toString();
+	}else{
+		returnMonth = beforeMonth.toString();
+	}
+	returnYear = beforeYear.toString();
+	obj.value = returnYear + returnMonth;
+}
+/*
+ *	입력한 달의 앞달을 리턴
+ */
+function laterMonth(obj){
+	if(obj.value == '' || obj.value == ""){
+		alert("YYYYMM 형식으로 년월을 입력하세요");
+		return;
+	}
+
+	var msg = '년월';
+	if(!Jcheck_number(obj, msg))	{obj.focus(); return;}			//숫자만 체크
+	if(!isLengthCheck(obj, obj.maxLength, msg)){obj.focus(); return;}	//최대길이만 가능
+
+	var laterCheck;
+	var laterCheckTwo;
+	var laterYear;
+	var laterMonth;
+	var returnYear;
+	var returnMonth;
+	laterCheck = Number(obj.value.substring(4,6));
+	if(laterCheck > 12){
+		alert("잘못된 날짜를 입력하셨습니다");
+		return;
+	}
+	laterCheck = Number(obj.value.substring(4,5));
+	laterCheckTwo = Number(obj.value.substring(5,6));
+	if(laterCheck == 0 && laterCheckTwo == 0){
+		alert("잘못된 날짜를 입력하셨습니다");
+		return;
+	}
+
+	laterCheck = Number(obj.value.substring(4,5));
+	laterYear = Number(obj.value.substring(0,4));
+	if(laterCheck > 0){
+		laterMonth = Number(obj.value.substring(4,6));
+	}else{
+		laterMonth = Number(obj.value.substring(5,6));
+	}
+	if(laterMonth == 12){
+		laterMonth = 1;
+		laterYear = laterYear+1;
+	}else{
+		laterMonth = laterMonth+1;
+	}
+	if(laterMonth < 10){
+		returnMonth = '0' + laterMonth.toString();
+	}else{
+		returnMonth = laterMonth.toString();
+	}
+	returnYear = laterYear.toString();
+	obj.value = returnYear + returnMonth;
+}
+
+//콤보박스 텍스트 얻기(선택값 없을 때 "" 리턴)
+function getComboText(obj)
+{
+	if(obj == null) return "";
+	if(obj.options == null) return "";
+	if(obj.options.length == null || obj.options.length == 0) return "";
+
+	return obj.options(obj.selectedIndex).text;
+}
+
+//콤보박스 텍스트 얻기(선택값 없을 때 "" 리턴)
+function getComboValue(obj)
+{
+	if(obj == null) return "";
+	if(obj.options == null) return "";
+	if(obj.options.length == null || obj.options.length == 0) return "";
+
+	return obj.options(obj.selectedIndex).value;
+}
+
+function setCombo(_combo, _value){
+	for(i = 0 ; i < _combo.options.length ; i++){
+		if( _combo.options[i].value == _value){
+			_combo.options[i].selected = true;
+			var eventObj = document.createEventObject();
+			_combo.fireEvent("onchange");
+			break;
+		}
+	}
+}
+
+/********************************************************************
+*  Function Name : isValidFloat()                                   *
+*  Description   : 소수의 유효성을 체크한다.                         *
+*  Input Data    : obj, intNum, ptNum                          *
+*                  예) "111.22" -> intNum:3, ptNum=2                *
+*  Output Data   : true/false                                       *
+*  사용 Function :                                                  *
+********************************************************************/
+function isValidFloat(obj, intNum, ptNum, msg) {
+
+	//1. null 체크
+	if(!JfieldIsEmpty(obj, msg))	{obj.focus(); return false;}				//null체크
+
+	//2. 숫자,콤마(,)로 되어있는지 체크
+	if(!isNumPeriod(obj, msg))	{obj.select(); return false;}			//숫자만 체크
+
+	//3. 자릿수 체크
+    var val = trimComma(obj.value);
+    var ptindex = val.indexOf('.');
+    if (ptindex != -1) {
+        intstr = val.substring(0, ptindex);
+        ptstr  = val.substring(ptindex+1, val.length);
+
+        if (intstr.length > intNum) {
+            alert('자리수 초과입니다.');
+	        obj.select();
+            return false;
+        }
+
+        if (ptstr.length > ptNum) {
+            alert('소수점이하 ' + ptNum + '까지 입력할 수 있습니다.');
+	        obj.select();
+            return false;
+        }
+        if (ptstr.indexOf('.') != -1) {
+            alert('소수점위치가 잘못되었습니다.');
+	        obj.select();
+            return false;
+        }
+    } else {
+        if (val.length > intNum) {
+            alert('자리수 초과입니다.');
+	        obj.select();
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+* 올바른 월 표현식인지 체크
+* @param _form : form 객체 명
+* @param _date : 날짜 입력 element명
+*/
+function isValidMonth (_form, _date) {
+	var form = eval('document.'+ _form);
+	var date = form[_date].value.replace(/\//g,"");
+	var format = /\d{6}/;
+
+	if (date.length==6 && date.search(format) != -1) {
+		var yyyy = parseInt(date.substring(0,4),10);
+		var mm = parseInt(date.substring(4,6),10);
+		if ((mm >= 1 && mm <= 12)) return true;
+	}
+	alert("유효한 년월 또는 유형(YYYY/MM)이 아닙니다.");
+	form[_date].focus();
+	form[_date].select();
+	return false;
+}
+
+/**
+* YYYY/MM형식인지 체크
+* @param _form : form 객체 명
+* @param _date : 날짜 입력 element명
+*/
+function isValidSlashMonth(_form, _date) {
+	var form = eval('document.'+ _form);
+	var format = /\d{4}\/\d{2}/;
+
+	if (form[_date].value.search(format) != -1) {
+		return isValidMonth(_form, _date);
+	}
+	alert("유효한 년월 또는 유형(YYYY/MM)이 아닙니다.");
+	form[_date].focus();
+	form[_date].select();
+	return false;
+}
+
+function floatRound(_value, _index){
+	return Math.round( _value * Math.pow(10,_index) )/ Math.pow(10,_index);
+}
+
+// disabled 되는 체크박스를 제외한 체크박스 전체선택(파라미터 :체크박스 객체)
+function checkAnAbleView(objNm){
+	if(objNm == null){
+		return;
+	}
+	var obj = objNm.length;
+	if(obj == null){
+		if(objNm.disabled == true){
+			return;
+		}else{
+			if(objNm.checked == true){
+				objNm.checked = false;
+			}else{
+				objNm.checked = true;
+			}
+		}
+	}else{
+		var allCheck;
+		var disAbledCheck = new Array;
+		var idx = 0;
+		for(var i=0; i<objNm.length; i++){
+			if(objNm[i].disabled == true){
+				disAbledCheck[idx] = i;
+				idx += 1;
+			}else{
+				if(objNm[i].checked == true){
+					allCheck = false;
+				}else{
+					allCheck = true;
+				}
+			}
+		}
+		idx = 0;
+		for(var i=0; i<objNm.length; i++){
+			if(disAbledCheck.length == null){
+				objNm[i].checked = allCheck;
+			}else{
+				if(disAbledCheck[idx] == i){
+					objNm[i].checked = false;
+					idx += 1;
+				}else{
+					objNm[i].checked = allCheck;
+				}
+			}
+		}
+	}
+	return;
+}
+
+function displayText(_text, _width, _length){
+	if(_length == null || _length == '' || _length <= 0){
+		_width = _width - 10 ;
+		_length = _width/11;
+	}
+
+	if(_text == null){
+		return '';
+	}else if(_length != null && _length > 0 && _text.length > _length ){
+		return _text.substring(0, _length-3) + '...';
+	}else{
+		return _text;
+	}
+}
+
+//선택된 Check Box 갯수 구하기
+function getSelectCount(checkOBJ){
+	//변수선언
+	var selectCount = 0;
+
+	//한건도 없다면...
+	if (!checkOBJ) {return selectCount;}
+
+	//1건이라면 그건이 선택되었는지 체크
+	if (!checkOBJ.length) {
+		if (checkOBJ.checked) {selectCount=1;}
+		else {selectCount=0;}
+		return selectCount;
+	}
+
+	//선택건수 구하기
+	for (i=0; i<checkOBJ.length; i++){if (checkOBJ[i].checked) {selectCount++;}}
+	return selectCount;
+}
+
+function checkNum(_elem){
+	if(event.keyCode == 13 || event.keyCode == 9){
+		return true;
+	}else if( event.keyCode == 45 ){
+		//입력이 '-'이면
+		event.keyCode = '';
+		alert('음수를 입력할 수 없습니다.');
+		return false;
+	}else if( event.keyCode < 48 || 57 < event.keyCode ){
+		//입력이 숫자가 아니면
+		event.keyCode = '';
+		alert('숫자만 입력가능합니다.');
+		return false;
+	}else{
+
+	}
+
+	return true;
+}
+
+
+//전체 선택 버튼 처리
+//check box object(document.all.checkboxName)를 넣어준다.
+function cbCheck(cks)
+{
+	//체크박스 존재 X
+	if(cks == null){}
+	//체크박스 존재 O
+	else
+	{
+		var len = cks.length;
+		//체크박스 1개 존재
+		if(len == null)
+		{
+			if(cks.checked)	{cks.checked = false;}
+			else	{cks.checked = true;}
+		}
+		//체크박스 2개 이상 존재
+		else
+		{
+			var bool;
+			for(ii=0; ii< len; ii++)
+			{
+				if(ii == 0)
+				{
+					if(cks[ii].checked)	bool = false;
+					else	bool = true;
+				}
+
+				cks[ii].checked = bool;	//1번째 것을 따르자.
+
+//				if(cks[ii].checked)	{cks[ii].checked = false;}
+//				else	{cks[ii].checked = true;}
+			}
+		}
+	}
+}
+
+//파라미터 변경(POST -> GET)
+//파라미터 form Object
+function generate(frm)
+{
+	var rstVal = "";
+	var bufArr;
+
+	if(frm == null)	return "";
+	var objArr = frm.all;
+	if(objArr == null)	return "";
+
+	rstVal += generate2(objArr);
+
+	return rstVal;
+}
+
+//파라미터 변경2(POST -> GET)
+function generate2(cks)
+{
+	var rstVal = "";
+
+	//존재 X
+	if(cks == null){}
+	//존재 O
+	else
+	{
+		var len = cks.length;
+		//1개 존재
+		if(len == null)
+		{
+			var ck = cks;
+			if(ck.disabled != true)
+			{
+				if(rstVal == "")
+					rstVal += generate3(ck);
+				else
+				{
+					var bufRst = generate3(ck);
+					rstVal += (bufRst=="" ? "" : ("&" + bufRst));
+				}
+			}
+		}
+		//2개 이상 존재
+		else
+		{
+			var rstVal = "";
+			for(i=0; i< len; i++)
+			{
+				var ck = cks[i];
+				if(ck.disabled != true)
+				{
+					if(rstVal == "")
+						rstVal += generate3(ck);
+					else
+					{
+						var bufRst = generate3(ck);
+						rstVal += (bufRst=="" ? "" : ("&" + bufRst));
+					}
+				}
+			}
+		}
+	}
+
+	return rstVal;
+}
+
+//파라미터 변경3(POST -> GET)
+//input의 radio, checkbox, text, hidden, password 처리 및 select, textarea 처리
+function generate3(obj)
+{
+	var rstVal = "";
+
+	//input tag
+	switch(obj.tagName.toUpperCase())
+	{
+		case "INPUT":
+			switch(obj.type.toUpperCase())
+			{
+				case "RADIO":
+				case "CHECKBOX":
+					if(obj.checked)
+						rstVal += (obj.name + "=" + obj.value);
+					break;
+				case "TEXT":
+				case "HIDDEN":
+				case "PASSWORD":
+					rstVal += (obj.name + "=" + obj.value);
+					break;
+			}
+			break;
+		case "SELECT":
+		case "TEXTAREA":
+			rstVal += (obj.name + "=" + obj.value);
+			break;
+	}
+
+	return rstVal;
+}
+
+
+
+
+
+function chkTwoDate(fromObj, toObj, compFormat){
+
+   var fromD;
+	var	toD;
+
+	datefrom = fromObj.value;
+	dateto = toObj.value;
+
+   if(!(datefrom.length == 0 || dateto.length == 0)){
+		if (compFormat == "dd.MM.yyyy"){
+			fromD = new Date(datefrom.substring(6,10), datefrom.substring(3,5)-1, datefrom.substring(0,2), 0, 0,0);
+			toD   = new Date(dateto.substring(6,10), dateto.substring(3,5)-1, dateto.substring(0,2), 0, 0,0);
+		}else{
+			fromD = new Date(datefrom.substring(6,10), datefrom.substring(0,2)-1, datefrom.substring(3,5), 0, 0,0);
+			toD   = new Date(dateto.substring(6,10), dateto.substring(0,2)-1, dateto.substring(3,5), 0, 0,0);
+		}
+
+		if(fromD.getTime() > toD.getTime()){
+			return false;
+		}
+	   return true;
+   }
+	return false;
+}
+
+
+/**
+ * fromObj : source date
+ * toObj : target date
+ * compFormat : user date format
+ * Compare two date
+ */ 
+function compareTwoDate(fromObj, toObj, compFormat, mode)
+{
+	var fromD;
+	var	toD;
+	var ret = false;
+
+	var datefrom = "";
+	var dateto = "";
+	
+	if( typeof fromObj  === "object" ){
+		datefrom = fromObj.value;
+	} else { 
+		datefrom = fromObj;
+	}
+	
+	if( typeof toObj === "object" ){
+		dateto = toObj.value;
+	} else { 
+		dateto = toObj;
+	}
+	
+	
+	if(!mode){
+		mode = "<=";
+	}
+
+   	if (!(datefrom.length == 0 || dateto.length == 0))
+   	{
+   		compFormat = removeChar(compFormat, ".");
+   		compFormat = removeChar(compFormat, "/");
+   		compFormat = removeChar(compFormat, "-");
+   	
+   		datefrom = removeChar(datefrom, ".");
+   		datefrom = removeChar(datefrom, "/");
+   		datefrom = removeChar(datefrom, "-");
+   		
+   		dateto = removeChar(dateto, ".");
+   		dateto = removeChar(dateto, "/");
+   		dateto = removeChar(dateto, "-");
+   		
+   		var idx_y = compFormat.indexOf('yyyy');
+		var year1 = datefrom.substring(idx_y, idx_y+4);
+		var year2 = dateto.substring(idx_y, idx_y+4);
+		
+		var idx_m = compFormat.indexOf('MM');
+		var mon1 = datefrom.substring(idx_m, idx_m+2);
+		var mon2 = dateto.substring(idx_m, idx_m+2);
+
+		var idx_d = compFormat.indexOf('dd');
+		var day1 = datefrom.substring(idx_d, idx_d+2);
+		var day2 = dateto.substring(idx_d, idx_d+2);
+
+		fromD = new Date(year1, mon1-1, day1, 0, 0, 0);
+		toD   = new Date(year2, mon2-1, day2, 0, 0,0);
+
+		if(mode == ">"){
+			ret = (fromD.getTime() > toD.getTime());
+		}else if(mode == "<"){
+			ret = (fromD.getTime() < toD.getTime());
+		}else if(mode == "<="){
+			ret = (fromD.getTime() <= toD.getTime());
+		}else if(mode == ">="){
+			ret = (fromD.getTime() >= toD.getTime());
+		}else if(mode == "=="){
+			ret = (fromD.getTime() == toD.getTime());
+		}
+		
+		/*
+		if(fromD.getTime() > toD.getTime())
+		{
+			return false;
+		}
+	   	return true;
+	   	*/
+   	}
+	return ret;
+}
+
+
+
+// 전화번호에 들어있는 문자검사(숫자및 문자만 허용)
+function checkTelNo(obj) {
+    var chars = "01234567890-()[]:";
+
+    if (obj.value.length > 0) {
+	    if (containsCharsOnly(obj,chars))	{
+	    	return false;
+	    }	    	        
+	    else {
+	    	return true;
+	   }	    	
+    }
+    else	return true;
+	
+}
+
+function chkFromToDate(datefrom, dateto){ //0708 by simple for asia
+
+   var fromD;
+	var	toD;
+
+   if(!(datefrom.length == 0 || dateto.length == 0)){
+
+		fromD = new Date(datefrom.substring(0,4), datefrom.substring(4,6)-1, datefrom.substring(6,8), 0, 0,0);
+		toD   = new Date(dateto.substring(0,4), dateto.substring(4,6)-1, dateto.substring(6,8), 0, 0,0);
+
+		if(fromD.getTime() > toD.getTime()){
+			return false;
+		}
+	   return true;
+   }
+	return false;
+}
+
+function chkFromToDate2(datefrom, dateto){ //0708 by simple for asia
+
+	   var fromD;
+		var	toD;
+
+		fromD = datefrom;
+		toD   = dateto.substring(0,2)+dateto.substring(3,5)+dateto.substring(6,8)
+		
+	   if(!(datefrom.length == 0 || dateto.length == 0)){
+
+			if(fromD  > toD){
+				return false;
+			}
+		   return true;
+	   }
+		return false;
+	}
+
+
+
+function gfn_CheckDate(yyyy, mm, dd)
+{
+  var Year = yyyy;
+  var Mon  = mm;
+  var Day  = dd;
+
+  if(Year < "1971")                 return false;
+  else if(Mon < "01" || Mon > "12") return false;
+  else if(Day == ""  || Day == null ) return true;
+  else if(Day < "01" || Day > "31") return false;
+
+  switch (Mon) {
+    case "01" :
+    case "03" :
+    case "05" :
+    case "07" :
+    case "08" :
+    case "10" :
+    case "12" :
+      return true;
+      break;
+    case "04" :
+    case "06" :
+    case "09" :
+    case "11" :
+      if(Day > "30")  return false;
+      else            return true;
+      break;
+    case "02" :
+      if(Day > "29") 	return false;
+      else if(Day == "29") {
+        if(! gfn_Mod(Year,"4"))       return false;
+        else {
+          if(! gfn_Mod(Year,"100"))   return true;
+          else {
+            if(! gfn_Mod(Year,"400")) return false;
+            else                      return true;
+          }
+        }
+      } else                          return true;
+  }
+}
+
+function gfn_Mod(a, b)
+{
+	var compSt = "";
+
+	compSt = String(a / b);
+	index = compSt.indexOf(".");
+
+	if(index < 0) return true;
+
+	return false;
+}
+
+
+function checkDate(_date, compFormat)
+{
+  var Year, Mon, Day, Date;
+  var _displayDate = "";
+  var gubun = compFormatCheck( compFormat );
+  
+  if( typeof _date === "object" ){
+	_displayDate = _date.value;
+  } else { 
+	_displayDate = _date;
+  }
+  
+  //from china : 사용자 날짜 형식과 입력한 날짜 형식이 틀려도 정상적인 날짜로  인식되는 경우를 방지하기 위해 해당 로직 추가
+  if(_displayDate.indexOf(".") != compFormat.indexOf(".")){
+	  return false;
+  }
+
+  Year = toDisplayYear(_displayDate, gubun, compFormat);
+  Mon = toDisplayMonth(_displayDate, gubun, compFormat);
+  Day = toDisplayDay(_displayDate, gubun, compFormat);
+
+  if(Year < "1971")                 return false;
+  else if(Mon < "01" || Mon > "12") return false;
+  else if(Day == ""  || Day == null ) return true;
+  else if(Day < "01" || Day > "31") return false;
+
+  switch (Mon) {
+    case "01" :
+    case "03" :
+    case "05" :
+    case "07" :
+    case "08" :
+    case "10" :
+    case "12" :
+      return true;
+      break;
+    case "04" :
+    case "06" :
+    case "09" :
+    case "11" :
+      if(Day > "30")  return false;
+      else            return true;
+      break;
+    case "02" :
+      if(Day > "29") 	return false;
+      else if(Day == "29") {
+        if(! checkMod(Year,"4",gubun))       return false;
+        else {
+          if(! checkMod(Year,"100",gubun))   return true;
+          else {
+            if(! checkMod(Year,"400",gubun)) return false;
+            else                      return true;
+          }
+        }
+      } else                          return true;
+  }
+}
+
+
+
+function checkFromToDate(_fromDate, _toDate, _compFormat)
+{
+  var fromD, toD;
+
+  var FromYear, FromMon, FromDay;
+  var ToYear, ToMon, ToDay;
+  var _displayFromDate, _displayToDate;
+
+  var gubun = compFormatCheck( _compFormat );
+
+  if( typeof _fromDate === "object" ){
+	_displayFromDate = _fromDate.value;
+  } else { 
+	_displayFromDate = _fromDate;
+  }
+
+  if( typeof _toDate === "object" ){
+	_displayToDate = _toDate.value;
+  } else { 
+	_displayToDate = _toDate;
+  }
+
+  FromYear = toDisplayYear(_displayFromDate, gubun, _compFormat);
+  FromMon = toDisplayMonth(_displayFromDate, gubun, _compFormat);
+  FromDay = toDisplayDay(_displayFromDate, gubun, _compFormat);
+
+  ToYear = toDisplayYear(_displayToDate, gubun, _compFormat);
+  ToMon = toDisplayMonth(_displayToDate, gubun, _compFormat);
+  ToDay = toDisplayDay(_displayToDate, gubun, _compFormat);
+  
+  //alert(FromYear + '-' + FromMon + '-' + FromDay);
+  //alert(ToYear + '-' + ToMon + '-' + ToDay);
+  
+  var FromYmd = String(FromYear) + String(FromMon) + String(FromDay);
+  var ToYmd = String(ToYear) + String(ToMon) + String(ToDay);
+  
+  //alert(FromYmd);
+  //alert(ToYmd);
+  
+  if (Number(FromYmd) > Number(ToYmd)) {
+	  return false;
+  }
+  
+  return true;
+  
+  /*
+  FromMon = parseInt(FromMon)-1;
+  ToMon = parseInt(ToMon)-1;
+  
+  fromD = new Date(FromYear, FromMon, FromDay, 0, 0, 0);
+  toD = new Date(ToYear, ToMon, ToDay, 0, 0, 0);
+  
+  if(fromD.getTime() > toD.getTime()){
+	return false;
+  }
+  return true;
+  */
+  
+  //return true
+}
+function checkFromToDate8(_fromDate, _toDate, _compFormat)
+{
+  var fromD, toD;
+
+  var FromYear, FromMon, FromDay;
+  var ToYear, ToMon, ToDay;
+  var _displayFromDate, _displayToDate;
+
+  var gubun = compFormatCheck( _compFormat );
+
+  if( typeof _fromDate === "object" ){
+	_displayFromDate = _fromDate.value;
+  } else { 
+	_displayFromDate = _fromDate;
+  }
+
+  if( typeof _toDate === "object" ){
+	_displayToDate = _toDate.value;
+  } else { 
+	_displayToDate = _toDate;
+  }
+
+  FromYear = toDisplayYear(_displayFromDate, gubun, _compFormat);
+  FromMon = toDisplayMonth(_displayFromDate, gubun, _compFormat);
+  FromDay = toDisplayDay(_displayFromDate, gubun, _compFormat);
+
+  ToYear = toDisplayYear(_displayToDate, gubun, _compFormat);
+  ToMon = toDisplayMonth(_displayToDate, gubun, _compFormat);
+  ToDay = toDisplayDay(_displayToDate, gubun, _compFormat);
+  
+  //alert(FromYear + '-' + FromMon + '-' + FromDay);
+  //alert(ToYear + '-' + ToMon + '-' + ToDay);
+  
+  var FromYmd = String(FromYear) + String(FromMon) + String(FromDay);
+  var ToYmd = String(ToYear) + String(ToMon) + String(ToDay);
+  
+  //alert(FromYmd);
+  //alert(ToYmd);
+  
+  if (Number(FromYmd) - Number(ToYmd) > 7) {
+	  return false;
+  }
+  
+  return true;
+  
+  /*
+  FromMon = parseInt(FromMon)-1;
+  ToMon = parseInt(ToMon)-1;
+  
+  fromD = new Date(FromYear, FromMon, FromDay, 0, 0, 0);
+  toD = new Date(ToYear, ToMon, ToDay, 0, 0, 0);
+  
+  if(fromD.getTime() > toD.getTime()){
+	return false;
+  }
+  return true;
+  */
+  
+  //return true
+}
+
+function checkFromToDateEqul(_fromDate, _toDate, _compFormat)
+{
+  var fromD, toD;
+
+  var FromYear, FromMon, FromDay;
+  var ToYear, ToMon, ToDay;
+  var _displayFromDate, _displayToDate;
+
+  var gubun = compFormatCheck( _compFormat );
+
+  if( typeof _fromDate === "object" ){
+	_displayFromDate = _fromDate.value;
+  } else { 
+	_displayFromDate = _fromDate;
+  }
+
+  if( typeof _toDate === "object" ){
+	_displayToDate = _toDate.value;
+  } else { 
+	_displayToDate = _toDate;
+  }
+
+  FromYear = toDisplayYear(_displayFromDate, gubun, _compFormat);
+  FromMon = toDisplayMonth(_displayFromDate, gubun, _compFormat);
+  FromDay = toDisplayDay(_displayFromDate, gubun, _compFormat);
+
+  ToYear = toDisplayYear(_displayToDate, gubun, _compFormat);
+  ToMon = toDisplayMonth(_displayToDate, gubun, _compFormat);
+  ToDay = toDisplayDay(_displayToDate, gubun, _compFormat);
+  
+  //alert(FromYear + '-' + FromMon + '-' + FromDay);
+  //alert(ToYear + '-' + ToMon + '-' + ToDay);
+  
+  var FromYmd = String(FromYear) + String(FromMon) + String(FromDay);
+  var ToYmd = String(ToYear) + String(ToMon) + String(ToDay);
+  
+  //alert(FromYmd);
+  //alert(ToYmd);
+  
+  if (Number(FromYmd) == Number(ToYmd)) {
+	  return false;
+  }
+  
+  return true;
+  
+  /*
+  FromMon = parseInt(FromMon)-1;
+  ToMon = parseInt(ToMon)-1;
+  
+  fromD = new Date(FromYear, FromMon, FromDay, 0, 0, 0);
+  toD = new Date(ToYear, ToMon, ToDay, 0, 0, 0);
+  
+  if(fromD.getTime() > toD.getTime()){
+	return false;
+  }
+  return true;
+  */
+  
+  //return true
+}
+
+
+function checkMod(a, b, gubun)
+{
+	var compSt = "";
+
+	compSt = String(a / b);
+	index = compSt.indexOf(gubun);
+
+	if(index < 0) return true;
+
+	return false;
+}
+
+
+function compFormatCheck(_compFormat)
+{
+  var gubun = "";
+
+  if( _compFormat.indexOf("-")>0 ){
+	gubun = "-";
+  }else if( _compFormat.indexOf("/")>0 ){
+	gubun = "/";
+  }else if( _compFormat.indexOf(".")>0 ){
+	gubun = ".";
+  }
+
+  return gubun;
+}
+
+
+function toDisplayDay(_date, _gubun, _compFormat)
+{
+  var Day = "";
+
+  if(typeof(_date) == 'object'){
+	  _date = _date.value;
+  }
+  
+  if( _date.length == 10 ){
+	if( removeChar(_compFormat.toUpperCase(),_gubun) == "YYYYMMDD" ){
+	  Day = _date.substring(8,10);
+	}else if( removeChar(_compFormat.toUpperCase(),_gubun) == "MMDDYYYY" ){
+	  Day = _date.substring(3,5);
+	}else if( removeChar(_compFormat.toUpperCase(),_gubun) == "DDMMYYYY" ){
+	  Day = _date.substring(0,2);
+	}
+  } else {
+	Day = _date.substring(6,8);
+  }
+
+  return Day;
+}
+
+
+function toDisplayMonth(_date, _gubun, _compFormat)
+{
+  var Mon = "";
+  
+  if(typeof(_date) == 'object'){
+	  _date = _date.value;
+  }
+  
+  if( _date.length == 10 ){
+	if( removeChar(_compFormat.toUpperCase(),_gubun) == "YYYYMMDD" ){
+	  Mon = _date.substring(5,7);
+	}else if( removeChar(_compFormat.toUpperCase(),_gubun) == "MMDDYYYY" ){
+	  Mon = _date.substring(0,2);
+	}else if( removeChar(_compFormat.toUpperCase(),_gubun) == "DDMMYYYY" ){
+	  Mon = _date.substring(3,5);
+	}
+  } else {
+	Mon = _date.substring(4,6);
+  }
+
+  return Mon;
+}
+
+
+function toDisplayYear(_date, _gubun, _compFormat)
+{
+  var Year = "";
+  
+  if(typeof(_date) == 'object'){
+	  _date = _date.value;
+  }
+  
+  if( _date.length == 10 ){	 
+	if( removeChar(_compFormat.toUpperCase(),_gubun) == "YYYYMMDD" ){
+	  Year = _date.substring(0,4);
+	}else if( removeChar(_compFormat.toUpperCase(),_gubun) == "MMDDYYYY" ){
+	  Year = _date.substring(6,10);
+	}else if( removeChar(_compFormat.toUpperCase(),_gubun) == "DDMMYYYY" ){
+	  Year = _date.substring(6,10);
+	}
+  } else {
+	Year = _date.substring(0,4);
+  }
+
+  return Year;
+}
+
+
+function checkDateFormat(obj, delKey, direction, compFormat)
+{
+  var gubun = compFormatCheck( compFormat );
+
+  if (obj.value.length < 10){
+  	if (delKey != 9){
+	  	if(delKey !=8 && delKey !=46 && delKey !=16 && !(delKey > 36 && delKey < 41)){
+  			var _str = obj.value.length;
+   			if ((delKey >= 48 && delKey <= 57) || (delKey >= 96 && delKey <=105)){
+				if( removeChar(compFormat.toUpperCase(),gubun).substring(0,4) == "YYYY" ){
+			    	if (_str == 4 && obj.value.indexOf(gubun) <= 0){
+			    		obj.value = obj.value + gubun;
+			    	} else if (_str == 5 && obj.value.indexOf(gubun) == 3){
+			    		obj.value = obj.value.substring(0,3).concat(obj.value.substring(4,5)).concat(obj.value.substring(3,4));
+			    	} else if (_str == 7 && obj.value.lastIndexOf(gubun) == 4){
+			    		obj.value = obj.value + gubun;
+					} else if (_str == 8 && obj.value.lastIndexOf(gubun) == 6){
+			    		obj.value = obj.value.substring(0,6).concat(obj.value.substring(7,8)).concat(obj.value.substring(6,7));
+			    	}
+			    } else { // MMDDYYYY or DDMMYYYY
+			    	if (_str == 2 && obj.value.indexOf(gubun) <= 0){
+			    		obj.value = obj.value + gubun;
+			    	} else if (_str == 3 && obj.value.indexOf(gubun) == 1){
+			    		obj.value = obj.value.substring(0,1).concat(obj.value.substring(2,3)).concat(obj.value.substring(1,2));
+			    	} else if (_str == 5 && obj.value.lastIndexOf(gubun) == 2){
+			    		obj.value = obj.value + gubun;
+			    	} else if (_str == 6 && obj.value.lastIndexOf(gubun) == 4){
+			    		obj.value = obj.value.substring(0,4).concat(obj.value.substring(5,6)).concat(obj.value.substring(4,5));
+			    	}
+			    }
+   			} else {
+   				if (direction == "up"){
+     				if (obj.value.length == 0){
+      					obj.value = ""
+	     			} else {
+		      			obj.value = obj.value.substring(0,obj.value.length-1)
+	   				}
+    			}
+	 		}
+  			obj.focus()
+	  	}
+ 	} else {
+ 		if (direction == "down"){
+ 			checkDate(obj, compFormat);
+  		}
+  	}
+  } else {
+    if (delKey != 229){
+	  if ((delKey > 34 && delKey < 41) || (delKey > 47 && delKey < 58) || (delKey > 95 && delKey < 106) || delKey == 8 || delKey == 9 || delKey == 13 || delKey == 46){
+		if (direction == "up"){
+		  checkDate(obj, compFormat);
+	    }
+	  } else {
+	  	if (direction == "up"){
+	  	  obj.value = obj.value.substring(0,obj.value.length-1);
+	    }
+	    obj.focus();
+  	  }
+  	}
+  }
+}
+
+
+function isEmail(_str)
+{
+  return _str.search(/^\s*[\w\~\-\.]+\@[\w\~\-]+(\.[\w\~\-]+)+\s*$/g)>=0;
+}
+
+function isEmptyString(_str)
+{
+  var str = trim(_str);
+  if ( str == null || str == "" ){
+	return false;
+  }
+  return true;
+}
+
+
+function timeCheck(_obj)
+{
+  var err = 0;
+  var hh, mm;
+  var chartest = "";
+  if( typeof _obj === "object" ){
+	chartest = removeChar(_obj.value,":");
+  }else{
+	chartest = removeChar(_obj,":");
+  }
+  if (chartest == '') return true;
+  if (chartest.length != 4) { return false; }
+  if (isNaN(chartest)) return false;
+  hh = chartest.substring(0, 2); // hour
+  mm = chartest.substring(2, 4); // min
+  if (hh < 0 || hh > 24) err = 1;
+  if (mm < 0 || mm > 60) err = 1;
+  if (err == 1) { return false; }
+  return true;
+} 
+
+
+function AddMonths(date_string,mm) {
+	var date = toTimeObject(date_string);
+	date.setMonth(date.getMonth() + mm );
+	return toTimeString(date) ;
+}
+
+
+function converttoDBFormat(_date, compFormat)
+{
+  var Year = "";
+  var Mon  = "";
+  var Day  = "";
+  var _displayDate = "";
+
+  var gubun = compFormatCheck( compFormat );
+
+  //if( _date == "[object]" ){
+  if(typeof(_date) == "object") {
+	_displayDate = _date.value;
+  } else { 
+	_displayDate = _date;
+  }
+
+  Year = toDisplayYear(_displayDate, gubun, compFormat);
+  Mon = toDisplayMonth(_displayDate, gubun, compFormat);
+  Day = toDisplayDay(_displayDate, gubun, compFormat);
+
+  return Year.concat(Mon).concat(Day);
+}
+
+function converttoTimeFormat(_str)
+{
+  var _displayTime = "";
+  var temp=""
+
+  //if( _str == "[object]" ){
+  if(typeof(_str) == "object") {
+	_displayTime = _str.value;
+  } else { 
+	_displayTime = _str;
+  }
+
+  for(var i=0;i<_displayTime.length;++i) {
+	var c = _displayTime.charAt(i)
+	if(c!=":") temp += c
+  }
+  return temp
+}
+
+
+
+function convertToDisp(_date, _time, _ampm, _compFormat)
+{
+  var _displayDate, _displayTime, _displayAmPm, _displayFormat;
+
+  var gubun = compFormatCheck( _compFormat );
+
+  if(typeof(_date) == 'object'){
+	  _date = _date.value;
+  }
+  
+  if( _compFormat.toUpperCase().substring(0,4) == "YYYY" ){
+	_displayFormat = "0000".concat(gubun).concat("00").concat(gubun).concat("00");
+  } else {
+	_displayFormat = "00".concat(gubun).concat("00").concat(gubun).concat("0000");
+  }
+  if( !isEmptyString(_date) && trim(_date) != _displayFormat ){
+    _displayDate = _date;
+  } else {
+	_displayDate = _displayFormat;
+  }
+  if( !isEmptyString(_time) && trim(_time) != "00:00" ){
+	_displayTime = _time;
+  } else {
+	_displayTime = "";
+  }
+  if( (trim(_ampm).toUpperCase() == "AM") || (trim(_ampm).toUpperCase() == "PM") ){
+    _displayAmPm = _ampm;
+  } else {
+	_displayAmPm = "";
+  }
+  return _displayDate.concat(" ").concat(_displayTime).concat(" ").concat(_displayAmPm);  
+}
+
+
+// Date Type
+function LastDate(oDate)
+{
+    var yyyy = oDate.getYear();
+    var mm = oDate.getMonth();
+    var strLastDay = null ;
+    var monthDD = new MonthArr(31,28,31,30,31,30,31,31,30,31,30,31);
+    if ( ( (yyyy%4 == 0) && (yyyy%100 != 0) ) || (yyyy%400 == 0) )
+    {
+        monthDD[1] = 29;
+    }
+    strLastDay = monthDD[mm] ;
+    return strLastDay ;
+}
+
+
+// Calendar Array
+function MonthArr(m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11)
+{
+      this[0]   = m0;
+      this[1]   = m1;
+      this[2]   = m2;
+      this[3]   = m3;
+      this[4]   = m4;
+      this[5]   = m5;
+      this[6]   = m6;
+      this[7]   = m7;
+      this[8]   = m8;
+      this[9]   = m9;
+      this[10]  = m10;
+      this[11]  = m11;
+}
+
+function nvl(str1, str2)
+{
+  if ( str1 == null || str1 == "" ) return str2;
+	return str1;
+}
+
+
+function stringTrim(str)
+{
+  return stringRTrim(stringLTrim(str));
+}
+
+function stringLTrim(str)
+{
+  return (typeof(str) != "string") ? null : str.replace(/^ +/, "");
+}
+
+function stringRTrim(str)
+{
+  return (typeof(str) != "string") ? null : str.replace(/ +$/, "");
+}
+
+
+// String Type (YYYYMM)
+function strLastDate(yyyymm)
+{
+    var yyyy = yyyymm.substring(0,4) +"" ;
+    var mm   = yyyymm.substring(4,6) +"" ;
+    var strLastDay = null ;
+
+    var monthDD = new MonthArr(31,28,31,30,31,30,31,31,30,31,30,31);
+    var im = eval(mm) - 1;
+
+    if ( ( (yyyy%4 == 0) && (yyyy%100 != 0) ) || (yyyy%400 == 0) )
+    {
+        monthDD[1] = 29;
+    }
+    strLastDay = monthDD[im] ;
+    return strLastDay ;
+}
+
+
+function submitEventHandler( _frm ){
+	var pattern = /<script|<\/script/;
+	//var pattern = /<script|<\\script/;    
+	var _obj = _frm.getElementsByTagName("INPUT");
+	var size = _obj.length;
+	
+	for(var i=0; i<size; i++){
+		var _input = _obj[i];
+		if( _input.type=="text" ){
+			if( pattern.test( _input.value.toLowerCase() ) ){
+				alert("You can't input this value.[" + _input.value + "]" );
+				_input.select();
+				return false;
+			}
+		}           
+	}
+	return true;
+} 
+
+
+function toTimeObject(time) {
+	var year  = time.substr(0,4);
+	var month = time.substr(4,6) - 1;
+	return new Date(year,month);
+}
+
+function toTimeString(date) {
+	var year  = date.getFullYear();
+	var month = date.getMonth() + 1;
+	if (("" + month).length == 1) month = "0" + month;
+	return ("" + year + month)
+}
+
+
+
+function enCheck(target){
+    var eng="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_/0123456789~!@#$%&*()+=`[{}]'^\|:,.?";
+    var i;
+    var tempStr;
+
+    for(i=0;i<target.length;i++){
+      tempStr = target.substring(i,i+1);
+      if(eng.indexOf(tempStr) < 0 ) return false;
+    }
+    return true;
+}
+
+
+function trim(_str)
+{
+	return _str == null ? "" : _str.replace(/(^\s*)|(\s*$)/gi, "");
+}
+
+
+
+function setFormatDate(obj, compFormat){				
+	
+	var strResult = "";			
+	var strDate = "";				
+	
+	var yyyy="";				
+	var mm="";				
+	var dd="";				
+	
+	strDate = obj.value;				
+	if(strDate != ""){				
+		strDate = removeDot(strDate);		
+		if(strDate.length != 8 || !numCheck(strDate)){		
+			alert("Invalid date!");	
+			obj.focus();	
+			return;	
+		}else{		
+			if (compFormat == "yyyy.MM.dd"){	
+				strResult = strDate.substring(0,4)+"."+strDate.substring(4,6)+"."+strDate.substring(6,8);		
+				yyyy = strDate.substring(0,4);
+				mm = strDate.substring(4,6);
+				dd = strDate.substring(6,8);
+			}else{		
+				strResult = strDate.substring(0,2)+"."+strDate.substring(2,4)+"."+strDate.substring(4,8);
+				yyyy = strDate.substring(4,8);
+				mm = strDate.substring(2,4);
+				dd = strDate.substring(0,2);
+			}	
+			if(!chkDate(yyyy,mm,dd)){	
+				alert("not exsist date!!");
+				obj.focus();
+				return;
+			}	
+			obj.value = strResult;			
+		}			
+	}				
+
+	if(!chkDate(yyyy,mm,dd)){			
+		alert("not exsist date!!");		
+		obj.focus();		
+	}			
+
+
+}				
+
+
+function setFormatDate(obj){		
+
+	var strResult = "";	
+	var strDate = "";		
+	
+	strDate = obj.value;		
+	strDate = removeDot(strDate);	
+	if(strDate.length != 8 || !numCheck(strDate)){	
+		alert("Invalid date!");
+		obj.focus();
+		return;
+	}else{	
+		strResult = strDate.substring(0,2)+"."+strDate.substring(2,4)+"."+strDate.substring(4,8);	
+		obj.value = strResult;		
+	}		
+}		
+
+
+function setFormatMonth(obj){											
+									
+	var strResult = "";										
+	var strDate = "";											
+										
+	strDate = obj.value;											
+	strDate = removeDot(strDate);										
+	if(strDate.length != 6 || !numCheck(strDate)){										
+		alert("Invalid date!");									
+		obj.focus();									
+		return;									
+	}else{										
+		strResult = strDate.substring(0,2)+"."+strDate.substring(2,6);										
+		obj.value = strResult;											
+	}											
+}											
+
+
+String.prototype.trim = function()
+{
+	return this.replace(/(^\s*)|(\s*$)/gi, "");
+}
+
+String.prototype.replaceAll = function(str1, str2)
+{
+	var temp_str = "";
+
+	if (this.trim() != "" && str1 != str2)
+	{
+		temp_str = this.trim();
+
+		while (temp_str.indexOf(str1) > -1)
+		{
+  			temp_str = temp_str.replace(str1, str2);
+		}
+	}
+
+	return temp_str;
+
+}  
+
+
+function chkDate(y, m, d) {
+	var er = 0; // ���� ����
+	var daa = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+	if (y%1000 != 0 && y%4 == 0) daa[1] = 29; // 1��
+	if (d > daa[m-1] || d < 1) er = 1; // ��¥ üũ
+	if (m < 1 || m > 12) er = 1; // �� üũ
+	if (m%1 != 0 || y%1 != 0 || d%1 != 0) er = 1; // d�� üũ
+	if (er == 1) return true;
+	else return false;
+}	
+
+
+/**
+ *	Checks fields for number only
+ */
+function checkDigit( msg )
+{
+	var eventKeyVal = event.keyCode;
+
+	if( !event.ctrlKey ){
+		
+		if( 
+			eventKeyVal==8 || 	// backspace
+			eventKeyVal==9 || 	// tab
+			eventKeyVal==46 ||  // delete
+			eventKeyVal==16 ||  // shift
+			eventKeyVal==17 ||  // control
+			eventKeyVal==18 ||  // alt
+			eventKeyVal==33 ||	// PgUp
+			eventKeyVal==34 ||  // PgDn
+			eventKeyVal==35 || 	// end
+			eventKeyVal==36 || // home
+			eventKeyVal==37 || // left arrow
+			eventKeyVal==38 || // up arrow
+			eventKeyVal==39 || // right arrow
+			eventKeyVal==40 ) // down arrow
+		
+			return;
+
+		// Numeric pad
+		if( eventKeyVal==144 || eventKeyVal==13) return; // Num Loc, Enter, dot(110)
+		if( eventKeyVal>=96 && eventKeyVal<=105 ) return; // 0~9
+		
+		if( event.keyCode<48 || event.keyCode>57 ){
+			alert( msg );
+			if(event.preventDefault){
+	            event.preventDefault();
+	        } else {
+	            event.returnValue = false;
+	        }
+		}
+	}
+}
+
+
+function checkDigitIncludeDot( msg ){
+	
+	var eventKeyVal = event.keyCode;
+
+	if( !event.ctrlKey ){
+		
+		if( 
+		eventKeyVal==8 || // backspace
+		eventKeyVal==9 || // tab
+		eventKeyVal==46 ||  // delete
+		eventKeyVal==16 ||  // shift
+		eventKeyVal==17 ||  // control
+		eventKeyVal==18 ||  // alt
+		eventKeyVal==33 ||   // PgUp
+		eventKeyVal==34 ||  // PgDn
+		eventKeyVal==35 || // end
+		eventKeyVal==36 || // home
+		eventKeyVal==37 || // left arrow
+		eventKeyVal==38 || // up arrow
+		eventKeyVal==39 || // right arrow
+		eventKeyVal==40 ) // down arrow
+		
+		return;
+		
+		// Numeric pad
+		if( eventKeyVal==144 || eventKeyVal==13 || eventKeyVal==110  || eventKeyVal==190) return; // Num Loc, Enter, dot(190)
+		if( eventKeyVal>=96 && eventKeyVal<=105 ) return; // 0~9
+
+		// can input minus sign (2007-12-11) 
+		if ( event.keyCode == 45 || event.keyCode == 189  ) {
+			return;
+		}
+		
+		if( event.keyCode<48 || event.keyCode>57 ){
+			alert( msg );
+			if(event.preventDefault){
+	            event.preventDefault();
+	        } else {
+	            event.returnValue = false;
+	        }
+		}
+		
+	}
+	
+}
+
+
+function checkDigitExceptDot( msg ){
+	var eventKeyVal = event.keyCode;
+
+	if( !event.ctrlKey ){
+			if( eventKeyVal==190 || // dot
+				eventKeyVal==110 ) // dot(numeric pad)
+					return;
+
+			
+			checkDigit( msg );
+	}
+}
+
+function checkDigitOnly( msg ){	
+	var eventKeyVal = event.keyCode;
+
+	if( !event.ctrlKey ){
+		
+		if( 
+			eventKeyVal==8 || 	// backspace
+			eventKeyVal==9 || 	// tab
+			eventKeyVal==46 ||  // delete
+			
+			eventKeyVal==17 ||  // control
+			eventKeyVal==18 ||  // alt
+			eventKeyVal==33 ||	// PgUp
+			eventKeyVal==34 ||  // PgDn
+			eventKeyVal==35 || 	// end
+			eventKeyVal==36 || // home
+			eventKeyVal==37 || // left arrow
+			eventKeyVal==38 || // up arrow
+			eventKeyVal==39 || // right arrow
+			eventKeyVal==40 ) // down arrow
+		
+			return;
+
+		// Numeric pad
+		if( eventKeyVal==144 || eventKeyVal==13) return; // Num Loc, Enter, dot(110)
+		if( eventKeyVal>=96 && eventKeyVal<=105 ) return; // 0~9
+		
+		if( event.keyCode<48 || event.keyCode>57 ){
+			alert( msg );
+			if(event.preventDefault){
+	            event.preventDefault();
+	        } else {
+	            event.returnValue = false;
+	        }
+		}
+	}
+}
+//--------------------------------------------------------
+//--------------------------------------------------------
+
+
+/*
+* 중국 수량과 IMEI 갯수 비교 체크
+* 
+* @param qty : 입력한 자재수량
+* @param imeis : 입력한 IMEI 값(,로 구분, 예:1234,2345)
+* @return : true/false
+*/
+function checkPBACount(qty, imeis) {
+	var sImeis = stringTrim(imeis)
+	if ( sImeis == '' ) {
+		return false;
+	} else {
+		var aryImei = sImeis.split(",");
+
+		if ( eval(qty) != aryImei.length ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+/********************************************************************
+*  Function Name : isValidLatitudeLongitude()                       *
+*  Description   : 경위도의 유효성을 체크한다.                         *
+*  Input Data    : str, intNum, ptNum                               *
+*                  예) "111.22" -> intNum:3, ptNum=2                *
+*  Output Data   : return (true/false)                              *
+*  사용 Function :                                                  *
+********************************************************************/
+function isValidLatitudeLongitude(str, intNum, ptNum) {
+	var chars = '0123456789.';
+	
+	//1. 숫자, Dot(.)로 되어있는지 체크
+	for (var inx = 0; inx < str.length; inx++) {
+		if (chars.indexOf(str.charAt(inx)) == -1) {
+           return false; 
+	    }
+	}
+
+	//2. 자릿수 체크
+    var ptindex = str.indexOf('.');
+    if (ptindex != -1) {
+        intstr = str.substring(0, ptindex);
+        ptstr  = str.substring(ptindex+1, str.length);
+
+        if (intstr.length > intNum) {
+            return false;
+        }
+        if (ptstr.length > ptNum) {
+            return false;
+        }
+        if (ptstr.indexOf('.') != -1) {
+            return false;
+        }
+    } else {
+        if (str.length > intNum) {
+            return false;
+        }
+    }
+    return true;
+}

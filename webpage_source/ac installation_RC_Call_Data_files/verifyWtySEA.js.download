@@ -1,0 +1,812 @@
+var clickType = "";
+var jsonObj_Wty_result = null;
+/**
+ * 1 : this.isAutoWty && ST035 -> ST040
+ * 2 : this.isAutoWty && DB STATUS=ST025,ST030,ST035,ST070;
+ * 3 : this.isAutoWty && ST025,ST030 -> ST035
+ * @param type
+ */
+function verifyWty(type) 
+{
+		var statusCode = $j("#STATUS").val();
+		var serviceType = $j("#SERVICE_TYPE").val();
+		var onlyVerifyGERP = false;
+		clickType = type;
+		if(clickType == "2" && !(statusCode == "ST035" || statusCode == "ST040")){
+			onlyVerifyGERP = true;
+		}
+
+		// Confrim if OW w'ty will be created. (2011-04-04)
+		if(_l.u.c == 'C310' || _l.u.c == 'C370' || _l.u.c == 'C330'){
+			if (_l.IN_OUT_WTY == 'OW') {
+				if (!confirm('This product is out of warranty, do you want to continue?'))
+					return;
+			}
+		}
+		
+		if(onlyVerifyGERP){
+			var conditionCodeLang = $j("#tdCondtionCode").text();
+			var symptomCodeLang = $j("#tdSymptomCode").text();
+			var defectCodeLang = $j("#tdIrisDef1").text();
+			var repairCodeLang = $j("#tdRepairCode").text();
+			
+			if(_l.u.c == 'C310' || _l.u.c == 'C370' || _l.u.c == 'C330'){
+				if($('IRIS_REPAIR').value == "" || $('IRIS_DEFECT').value == ""){
+					if(!confirm("Repair code and Defect code fields are blank in S/O, errors like MC008 / CC007 / MC006 will be displayed.\nDo you want to continue?")){
+						return;
+					}
+				}
+			}else if(isNewChina){
+				if($('IRIS_SYMPT').value == "" || $('IRIS_REPAIR').value == "" || $('IRIS_CONDI').value == "" ){
+					if(!confirm("Condition, Symptom and Repair code fields are blank in S/O, errors like MC008 / CC007 / MC006 will be displayed.\nDo you want to continue?")){
+						return;
+					}
+				}
+			}else{
+				if($('IRIS_SYMPT').value == "" || $('IRIS_REPAIR').value == "" || $('IRIS_CONDI').value == "" || $('IRIS_DEFECT').value == ""){
+					if(!confirm("Condition/Symptom/Defect/Repair fields are blank in S/O, errors like MC008 / CC007 / MC006 will be displayed.\nDo you want to continue?")){
+						return;
+					}
+				}// if (checkWtyData()) {
+			}
+			
+		}else{
+			if (!checkHHPAccesorySAW()) {
+				return;
+			}
+			
+			if (_l.sawPending) { /*
+									 * SAW Request 상태인게 있으면 그 SO에 대해서는 워런티 생성하지 못하도록 -
+									 * 2010-12-01
+									 */
+				alert(_l.r.m.EXT_0036);
+				return;
+			}
+			
+			if (!checkWtyData()) {
+				return;
+			}// if (checkWtyData()) {
+			
+		}
+		$('progressloading').startWaiting();
+		$j("#WB_CREATE").empty();
+		$j("#detailForm").find("[name]").each(function(){
+			var name = $j(this).attr("name");
+			if(name == "ASC_CODE"){
+				if(this.tagName == "SELECT"){
+					insertValue("WB_CREATE", "Partner", $j("#detailForm").find("[name=ASC_CODE]").eq(0).val());
+				}else{
+					setWBParameter("ASC_CODE", "Partner");
+				}
+			}else if(name == "NEW_IMEI"){
+				setWBParameter("NEW_IMEI", "NEW_IMEI_NO");
+			}else if(name == "HOMEPHON_NUMBER"){
+				setWBParameter("HOMEPHON_NUMBER", "CONSU_TEL");
+			}else if(name == "POST_CODE"){
+				setWBParameter("POST_CODE", "ZIP_CODE");
+			}else if(name == "REPAIR_DESC"){
+				setWBParameter("REPAIR_DESC", "REPAIRDESC");
+			}else if(name == "DEFECT_DESC"){
+				setWBParameter("DEFECT_DESC", "DEFECTDESC");
+			}else if(name == "REPAIR_COMP_DATE"){
+				setWBParameter("REPAIR_COMP_DATE", "COMPLETE_DT");
+			}else if(name == "NEW_FIRMWARE"){
+				setWBParameter("NEW_FIRMWARE", "FIRMWARE_VER");
+			}else if(name == "REQUEST_DATE"){
+				if(isEuUser){
+					if(_l.CALL_CATEGORY == "I"){
+//						_l.CUST_REQ_DATE -> RECEIVE_DATE
+						if (_l.CUST_REQ_DATE.substr(0,2) == "00") {
+							insertValue("WB_CREATE", "RECEIVE_DATE", _l.CUST_REQ_DATE);
+						}else{
+							setWBParameter("REQUEST_DATE", "RECEIVE_DATE");
+						}
+					}else{
+//						CUST_REQ_DATE -> _l.CALL_RCV_DT;
+//						_l.CUST_REQ_DATE -> RECEIVE_DATE;
+						if (_l.CALL_RCV_DT.substr(0,2) != "00") {
+							insertValue("WB_CREATE", "RECEIVE_DATE", _l.CALL_RCV_DT);
+						}else{
+							setWBParameter("REQUEST_DATE", "RECEIVE_DATE");
+						}
+					}
+				}else{
+					setWBParameter("REQUEST_DATE", "RECEIVE_DATE");
+				}
+			}else if(name == "SUB_SVC_TYPE"){
+				setWBParameter("SUB_SVC_TYPE", "SUB_TYPE");
+			}else if(name == "SUB_SVC_TYPE2"){
+				setWBParameter("SUB_SVC_TYPE2", "SUB_TYPE2");
+			}else if(name == "PRINTED_PAGE"){
+				setWBParameter("PRINTED_PAGE", "PRINTED_PAGES");
+			}else if(name == "PURCHASE_DATE"){
+				if ($j("#detailForm").find("#PURCHASE_DATE").val().substr(0,2) != "00") {
+					insertValue("WB_CREATE", "PURCHASING_DT", $j("#detailForm").find("#PURCHASE_DATE").val());
+				}
+			}else if(name == "IRIS_REPAIR" || name == "IRIS_DEFECT" || name == "IRIS_CONDI" || name == "IRIS_SYMPT"){
+				return true;//detailForm에 같은 name의 DOM이 2개라서 따로 추가해준다.
+			}else if ((_l.u.isChinaRegion || _l.u.c == 'C550') && name == "LAB_TYPE"){
+				//ST035 : LAB_TYPE 경우 clone후 복사하면 selected 가 없어진체로 option이 만들어 져서 .value 하면 값이 "" 되어버림.
+				//ST040 : LAB_TYPE 이 두개가 넘어온다.
+				//updateMain.jsp 안에서 select 태그에서는 name을 없애고, hidden 에만 name 을 두면 될거 같은데, 다른데 어디가 문제일지 확인하는데 시간걸려서 이대로 둔다.
+				if(document.WB_CREATE.LAB_TYPE){					
+				}else{
+					insertValue("WB_CREATE", name, this.value);
+				}
+			}else if(name == "CONTACT_FLAG"){
+				if(isEuUser){
+					setWBParameter("CONTACT_FLAG", "DATA_PROT_QUEST");
+				}
+			}else{
+				$j(this).clone().css("display", "none").appendTo($j("#WB_CREATE"));
+			}
+		});
+		
+		if(_l.currStatus != "ST035" && statusCode == "ST035"){
+			$('WB_CREATE').COMPLETE_DT.value = $j("#detailForm").find("#SERVICE_DATE").val();
+		}
+		if(_l.currStatus != "ST040" && statusCode == "ST040"){
+			insertValue("WB_CREATE", "DLVRY_DT", $j("#detailForm").find("#SERVICE_DATE").val());
+		}
+		
+		//Parameter Setting
+		insertValue("WB_CREATE", "CONSU_NAME", $j("#detailForm").find("#NAME_FIRST").val()+" "+$j("#detailForm").find("#NAME_LAST").val());
+		
+		if(isEuUser || _l.u.c == 'C820'){
+			insertValue("WB_CREATE", "CONSU_ADD1", $j("#detailForm").find("#STREET1").val());
+			insertValue("WB_CREATE", "CONSU_ADD2", $j("#detailForm").find("#STREET2").val()+" "+$j("#detailForm").find("#STREET3").val());
+		}else if(_l.u.c == 'C310' || _l.u.c == 'C330'){
+			insertValue("WB_CREATE", "CONSU_ADD1", $j("#detailForm").find("#STREET1").val());
+			insertValue("WB_CREATE", "CONSU_ADD2", $j("#detailForm").find("#STREET3").val()+" "+$j("#detailForm").find("#STREET2").val());
+		}else if(_l.u.c == 'C290'){
+			insertValue("WB_CREATE", "CONSU_ADD1", $j("#detailForm").find("#STREET1").val()+" "+$j("#detailForm").find("#STREET2").val());
+			insertValue("WB_CREATE", "CONSU_ADD2", $j("#detailForm").find("#DISTRICT").val());
+		}else if(_l.u.c == 'C750'){
+			insertValue("WB_CREATE", "CONSU_ADD1", $j("#detailForm").find("#STREET1").val()+" "+$j("#detailForm").find("#STREET2").val()+" "+$j("#detailForm").find("#STREET3").val());
+			insertValue("WB_CREATE", "CONSU_ADD2", $j("#detailForm").find("#DISTRICT").val());
+		}else{
+			insertValue("WB_CREATE", "CONSU_ADD1", $j("#detailForm").find("#STREET3").val()+" "+$j("#detailForm").find("#STREET2").val());
+			insertValue("WB_CREATE", "CONSU_ADD2", $j("#detailForm").find("#STREET1").val());
+		}
+
+		if ($j("#detailForm").find("#BP_TYPE").val() == "C001") {
+			insertValue("WB_CREATE", "CONSU_TYPE", "1");
+		}else if($j("#detailForm").find("#BP_TYPE").val() == "D001"){
+			insertValue("WB_CREATE", "CONSU_TYPE", "2");
+		}
+		
+		var consuTel = "";
+		if($j("#detailForm").find("#MOBILE_NUMBER").val() != ""){
+			consuTel = $j("#detailForm").find("#MOBILE_NUMBER").val();
+		}else if($j("#detailForm").find("#HOMEPHON_NUMBER").val() != ""){
+			consuTel = $j("#detailForm").find("#HOMEPHON_NUMBER").val();
+		}else if($j("#detailForm").find("#OFFICEPHON_NUM").val() != ""){
+			consuTel = $j("#detailForm").find("#OFFICEPHON_NUM").val();
+		}
+		$('WB_CREATE').CONSU_TEL.value = consuTel;
+		
+		if(_l.u.c == 'C750'){
+			$('WB_CREATE').COUNTRY.value = _l.u.CountryCd;
+		}
+		
+		var REPAIR_RCV_DT = _l.REPAIR_RCV_DATE;
+		
+		if(isEuUser && _l.u.c != 'C4A0'){
+			if(serviceType == "IH"){
+				REPAIR_RCV_DT = $j("#detailForm").find("#FIRST_VISIT_DATE").val().substr(0,2) != "00"?
+						$j("#detailForm").find("#FIRST_VISIT_DATE").val():_l.CREATE_DATE;
+			}else if (serviceType == "PS"){
+				if(_l.CALL_CATEGORY == "I"){
+					//그대로
+				}else{
+					REPAIR_RCV_DT = $j("#detailForm").find("#CALL_RCV_DT").val().substr(0,2) != "00"?
+							$j("#detailForm").find("#CALL_RCV_DT").val():_l.CREATE_DATE;
+				}
+			}else{
+				REPAIR_RCV_DT = $j("#detailForm").find("#UNIT_RECV_DATE").val().substr(0,2) != "00"?
+						$j("#detailForm").find("#UNIT_RECV_DATE").val():_l.CREATE_DATE;
+			}
+		}else{
+			if (REPAIR_RCV_DT.substr(0,2) == "00") {
+				if ("FC,CI,PS".indexOf(serviceType) != -1) {
+					REPAIR_RCV_DT = $j("#detailForm").find("#UNIT_RECV_DATE").val().substr(0,2) != "00"?
+							$j("#detailForm").find("#UNIT_RECV_DATE").val():_l.CREATE_DATE;
+				} else {
+					REPAIR_RCV_DT = $j("#detailForm").find("#ASC_ACK_DATE").val().substr(0,2) != "00"?
+							$j("#detailForm").find("#ASC_ACK_DATE").val():_l.CREATE_DATE;
+				}
+			}
+		}
+		
+		if (REPAIR_RCV_DT.substr(0,2) != "00") {
+			insertValue("WB_CREATE", "REPAIR_RCV_DT", REPAIR_RCV_DT);
+		}
+		
+		
+
+  /*
+  var APPOINT_DT = $j("#detailForm").find("#FIRST_APP_DATE").val().substr(0,2) != "00"?
+    $j("#detailForm").find("#FIRST_APP_DATE").val():$j("#detailForm").find("#LAST_APP_DATE").val();
+  insertValue("WB_CREATE", "APPOINT_DT", APPOINT_DT);
+  */
+		var APPOINT_DT = $j("#detailForm").find("#FIRST_APP_DATE").val().substr(0,2) != "00"?
+				$j("#detailForm").find("#FIRST_APP_DATE").val():$j("#detailForm").find("#LAST_APP_DATE").val();
+		if (APPOINT_DT.substr(0,2) != "00") {
+			insertValue("WB_CREATE", "APPOINT_DT", APPOINT_DT);
+		}
+		
+		for(var i=0;i<$j("#detailForm").find("[name=PARTS_SEQ_NO]").length;i++){
+			if($j("#detailForm").find("[name=PARTS_CODE]").eq(i).val() == ""){
+				insertValue("WB_CREATE", "POSKT", "TXT");
+			}else{
+				insertValue("WB_CREATE", "POSKT", "MAT");
+			}
+			insertValue("WB_CREATE", "USED_QTY", $j("#detailForm").find("#PARTS_QTY").eq(i).val());
+			
+			var dtDOC_NUM = $j("#detailForm").find("#INVOICE_NO").eq(i).val();
+			
+			if (_l.u.isChinaRegion){
+				if(dtDOC_NUM == undefined){
+					dtDOC_NUM = '';
+				}
+			}
+			insertValue("WB_CREATE", "DOC_NUM", dtDOC_NUM);
+			var dtDOC_ITEM = $j("#detailForm").find("#INVOICE_ITEM_NO").eq(i).val();
+			if(dtDOC_ITEM == undefined){
+				dtDOC_ITEM = '';
+			}
+			insertValue("WB_CREATE", "DOC_ITEM", dtDOC_ITEM);
+			insertValue("WB_CREATE", "UNIT_PRICE", "0");
+			insertValue("WB_CREATE", "MANUFACTURER", "");
+			
+			//insertValue("WB_CREATE", "REPAIR_LOC", $j("#detailForm").find("#REPAIR_LOC").eq(i).val());
+		}
+		
+		insertValue("WB_CREATE", "sel_def_block_nm", "");
+		insertValue("WB_CREATE", "sel_cond_nm", "");
+		insertValue("WB_CREATE", "sel_repair_nm", "");
+		insertValue("WB_CREATE", "sel_defect_nm", "");
+		insertValue("WB_CREATE", "sel_symp_nm", "");
+		
+		insertValue("WB_CREATE", "serviceProduct", "");
+		insertValue("WB_CREATE", "ASC_BILL_NO", $j("#detailForm").find("#ASC_JOB_NO").val());
+		
+		if(isCisUser){
+			$('WB_CREATE').CITY.value = $j("#detailForm").find("#STREET3").val();
+		}
+		
+		$j("#WB_CREATE").find("#STATUS").empty().append($j("<option/>").val(_l.IN_OUT_WTY == "OW"?"79":"10"));
+		
+		insertValue("WB_CREATE", "CURRENCY", _l.userCurrency);
+		
+		insertValue("WB_CREATE", "REPAIR", $j("#detailForm").find("[name=IRIS_REPAIR]").eq(0).val());
+		insertValue("WB_CREATE", "DEFECT", $j("#detailForm").find("[name=IRIS_DEFECT]").eq(0).val());
+		insertValue("WB_CREATE", "CONDI", $j("#detailForm").find("[name=IRIS_CONDI]").eq(0).val());
+		insertValue("WB_CREATE", "SYMPT", $j("#detailForm").find("[name=IRIS_SYMPT]").eq(0).val());
+		$('progressloading').stopWaiting();
+		var txt = document.WB_CREATE.MODEL.value;
+		txt = txt.replace(/\s/g, ""); 	
+
+		if (txt == '') {
+			alert("Please key in Model.");	
+			return;
+		}
+
+		if (txt.length < 5) {
+			alert('Please enter Model 4 or more characters.');	
+			return;
+		}
+				
+		if ($('WB_CREATE').STATUS.value == "") {
+			alert("Please select status.");
+			return;
+		}
+		
+		if( $('WB_CREATE').Partner.value.length == 0) {	
+			alert("Assigned should be selected.");
+			return;
+		}
+
+		if( $('WB_CREATE').CONSU_NAME.value.trim() == '' )
+		{
+			alert('Please key in Consumer Name');	
+			return;
+		}
+		
+		if(_l.u.c == 'C310' || _l.u.c == 'C370'){
+			
+			if(statusCode == "ST035" || statusCode == "ST040"){
+				if($j("#detailForm").find("#HOMEPHON_NUMBER").val() == "" 
+					&& $j("#detailForm").find("#MOBILE_NUMBER").val() == "" 
+					&& $j("#detailForm").find("#OFFICEPHON_NUM").val() == ""){
+					alert("Please Input the Cell Phone Number or Homephone Number or office.");
+					return;
+				}
+			}
+		}
+		
+
+		var notAllowed = "<>";
+		if ( containsChars($('WB_CREATE').REPAIRDESC, notAllowed) )
+    	{
+    		alert("Repair Desc Not Allowed '<' and '>'");
+    		return;
+    	}
+
+		if ( containsChars($('WB_CREATE').DEFECTDESC, notAllowed) )
+    	{
+    		alert("Defect Desc Not Allowed '<' and '>'");
+    		return;
+    	}
+    	
+		if ( containsChars($('WB_CREATE').ACCESSORY, notAllowed) )
+    	{
+    		alert("Accessory Not Allowed '<' and '>'");
+    		return;
+    	}
+
+		if ( containsChars($('WB_CREATE').REMARK, notAllowed) )
+    	{
+    		alert("Remarks Not Allowed '<' and '>'");
+    		return;
+    	}
+
+		/* Repair received date */
+		if( trim($('WB_CREATE').REPAIR_RCV_DT.value) == "") {
+			alert('Please key in Repair Received Date');	
+			return;
+		}
+		if(!onlyVerifyGERP){
+			/* Complete date */
+			if( trim($('WB_CREATE').COMPLETE_DT.value) == "") {
+				alert('Please key in Completed Date');	
+				return;
+			}
+					
+	        if( !checkDate($('WB_CREATE').COMPLETE_DT.value, _l.u.DateFormat2) ){
+				alert('Please check Date Format Completed Date');
+	        	return;
+	        }
+		}else{
+			$('WB_CREATE').COMPLETE_DT.value = "";
+		}
+        
+        var ch01 = ".0123456789";
+		var oPOSKT = document.getElementsByName("POSKT");
+		var item_type ;
+		if ( oPOSKT.length == 1 )
+		{
+			item_type = $('WB_CREATE').POSKT.value;
+			
+			if ( item_type == 'TXT' && $('WB_CREATE').REPAIR_LOC.value == '' )
+			{
+				alert('Please key in Location');	
+				return;
+			}
+			
+			if ( item_type == 'CON' && $('WB_CREATE').UNIT_PRICE.value == '' )
+			{
+				alert('Please key in Unit Price');	
+				return;
+			}
+			if ( item_type == 'MAT'){
+				$('WB_CREATE').USED_QTY.value = $('WB_CREATE').USED_QTY.value.replace(/\s/g, ""); 
+				if($('WB_CREATE').PARTS_CODE.value != ''){
+					if ( $('WB_CREATE').USED_QTY.value == '' )
+		    		{
+		    			alert('Please key in Qty');	
+		    			return;
+		    		}
+		    					
+					if ( containsCharsOnly($('WB_CREATE').USED_QTY, ch01) )
+		    		{
+		    			alert("Qty Allow digit and .(dot) only.");
+		    			return;
+		    		}
+		    		
+		    		var tmpQty;
+		    		tmpQty = parseFloat($('WB_CREATE').USED_QTY.value);
+		    		tmpQty = tmpQty.toFixed(0);
+		    		if ( tmpQty < 1 )
+		    		{
+		    			alert("[Qty] should be greater than 1.");
+		    			return;
+		    		} 
+	    		}
+				if($('WB_CREATE').USED_QTY.value != '' && $('WB_CREATE').PARTS_CODE.value == ''){	// QTY를 입력했는데 PARTS_CODE를 입력하지 않았으면 return 2015.04.22 jiw
+	    			alert("Please input \"Parts No\"");
+	    			return;
+	    		}
+			}
+		}
+		else
+		{
+			for ( var i = 0 ; i < oPOSKT.length ; i++ )
+			{
+				item_type = $('WB_CREATE').POSKT[i].value;
+				
+				if ( item_type == 'TXT' && $('WB_CREATE').REPAIR_LOC[i].value == '' )
+				{
+					alert('Please key in Location');	
+					return;
+				}
+			
+				if ( item_type == 'CON' && $('WB_CREATE').UNIT_PRICE[i].value == '' )
+				{
+					alert('Please key in Unit Price');	
+					return;
+				}
+				
+				if ( item_type == 'MAT'){
+					$('WB_CREATE').USED_QTY[i].value = $('WB_CREATE').USED_QTY[i].value.replace(/\s/g, ""); 	
+					if($('WB_CREATE').PARTS_CODE[i].value != '' ){
+						if ( $('WB_CREATE').USED_QTY[i].value == '' )
+			    		{
+							alert('Please key in Qty');	
+			    			return;
+			    		}
+		    						
+						if ( containsCharsOnly($('WB_CREATE').USED_QTY[i], ch01) )
+		    			{
+							alert("Qty Allow digit and .(dot) only.");
+		    				return;
+		    			}
+		    			
+			    		var tmpQty;
+			    		tmpQty = parseFloat($('WB_CREATE').USED_QTY[i].value);
+			    		tmpQty = tmpQty.toFixed(0);
+			    		if ( tmpQty < 1 )
+			    		{
+			    			alert("[Qty] should be greater than 1.");
+			    			return;
+			    		} 
+		    		}
+					if($('WB_CREATE').USED_QTY[i].value != '' && $('WB_CREATE').PARTS_CODE[i].value == ''){	// QTY를 입력했는데 PARTS_CODE를 입력하지 않았으면 return 2015.04.22 jiw
+		    			if($('WB_CREATE').USED_QTY[i].value != ''){
+		    				alert("Please input \"Parts No\"");
+			    			return;
+		    			}
+		    		}
+	    		}
+			}
+		}
+			
+		if(!onlyVerifyGERP){
+			if(!validWtyPartLocation()){
+				return;		
+			}		
+
+			if(_l.u.c == 'C310'){
+				if (!verify310()){
+					return;
+				}
+			}
+		}
+		
+		$('WB_CREATE').i_indicator.value = 'VERIFY_PASS_GCIC';
+		
+		$('progressloading').startWaiting();
+		$('WB_CREATE').action = urlPattern;
+		$('WB_CREATE').cmd.value = 'NewWarrantyCicCmd';
+		
+		
+		AjaxRequest(urlPatternGZIP, "WB_CREATE", setResult);
+	} 
+	function validWtyPartLocation(){
+		 
+		 var IRISRepairCode = false; 
+		 var EIARepairCode = false;
+		 var NewSAMSUNGRepairCode = false;
+		 
+	 	 var valid = true;
+		 
+	 	//중국 모두 티겟에서는 TXT 입력안하고, 워런티 수정에서 한다. 2016-12-12 법인요청에 의해서 반영됨.
+	 	//홍콩제외
+	 	if(isNewChina){
+	 		valid = true;	
+	 		return valid; 	
+	 	}
+	 		 	 
+	 	 
+	 	 
+	 	 var frm = document.WB_CREATE;
+		 var model = frm.MODEL.value;
+		 
+		 
+		 var conditionCode = frm.CONDI.value;
+		 var symptomCode = frm.SYMPT.value;
+		 var defectCode = frm.DEFECT.value;
+		 var repairCode = frm.REPAIR.value;
+		 
+		 var arrParts = cfArray(frm.PARTS_CODE);
+		 var arrPartsLoc = cfArray(frm.REPAIR_LOC);
+		 var arrPartsItem = cfArray(frm.POSKT);
+		 
+		 
+		 if(model == "" || model.indexOf("THB") == 0){
+			 valid = true;		 
+			 return valid;
+		 }		 
+		 
+		
+		var jsonObj_group = parent.jsonIrisCodeGroup_temp;
+		 if(jsonObj_group){
+				var codeGroupLength = jsonObj_group.dataLists.length;
+				for (var i = 0; i < codeGroupLength; i++) {
+					var tmp = jsonObj_group.dataLists[i].ctype;
+					if(tmp == "IRIS-R"){
+						IRISRepairCode = true; 
+						break;
+					}else if(tmp == "EIA-R"){
+						EIARepairCode = true;
+						break;
+					}else if(tmp == "NSAM-R"){
+						NewSAMSUNGRepairCode = true;
+						break;
+					}
+				}		 
+		 }else{
+			 valid = true;		 
+			 return valid;
+		 }
+		 
+
+			var locationCheck = new RepairLocationIRIS();
+			locationCheck.IRIS = IRISRepairCode;
+			locationCheck.EIA = EIARepairCode;
+			locationCheck.NSAM = NewSAMSUNGRepairCode;
+			locationCheck.condition = conditionCode;
+			locationCheck.symptom = symptomCode;
+			locationCheck.defect = defectCode;
+			locationCheck.repair = repairCode;
+			locationCheck.locations = arrPartsLoc;
+			locationCheck.parts = arrParts;
+			locationCheck.items = arrPartsItem;
+			locationCheck.wtyPage = true;
+			
+
+			if(locationCheck.isOK()){
+				valid = true;
+			}else{
+				valid = false;
+
+				if( locationCheck.isREF_WM() ){			
+					alert("Please Enter Joint Number in Part Location Field for Water & Gas Leakage. (REF,W/M)");
+				}else{
+					alert("The part location should be inputed, when Resoldering or Alignment");				
+				}
+			}
+			return valid;
+	}	
+	var ATTACHMENT_NEEDED_MODEL = false;
+	function getServiceProductOfModel(){
+
+		var url = urlPatternGZIP;
+		var data = "cmd=WtyModelSearchPopCmd&ATTACHMENT_NEEDED_MODEL=Y&model=" + document.WB_CREATE.MODEL.value;
+		$j.ajax({
+			  type: "POST",
+			  async  : false ,	/* 동기 */ 
+			  url: url,
+			  data: data,
+			  success: function(data){
+				  var len = data.dataLists.length;
+				  if(len > 0){
+					  document.WB_CREATE.serviceProduct.value = data.dataLists[0].svc_prcd;
+				  }
+				  ATTACHMENT_NEEDED_MODEL = data.ATTACHMENT_NEEDED_MODEL;
+			  }, 
+			  dataType: 'json'
+			});		
+	}	
+	function verify310() {
+		getServiceProductOfModel();
+		var svcPrd = document.WB_CREATE.serviceProduct.value;
+		var needAttachmentA3 = ( svcPrd == "CLPA1" ||  svcPrd == "MLP1");
+		var needAttachmentA4 = ATTACHMENT_NEEDED_MODEL;
+		var needAttachment = needAttachmentA3 || needAttachmentA4;
+		
+		
+		ATTACHMENT_NEEDED_MODEL = false;
+		needAttachment = false;
+		if(needAttachment){
+			if(cicAttachList.jsonObj.etFileInfoList.length < 1){
+				alert('Please upload a scan file of a printer test report (Configuration Sheet).');
+				return false;
+			}
+		}
+
+		if($("REP_TYPE").value == 'DM') {
+			if("" == _l.DISPLAY_UNIT){
+				alert('In order to select Demo Service (DM), the repair must be for a display unit and the Display Unit field needs to be selected in the Service Order Detail, Product Information.');
+				return false;
+			}
+		}
+
+		return true;
+	}	
+function setResult(response){
+	try{
+		var jsonObj_result = eval('('+response.responseText+')');
+		jsonObj_Wty_result = jsonObj_result; 
+		if (jsonObj_result != null ){
+			if ( !jsonObj_result.success ){
+				alert(_l.r.m.ERROR);
+				$('progressloading').stopWaiting();
+				return;
+			}else if(jsonObj_result.errList != null && jsonObj_result.errList.length > 0){
+				var errMsg = '';
+				for ( var k = 0 ; k < jsonObj_result.errList.length ; k++){
+					errMsg += jsonObj_result.errList[k].error_desc + '\n';
+				}
+				alert(_l.r.m.ERROR + ' : ' + errMsg);
+				
+				// PBA 비정상 교체 에러 메세지 처리 2015.09.11 jiw
+				if(errMsg.indexOf('[PBA:F]') > 0){
+					alert(_l.r.m.CHK_PBA_ABNORMAL);
+				}
+				// OCTA 비정상/Warning 메세지 처리 2017.07.21 jiw 
+				if(errMsg.indexOf('[OCTA:F]') > 0){
+					alert(_l.r.m.CHK_OCTA_ABNORMAL);
+				}
+				
+				$('progressloading').stopWaiting();
+				return;
+			}else{
+				if ( jsonObj_result.retcode != '0' ){
+					alert(jsonObj_result.retmsg);
+					$('progressloading').stopWaiting();
+					return;
+				}
+				
+				// PBA 정상 교체 메세지 처리 2015.09.11 jiw
+				// OCTA 비정상/Warning 메세지 처리 2017.07.21 jiw 
+				if (jsonObj_result.retmsg == "[PBA:S]"){
+					alert(_l.r.m.CHK_PBA_NORMAL);
+				}else if(jsonObj_result.retmsg.indexOf('OCTA:W') > 0){
+					alert(_l.r.m.CHK_OCTA_WARNING);
+				}
+				var length = jsonObj_result.etError.length;
+				var showListCount = 0;
+				if(length > 0){
+					$j('#tbodyError').html('');
+					var fileExist = $('attachTableBody').rows.length > 0;
+					for(var i=0;i<length;i++){
+						var errorCd = jsonObj_result.etError[i].error_code;
+						var errorTxt = jsonObj_result.etError[i].error_text;
+						if(_l.isVSR2Check){
+							if(jsonObj_result.etError[i].descFollowUpCode != ""){
+								if(fileExist && jsonObj_result.etError[i].msgfu == "E"){
+									continue;
+								}else{
+									var $tr	= $j("<tr></tr>");
+									$tr.append($j("<td class='td_ac'>" + errorCd + "</td>"));
+									$tr.append($j("<td style='text-align:left'>" + errorTxt + "</td>"));
+									$tr.append($j("<td class='td_ac'>" + jsonObj_result.etError[i].descFollowUpCode + "</td>"));
+									$j('#tbodyError').append($tr);
+									showListCount++;
+								}
+							}
+						}else{
+							var $tr	= $j("<tr></tr>");
+							$tr.append($j("<td class='td_ac'>" + errorCd + "</td>"));
+							$tr.append($j("<td style='text-align:left'>" + errorTxt + "</td>"));
+							$j('#tbodyError').append($tr);
+							showListCount++;
+						}
+					}
+					$j('#divErrorInfo').css('left', $j(window).width()/2-325);
+					$j('#divBlock').show();
+					$j('#divErrorInfo').show();
+					if(clickType == "2" || (_l.isVSR2Check && showListCount > 0)){
+						$j('#submitBtnTable').hide();
+					}else{	//1,3 일때는 save 가능. 단, 버튼메세지는 type 에 맞게
+						$j('#submitBtnTable').show();
+						if(clickType == "1"){
+							$j("#spanSubmitBtn").text(_l.r.c.LBL_06839);
+						}else if(clickType == "3"){
+							$j("#spanSubmitBtn").text(_l.r.c.LBL_00662);
+						}
+					}
+				}else{
+					if(clickType == "2"){						
+						var confirmStr = _l.r.m.EXT_0581 + "<br>" + _l.r.m.EXT_0582;
+						$j('#tbodyWtyNotice').html('');
+						var $tr	= $j("<tr></tr>");					
+						$tr.append($j("<td class='td_ac'>" + confirmStr + "</td>"));
+						$j('#tbodyWtyNotice').append($tr);
+						$j('#divWtyNoticeInfo').css('left', $j(window).width()/2-325);
+						$j('#divBlock').show();
+						$j('#divWtyNoticeInfo').show();
+						$j('#submitBtnTable2').hide();
+					}else{
+						var confirmStr = "Are you sure you want to change the status of this ticket to be “Goods Delivered”<br>and submit a warranty claim?";
+						if(clickType == "1"){
+							//Wty Verify 이후에 사용자에게 한번더 물어보고 ST040 & Wty Claim진행시킨다.
+							confirmStr = "Are you sure you want to change the status of this ticket to be “Goods Delivered”<br>and submit a warranty claim?";
+							$j("#spanSubmitBtn2").text(_l.r.c.LBL_06839);
+						}else if(clickType == "3"){
+							//Wty Verify 이후에 사용자에게 한번더 물어보고 ST035 진행시킨다.
+							confirmStr = "Are you sure you want to change the status of this ticket to be “Repair Completed”?";
+							$j("#spanSubmitBtn2").text(_l.r.c.LBL_00662);
+						}
+						
+						$j('#tbodyWtyNotice').html('');
+						var $tr	= $j("<tr></tr>");					
+						$tr.append($j("<td class='td_ac'>" + confirmStr + "</td>"));
+						$j('#tbodyWtyNotice').append($tr);
+						$j('#divWtyNoticeInfo').css('left', $j(window).width()/2-325);
+						$j('#divBlock').show();
+						$j('#divWtyNoticeInfo').show();
+						$j('#submitBtnTable2').show();
+					}
+										
+				}
+			}
+		}else{
+			alert(_l.r.m.ERROR);
+		}
+		
+	}catch(e){		
+	}
+	$('progressloading').stopWaiting();	
+}
+function setWBParameter(name, name2){
+	$j("#detailForm").find("[name="+ name +"]").clone().prop("disabled", false)
+	.attr("name", name2).attr("id", name2).css("display", "none").appendTo($j("#WB_CREATE"));
+}
+function clickClose() {
+	$j('#divErrorInfo').hide();
+	$j('#divWtyNoticeInfo').hide();
+	$j('#divConfirmNotice').hide();
+	$j('#divBlock').hide();
+}
+
+function clickCloseNew(isSaved) {
+	$j('#divErrorInfoNew').hide();
+	$j('#divWtyNoticeInfo').hide();
+	$j('#divBlock').hide();
+	
+	if(isSaved){
+		callDetail();
+	}
+}
+
+function checkErrorCodeInVerify(){
+	var jsonObj_result = jsonObj_Wty_result;
+	var length = jsonObj_result.etError.length;
+	if(_l.isVSR2Check && length > 0){
+		var isPass = true;
+		for(var i=0;i<length;i++){
+			toDo = jsonObj_result.etError[i].msgfu;
+			if(toDo == "B" || toDo == "E"){
+				if(toDo == "B"){
+					//입력값 체크
+					alert("You need to modify field value.");
+					isPass = false;
+					break;
+				}else if(toDo == "E"){
+					//첨부파일 유무 체크
+					if ($('attachTableBody').rows.length < 1) {
+						alert("Evidence attachment is required.");
+						isPass = false;
+						break;
+					}
+				}else if(toDo == "S"){
+					//첨부파일 유무 체크
+					alert("SAW approval is required.");
+					isPass = false;
+					break;
+				}
+			}
+		}
+				
+		if(isPass){
+			saveServiceOrder();
+		}else{
+			return;
+		}
+	}else{
+		saveServiceOrder();
+	}
+	
+}
