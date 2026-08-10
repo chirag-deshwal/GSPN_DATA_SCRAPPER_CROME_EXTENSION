@@ -492,207 +492,244 @@
           transform: translateY(-8px);
         }
       </style><style id="closerHelperStyle">
-      /* ── Main bar container ── */
-      #closerHelperPanel {
-        position: fixed;
-        bottom: 18px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 2147483640;
-        font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 0;
-        animation: chBarSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-      @keyframes chBarSlideUp {
-        from { opacity: 0; transform: translateX(-50%) translateY(18px); }
-        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
+        /* ── Main floating dock bar container (White/Light Theme) ── */
+        #closerHelperPanel {
+          position: fixed;
+          bottom: 22px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 2147483640;
+          font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
+          font-size: 13.5px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px;
+          background: rgba(255, 255, 255, 0.94);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          border-radius: 999px;
+          box-shadow: 
+            0 16px 40px rgba(15, 23, 42, 0.14),
+            0 4px 12px rgba(15, 23, 42, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+          animation: chBarSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes chBarSlideUp {
+          from { opacity: 0; transform: translateX(-50%) translateY(28px) scale(0.95); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
 
-      /* ── Shared button base ── */
-      .ch-bar-btn {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 11px 22px;
-        background: #ffffff;
-        border: 2.5px solid #1a1a1a;
-        color: #1a1a1a;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        user-select: none;
-        white-space: nowrap;
-        position: relative;
-        outline: none;
-        min-width: 150px;
-        justify-content: center;
-      }
-      .ch-bar-btn:first-child {
-        border-radius: 6px 0 0 6px;
-        border-right: 1.2px solid #1a1a1a;
-      }
-      .ch-bar-btn:nth-child(2) {
-        border-left: 1.2px solid #1a1a1a;
-        border-right: 1.2px solid #1a1a1a;
-      }
-      .ch-bar-btn:last-child {
-        border-radius: 0 6px 6px 0;
-        border-left: 1.2px solid #1a1a1a;
-        min-width: 52px;
-        padding: 11px 16px;
-      }
-      .ch-bar-btn:hover {
-        background: #f0f0f0;
-      }
-      .ch-bar-btn:active {
-        background: #e0e0e0;
-      }
-      .ch-bar-btn.ch-selected {
-        background: #e8f4fd;
-        border-color: #1a73e8;
-        color: #1a73e8;
-      }
+        /* ── Shared button base (White Theme) ── */
+        .ch-bar-btn {
+          all: unset;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 18px;
+          height: 38px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          color: #1e293b;
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.15px;
+          border-radius: 999px;
+          cursor: pointer;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+          user-select: none;
+          white-space: nowrap;
+          position: relative;
+          box-sizing: border-box;
+          justify-content: center;
+        }
+        .ch-bar-btn:hover {
+          background: #ffffff;
+          border-color: #cbd5e1;
+          color: #0f172a;
+          transform: translateY(-1.5px);
+          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        }
+        .ch-bar-btn:active {
+          transform: translateY(0) scale(0.98);
+        }
+        .ch-bar-btn.ch-selected {
+          background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+          border-color: #818cf8;
+          color: #3730a3;
+          box-shadow: 0 2px 10px rgba(99, 102, 241, 0.18);
+        }
 
-      /* ── Icon inside button ── */
-      .ch-bar-icon {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-      }
-      .ch-bar-icon svg {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-      }
+        /* Fill Button Styling */
+        #chBtnFill {
+          min-width: 44px;
+          padding: 9px 16px;
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+          color: #64748b;
+        }
+        .ch-bar-btn.ch-fill-ready {
+          background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+          border-color: #2563eb;
+          color: #ffffff;
+          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+        }
+        .ch-bar-btn.ch-fill-ready:hover {
+          background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+          box-shadow: 0 8px 24px rgba(37, 99, 235, 0.48);
+          transform: translateY(-2px) scale(1.03);
+        }
+        .ch-bar-btn.ch-fill-success {
+          background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+          border-color: #059669;
+          color: #ffffff;
+          box-shadow: 0 6px 22px rgba(16, 185, 129, 0.4);
+          animation: chPulse 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes chPulse {
+          0%   { transform: scale(1); }
+          50%  { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
 
-      /* ── Dropdown menu ── */
-      .ch-dropdown {
-        position: absolute;
-        bottom: calc(100% + 6px);
-        left: 0;
-        min-width: 220px;
-        max-height: 320px;
-        overflow-y: auto;
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        border-radius: 8px;
-        box-shadow: 0 8px 28px rgba(0,0,0,0.15);
-        z-index: 2147483641;
-        animation: chDropOpen 0.2s ease;
-      }
-      @keyframes chDropOpen {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      .ch-dropdown-item {
-        padding: 11px 18px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #333;
-        cursor: pointer;
-        transition: background 0.12s;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .ch-dropdown-item:last-child {
-        border-bottom: none;
-      }
-      .ch-dropdown-item:hover {
-        background: #f5f7fa;
-        color: #1a1a1a;
-      }
-      .ch-dropdown-item.ch-active {
-        background: #e8f4fd;
-        color: #1a73e8;
-        font-weight: 700;
-      }
-      .ch-dropdown-item .ch-check {
-        width: 16px;
-        text-align: center;
-        font-size: 13px;
-      }
-      .ch-dropdown-empty {
-        padding: 16px 18px;
-        color: #999;
-        font-size: 12px;
-        text-align: center;
-      }
-      .ch-dropdown-settings {
-        padding: 10px 18px;
-        border-top: 2px solid #eee;
-        text-align: center;
-      }
-      .ch-dropdown-settings a {
-        color: #666;
-        font-size: 11px;
-        text-decoration: none;
-        font-weight: 500;
-        cursor: pointer;
-        transition: color 0.15s;
-      }
-      .ch-dropdown-settings a:hover {
-        color: #1a73e8;
-      }
+        /* ── Icon inside button ── */
+        .ch-bar-icon {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          color: inherit;
+          opacity: 0.85;
+          transition: opacity 0.18s ease;
+        }
+        .ch-bar-btn:hover .ch-bar-icon {
+          opacity: 1;
+        }
+        .ch-bar-icon svg {
+          width: 16px;
+          height: 16px;
+          fill: currentColor;
+        }
 
-      /* ── Fill arrow button pulse ── */
-      .ch-bar-btn.ch-fill-ready {
-        background: #1a73e8;
-        border-color: #1a73e8;
-        color: #ffffff;
-      }
-      .ch-bar-btn.ch-fill-ready:hover {
-        background: #1557b0;
-        border-color: #1557b0;
-      }
-      .ch-bar-btn.ch-fill-success {
-        background: #0d9e4f;
-        border-color: #0d9e4f;
-        color: #ffffff;
-        animation: chPulse 0.4s ease;
-      }
-      @keyframes chPulse {
-        0%   { transform: scale(1); }
-        50%  { transform: scale(1.08); }
-        100% { transform: scale(1); }
-      }
+        /* ── Dropdown menu (White Theme) ── */
+        .ch-dropdown {
+          position: absolute;
+          bottom: calc(100% + 12px);
+          left: 50%;
+          transform: translateX(-50%);
+          min-width: 250px;
+          max-width: 330px;
+          max-height: 340px;
+          overflow-y: auto;
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          border-radius: 18px;
+          box-shadow: 
+            0 20px 48px rgba(15, 23, 42, 0.16),
+            0 8px 24px rgba(15, 23, 42, 0.08);
+          z-index: 2147483641;
+          animation: chDropOpen 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          padding: 6px;
+          box-sizing: border-box;
+        }
+        @keyframes chDropOpen {
+          from { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.94); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+        .ch-dropdown-item {
+          padding: 10px 14px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #334155;
+          cursor: pointer;
+          transition: all 0.18s ease;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 2px;
+        }
+        .ch-dropdown-item:last-child {
+          margin-bottom: 0;
+        }
+        .ch-dropdown-item:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+          transform: translateX(3px);
+        }
+        .ch-dropdown-item.ch-active {
+          background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+          color: #3730a3;
+          font-weight: 700;
+          border: 1px solid #a5b4fc;
+        }
+        .ch-dropdown-item .ch-check {
+          width: 16px;
+          text-align: center;
+          font-size: 13px;
+          font-weight: bold;
+        }
+        .ch-dropdown-empty {
+          padding: 16px;
+          color: #64748b;
+          font-size: 12.5px;
+          text-align: center;
+        }
+        .ch-dropdown-settings {
+          padding: 10px 12px;
+          border-top: 1px solid #e2e8f0;
+          margin-top: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .ch-dropdown-settings a {
+          color: #4f46e5;
+          font-size: 12px;
+          text-decoration: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: color 0.15s ease;
+        }
+        .ch-dropdown-settings a:hover {
+          color: #3730a3;
+        }
 
-      /* ── Toast ── */
-      .ch-toast-msg {
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #0d9e4f;
-        color: #fff;
-        padding: 10px 24px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(13,158,79,0.3);
-        z-index: 2147483641;
-        animation: chToastIn 0.3s ease;
-        font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
-      }
-      @keyframes chToastIn {
-        from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
+        /* ── Toast ── */
+        .ch-toast-msg {
+          position: fixed;
+          bottom: 84px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #059669;
+          color: #ffffff;
+          padding: 11px 24px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.15px;
+          box-shadow: 0 10px 30px rgba(5, 150, 105, 0.35);
+          z-index: 2147483641;
+          animation: chToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
+        }
+        @keyframes chToastIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.9); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
 
-      /* ── Click-away overlay ── */
-      .ch-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 2147483639;
-        background: transparent;
-      }
-    </style></head>
+        /* ── Click-away overlay ── */
+        .ch-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 2147483639;
+          background: transparent;
+        }
+      </style></head>
 
 <body style="background-color: transparent; height:100%;">
 <form id="formHelp" method="post" action="https://biz2.samsungcsportal.com/gspn/operate.do">

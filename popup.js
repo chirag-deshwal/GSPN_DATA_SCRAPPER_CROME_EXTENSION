@@ -135,6 +135,70 @@ function cleanColumnsAndData(data, columns) {
   }
 }
 
+// Universal Clipboard Copy helper (supports iframe embedded context & fallbacks)
+async function copyToClipboard(text, html) {
+  try {
+    if (html && typeof ClipboardItem !== 'undefined' && navigator.clipboard && navigator.clipboard.write) {
+      const items = {
+        'text/html': new Blob([html], { type: 'text/html' })
+      };
+      if (text) {
+        items['text/plain'] = new Blob([text], { type: 'text/plain' });
+      }
+      await navigator.clipboard.write([new ClipboardItem(items)]);
+      return true;
+    } else if (text && navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) {
+    console.warn('navigator.clipboard API write failed, attempting document.execCommand fallback:', e);
+  }
+
+  try {
+    const onCopy = (e) => {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      if (html) {
+        e.clipboardData.setData('text/html', html);
+      }
+      if (text) {
+        e.clipboardData.setData('text/plain', text);
+      }
+    };
+    document.addEventListener('copy', onCopy, { capture: true, once: true });
+
+    const container = document.createElement('div');
+    container.contentEditable = 'true';
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    if (html) {
+      container.innerHTML = html;
+    } else {
+      container.innerText = text || '';
+    }
+    document.body.appendChild(container);
+
+    const range = document.createRange();
+    range.selectNodeContents(container);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    container.focus();
+
+    const success = document.execCommand('copy');
+    selection.removeAllRanges();
+    document.body.removeChild(container);
+
+    if (success) return true;
+  } catch (err) {
+    console.warn('execCommand copy failed:', err);
+  }
+
+  throw new Error('Clipboard copy not permitted in current browser context.');
+}
+
 // Parse short date and compute aging
 function parseShortDateFromAscAssigned(value) {
   if (!value) return null;
@@ -142,40 +206,28 @@ function parseShortDateFromAscAssigned(value) {
   if (str.includes('00.00.0000') || str.includes('00/00/0000') || str.includes('00-00-0000')) {
     return null;
   }
-  // Try common date patterns: dd/mm/yyyy or yyyy-mm-dd or mm/dd/yyyy
-  const dateMatch = str.match(/(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})/);
+  // Support common date patterns: dd/mm/yyyy, dd.mm.yyyy, yyyy-mm-dd, yyyy.mm.dd, dd-mm-yyyy
+  const dateMatch = str.match(/(\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4})/);
   if (!dateMatch) return null;
   const d = dateMatch[1];
-  if (d.indexOf('-') >= 0) {
-    // Possible yyyy-mm-dd or dd-mm-yyyy; prefer yyyy-mm-dd when year has 4 digits at start
-    const parts = d.split('-');
-    if (parts[0].length === 4) {
-      // yyyy-mm-dd
-      const y = parseInt(parts[0], 10);
-      const m = parseInt(parts[1], 10);
-      const day = parseInt(parts[2], 10);
-      return new Date(y, m - 1, day);
-    } else {
-      // assume dd-mm-yyyy
-      const day = parseInt(parts[0], 10);
-      const m = parseInt(parts[1], 10);
-      const y = parseInt(parts[2], 10);
-      return new Date(y, m - 1, day);
-    }
-  }
+  let parts;
+  if (d.includes('-')) parts = d.split('-');
+  else if (d.includes('.')) parts = d.split('.');
+  else if (d.includes('/')) parts = d.split('/');
+  else return null;
 
-  if (d.indexOf('/') >= 0) {
-    const parts = d.split('/');
-    // assume dd/mm/yyyy (common in examples)
-    if (parts[2] && parts[2].length === 4) {
-      const day = parseInt(parts[0], 10);
-      const m = parseInt(parts[1], 10);
-      const y = parseInt(parts[2], 10);
-      return new Date(y, m - 1, day);
-    }
-    // fallback: try mm/dd/yyyy
-    const m = parseInt(parts[0], 10);
-    const day = parseInt(parts[1], 10);
+  if (parts.length !== 3) return null;
+
+  if (parts[0].length === 4) {
+    // yyyy-mm-dd or yyyy.mm.dd
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    return new Date(y, m - 1, day);
+  } else if (parts[2] && parts[2].length === 4) {
+    // dd/mm/yyyy or dd.mm.yyyy or dd-mm-yyyy
+    const day = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
     const y = parseInt(parts[2], 10);
     return new Date(y, m - 1, day);
   }
@@ -219,7 +271,9 @@ function ensureAscAssignedShortAndAging(dataArray, columnsArray) {
   const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
   for (const rec of dataArray) {
-    const raw = rec['ASC Assigned'] || rec['ASC_Assigned'] || rec['ASCAssigned'] || '';
+    const raw = rec['ASC Assigned'] || rec['ASC_Assigned'] || rec['ASCAssigned'] ||
+                rec['Appointment Date'] || rec['Customer Preferred Date'] || rec['Purchase Date'] ||
+                rec['Call Received'] || rec['1st Visit'] || rec['Repair Completed'] || rec['Job Information(Date)'] || '';
     const parsed = parseShortDateFromAscAssigned(raw);
     if (parsed && !isNaN(parsed.getTime())) {
       rec['Short ASC Assigned Date'] = formatDateDDMMYYYY(parsed);
@@ -646,7 +700,7 @@ if (btnCopyPreset) {
       const jsonStr = JSON.stringify(presetData, null, 2);
 
       // 1. Copy JSON string to clipboard
-      await navigator.clipboard.writeText(jsonStr);
+      await copyToClipboard(jsonStr, null);
 
       // 2. Download as [Service Order No].json
       const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -1751,12 +1805,7 @@ if (btnCopyExcel111) {
       statusText111.textContent = 'Copying to clipboard...';
 
       const excelContent = generateExcelHTML(scrapedData, scrapedColumns);
-
-      const clipboardItemInput = new ClipboardItem({
-        'text/html': new Blob([excelContent], { type: 'text/html' })
-      });
-
-      await navigator.clipboard.write([clipboardItemInput]);
+      await copyToClipboard(excelContent, excelContent);
 
       statusText111.textContent = `Copied ${scrapedData.length} tickets to clipboard`;
 
@@ -1883,12 +1932,7 @@ if (btnCopy) {
       setStatus('loading', 'Copying to clipboard...');
 
       const excelContent = generateExcelHTML(scrapedData, scrapedColumns);
-
-      const clipboardItemInput = new ClipboardItem({
-        'text/html': new Blob([excelContent], { type: 'text/html' })
-      });
-
-      await navigator.clipboard.write([clipboardItemInput]);
+      await copyToClipboard(excelContent, excelContent);
 
       setStatus('success', `Copied ${scrapedData.length} tickets to clipboard`);
 

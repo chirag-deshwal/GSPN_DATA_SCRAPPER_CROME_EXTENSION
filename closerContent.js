@@ -5,7 +5,7 @@
  * When the user selects Product + Work Type and clicks Fill, it auto-fills
  * text fields and auto-selects dropdown values on the page (works across iframes).
  */
-(function() {
+(function () {
   'use strict';
 
   const LOG_SOURCE = 'closerContent';
@@ -31,7 +31,7 @@
         message,
         timestamp: new Date().toISOString()
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   ['log', 'info', 'warn', 'error', 'debug'].forEach((method) => {
@@ -109,25 +109,24 @@
           overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); z-index: 2147483645; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; font-family: "Segoe UI", Inter, Arial, sans-serif;';
 
           const modalContainer = document.createElement('div');
-          modalContainer.style.cssText = `width: ${initialWidth}; max-width: ${initialMaxWidth}; height: ${initialHeight}; max-height: ${initialMaxHeight}; background: #ffffff; border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; transition: all 0.2s ease;`;
+          modalContainer.style.cssText = 'width: ' + initialWidth + '; max-width: ' + initialMaxWidth + '; height: ' + initialHeight + '; max-height: ' + initialMaxHeight + '; background: #ffffff; border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; transition: all 0.2s ease;';
 
           const headerTitle = getDialogTitle(url, targetName);
 
-          modalContainer.innerHTML = \`
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; font-size: 13px; font-weight: 700; user-select: none;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 15px;">📋</span>
-                <span>\${headerTitle}</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" class="gspn-modal-max-btn" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;" title="Maximize/Restore">🗖</button>
-                <button type="button" class="gspn-modal-close-btn" style="background: rgba(239,68,68,0.85); border: none; color: white; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="Close">×</button>
-              </div>
-            </div>
-            <div style="flex: 1; width: 100%; height: 100%; position: relative; background: #f8fafc;">
-              <iframe name="\${safeTarget}" id="gspnModalIframe_\${safeTarget}" style="width: 100%; height: 100%; border: none; display: block;" \${url ? \`src="\${url}"\` : ''}></iframe>
-            </div>
-          \`;
+          modalContainer.innerHTML =
+            '<div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; font-size: 13px; font-weight: 700; user-select: none;">' +
+              '<div style="display: flex; align-items: center; gap: 8px;">' +
+                '<span style="font-size: 15px;">📋</span>' +
+                '<span>' + headerTitle + '</span>' +
+              '</div>' +
+              '<div style="display: flex; align-items: center; gap: 6px;">' +
+                '<button type="button" class="gspn-modal-max-btn" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;" title="Maximize/Restore">🗖</button>' +
+                '<button type="button" class="gspn-modal-close-btn" style="background: rgba(239,68,68,0.85); border: none; color: white; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="Close">×</button>' +
+              '</div>' +
+            '</div>' +
+            '<div style="flex: 1; width: 100%; height: 100%; position: relative; background: #f8fafc;">' +
+              '<iframe name="' + safeTarget + '" id="gspnModalIframe_' + safeTarget + '" style="width: 100%; height: 100%; border: none; display: block;"' + (url ? ' src="' + url + '"' : '') + '></iframe>' +
+            '</div>';
 
           overlay.appendChild(modalContainer);
           document.body.appendChild(overlay);
@@ -558,9 +557,9 @@
 
     function findEl(idOrName) {
       const el = document.getElementById(idOrName)
-          || document.querySelector(`[name="${idOrName}"]`)
-          || document.querySelector(`[id*="${idOrName}" i]`)
-          || document.querySelector(`[name*="${idOrName}" i]`);
+        || document.querySelector(`[name="${idOrName}"]`)
+        || document.querySelector(`[id*="${idOrName}" i]`)
+        || document.querySelector(`[name*="${idOrName}" i]`);
       console.log(`${LOG}   findEl('${idOrName}') → ${el ? `FOUND <${el.tagName} id=${el.id}>` : 'NOT FOUND'}`);
       return el;
     }
@@ -651,25 +650,25 @@
     const ops = [];
     function q(fn) { ops.push(fn); }
 
-    q(() => tryText(fm.repairDetail,  'REPAIRDESC_L',  preset.repairDetailDesc));
+    q(() => tryText(fm.repairDetail, 'REPAIRDESC_L', preset.repairDetailDesc));
     q(() => setTextValue('REPAIR_DESC', preset.repairDetailDesc));
-    q(() => tryText(fm.defectDetail,  'DEFECTDESC_L',  preset.defectDetailDesc));
+    q(() => tryText(fm.defectDetail, 'DEFECTDESC_L', preset.defectDetailDesc));
     q(() => setTextValue('DEFECT_DESC', preset.defectDetailDesc));
     q(() => tryText(fm.statusComment, 'STATUS_COMMENT', preset.statusComment));
-    q(() => tryText(fm.remark,        'REMARK',         preset.remark));
-    q(() => tryText(fm.editText,      'EDITEXT',        preset.editText || preset.repairDetailDesc));
-    q(() => trySelect(fm.defectBlock, 'DEF_BLK',   preset.defectBlock));
-    q(() => trySelect(fm.condition,   'IRIS_CONDI', preset.conditionCode));
-    q(() => trySelect(fm.defectType,  'LAB_TYPE',   preset.defectType));
-    q(() => trySelect(fm.reasonCode,  'REASON',     preset.reasonCode));
-    q(() => trySelect(fm.defectCode,  'IRIS_DEFECT', preset.defectCode));
+    q(() => tryText(fm.remark, 'REMARK', preset.remark));
+    q(() => tryText(fm.editText, 'EDITEXT', preset.editText || preset.repairDetailDesc));
+    q(() => trySelect(fm.defectBlock, 'DEF_BLK', preset.defectBlock));
+    q(() => trySelect(fm.condition, 'IRIS_CONDI', preset.conditionCode));
+    q(() => trySelect(fm.defectType, 'LAB_TYPE', preset.defectType));
+    q(() => trySelect(fm.reasonCode, 'REASON', preset.reasonCode));
+    q(() => trySelect(fm.defectCode, 'IRIS_DEFECT', preset.defectCode));
     q(() => { if (preset.symptomQCode) setSelectValue('IRIS_SYMPT_QCODE', preset.symptomQCode); });
-    q(() => { if (preset.repairQCode)  setSelectValue('IRIS_REPAIR_QCODE', preset.repairQCode); });
+    q(() => { if (preset.repairQCode) setSelectValue('IRIS_REPAIR_QCODE', preset.repairQCode); });
 
     console.log(`${LOG} ── Running ${ops.length} ops...`);
     let delay = 0;
     ops.forEach((fn, i) => {
-      setTimeout(() => { console.log(`${LOG} step ${i+1}/${ops.length}`); fn(); }, delay);
+      setTimeout(() => { console.log(`${LOG} step ${i + 1}/${ops.length}`); fn(); }, delay);
       delay += 30 + Math.floor(Math.random() * 50);
     });
 
@@ -703,207 +702,244 @@
       const style = document.createElement('style');
       style.id = 'closerHelperStyle';
       style.textContent = `
-        /* ── Main bar container ── */
+        /* ── Main floating dock bar container (White/Light Theme) ── */
         #closerHelperPanel {
           position: fixed;
-          bottom: 18px;
+          bottom: 22px;
           left: 50%;
           transform: translateX(-50%);
           z-index: 2147483640;
-          font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 0;
-        animation: chBarSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-      @keyframes chBarSlideUp {
-        from { opacity: 0; transform: translateX(-50%) translateY(18px); }
-        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
+          font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
+          font-size: 13.5px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px;
+          background: rgba(255, 255, 255, 0.94);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          border-radius: 999px;
+          box-shadow: 
+            0 16px 40px rgba(15, 23, 42, 0.14),
+            0 4px 12px rgba(15, 23, 42, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+          animation: chBarSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes chBarSlideUp {
+          from { opacity: 0; transform: translateX(-50%) translateY(28px) scale(0.95); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
 
-      /* ── Shared button base ── */
-      .ch-bar-btn {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 11px 22px;
-        background: #ffffff;
-        border: 2.5px solid #1a1a1a;
-        color: #1a1a1a;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        user-select: none;
-        white-space: nowrap;
-        position: relative;
-        outline: none;
-        min-width: 150px;
-        justify-content: center;
-      }
-      .ch-bar-btn:first-child {
-        border-radius: 6px 0 0 6px;
-        border-right: 1.2px solid #1a1a1a;
-      }
-      .ch-bar-btn:nth-child(2) {
-        border-left: 1.2px solid #1a1a1a;
-        border-right: 1.2px solid #1a1a1a;
-      }
-      .ch-bar-btn:last-child {
-        border-radius: 0 6px 6px 0;
-        border-left: 1.2px solid #1a1a1a;
-        min-width: 52px;
-        padding: 11px 16px;
-      }
-      .ch-bar-btn:hover {
-        background: #f0f0f0;
-      }
-      .ch-bar-btn:active {
-        background: #e0e0e0;
-      }
-      .ch-bar-btn.ch-selected {
-        background: #e8f4fd;
-        border-color: #1a73e8;
-        color: #1a73e8;
-      }
+        /* ── Shared button base (White Theme) ── */
+        .ch-bar-btn {
+          all: unset;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 18px;
+          height: 38px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          color: #1e293b;
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.15px;
+          border-radius: 999px;
+          cursor: pointer;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+          user-select: none;
+          white-space: nowrap;
+          position: relative;
+          box-sizing: border-box;
+          justify-content: center;
+        }
+        .ch-bar-btn:hover {
+          background: #ffffff;
+          border-color: #cbd5e1;
+          color: #0f172a;
+          transform: translateY(-1.5px);
+          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        }
+        .ch-bar-btn:active {
+          transform: translateY(0) scale(0.98);
+        }
+        .ch-bar-btn.ch-selected {
+          background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+          border-color: #818cf8;
+          color: #3730a3;
+          box-shadow: 0 2px 10px rgba(99, 102, 241, 0.18);
+        }
 
-      /* ── Icon inside button ── */
-      .ch-bar-icon {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-      }
-      .ch-bar-icon svg {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-      }
+        /* Fill Button Styling */
+        #chBtnFill {
+          min-width: 44px;
+          padding: 9px 16px;
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+          color: #64748b;
+        }
+        .ch-bar-btn.ch-fill-ready {
+          background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+          border-color: #2563eb;
+          color: #ffffff;
+          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+        }
+        .ch-bar-btn.ch-fill-ready:hover {
+          background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+          box-shadow: 0 8px 24px rgba(37, 99, 235, 0.48);
+          transform: translateY(-2px) scale(1.03);
+        }
+        .ch-bar-btn.ch-fill-success {
+          background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+          border-color: #059669;
+          color: #ffffff;
+          box-shadow: 0 6px 22px rgba(16, 185, 129, 0.4);
+          animation: chPulse 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes chPulse {
+          0%   { transform: scale(1); }
+          50%  { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
 
-      /* ── Dropdown menu ── */
-      .ch-dropdown {
-        position: absolute;
-        bottom: calc(100% + 6px);
-        left: 0;
-        min-width: 220px;
-        max-height: 320px;
-        overflow-y: auto;
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        border-radius: 8px;
-        box-shadow: 0 8px 28px rgba(0,0,0,0.15);
-        z-index: 2147483641;
-        animation: chDropOpen 0.2s ease;
-      }
-      @keyframes chDropOpen {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      .ch-dropdown-item {
-        padding: 11px 18px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #333;
-        cursor: pointer;
-        transition: background 0.12s;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .ch-dropdown-item:last-child {
-        border-bottom: none;
-      }
-      .ch-dropdown-item:hover {
-        background: #f5f7fa;
-        color: #1a1a1a;
-      }
-      .ch-dropdown-item.ch-active {
-        background: #e8f4fd;
-        color: #1a73e8;
-        font-weight: 700;
-      }
-      .ch-dropdown-item .ch-check {
-        width: 16px;
-        text-align: center;
-        font-size: 13px;
-      }
-      .ch-dropdown-empty {
-        padding: 16px 18px;
-        color: #999;
-        font-size: 12px;
-        text-align: center;
-      }
-      .ch-dropdown-settings {
-        padding: 10px 18px;
-        border-top: 2px solid #eee;
-        text-align: center;
-      }
-      .ch-dropdown-settings a {
-        color: #666;
-        font-size: 11px;
-        text-decoration: none;
-        font-weight: 500;
-        cursor: pointer;
-        transition: color 0.15s;
-      }
-      .ch-dropdown-settings a:hover {
-        color: #1a73e8;
-      }
+        /* ── Icon inside button ── */
+        .ch-bar-icon {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          color: inherit;
+          opacity: 0.85;
+          transition: opacity 0.18s ease;
+        }
+        .ch-bar-btn:hover .ch-bar-icon {
+          opacity: 1;
+        }
+        .ch-bar-icon svg {
+          width: 16px;
+          height: 16px;
+          fill: currentColor;
+        }
 
-      /* ── Fill arrow button pulse ── */
-      .ch-bar-btn.ch-fill-ready {
-        background: #1a73e8;
-        border-color: #1a73e8;
-        color: #ffffff;
-      }
-      .ch-bar-btn.ch-fill-ready:hover {
-        background: #1557b0;
-        border-color: #1557b0;
-      }
-      .ch-bar-btn.ch-fill-success {
-        background: #0d9e4f;
-        border-color: #0d9e4f;
-        color: #ffffff;
-        animation: chPulse 0.4s ease;
-      }
-      @keyframes chPulse {
-        0%   { transform: scale(1); }
-        50%  { transform: scale(1.08); }
-        100% { transform: scale(1); }
-      }
+        /* ── Dropdown menu (White Theme) ── */
+        .ch-dropdown {
+          position: absolute;
+          bottom: calc(100% + 12px);
+          left: 50%;
+          transform: translateX(-50%);
+          min-width: 250px;
+          max-width: 330px;
+          max-height: 340px;
+          overflow-y: auto;
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          border-radius: 18px;
+          box-shadow: 
+            0 20px 48px rgba(15, 23, 42, 0.16),
+            0 8px 24px rgba(15, 23, 42, 0.08);
+          z-index: 2147483641;
+          animation: chDropOpen 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          padding: 6px;
+          box-sizing: border-box;
+        }
+        @keyframes chDropOpen {
+          from { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.94); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+        .ch-dropdown-item {
+          padding: 10px 14px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #334155;
+          cursor: pointer;
+          transition: all 0.18s ease;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 2px;
+        }
+        .ch-dropdown-item:last-child {
+          margin-bottom: 0;
+        }
+        .ch-dropdown-item:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+          transform: translateX(3px);
+        }
+        .ch-dropdown-item.ch-active {
+          background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+          color: #3730a3;
+          font-weight: 700;
+          border: 1px solid #a5b4fc;
+        }
+        .ch-dropdown-item .ch-check {
+          width: 16px;
+          text-align: center;
+          font-size: 13px;
+          font-weight: bold;
+        }
+        .ch-dropdown-empty {
+          padding: 16px;
+          color: #64748b;
+          font-size: 12.5px;
+          text-align: center;
+        }
+        .ch-dropdown-settings {
+          padding: 10px 12px;
+          border-top: 1px solid #e2e8f0;
+          margin-top: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .ch-dropdown-settings a {
+          color: #4f46e5;
+          font-size: 12px;
+          text-decoration: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: color 0.15s ease;
+        }
+        .ch-dropdown-settings a:hover {
+          color: #3730a3;
+        }
 
-      /* ── Toast ── */
-      .ch-toast-msg {
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #0d9e4f;
-        color: #fff;
-        padding: 10px 24px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(13,158,79,0.3);
-        z-index: 2147483641;
-        animation: chToastIn 0.3s ease;
-        font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
-      }
-      @keyframes chToastIn {
-        from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
+        /* ── Toast ── */
+        .ch-toast-msg {
+          position: fixed;
+          bottom: 84px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #059669;
+          color: #ffffff;
+          padding: 11px 24px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.15px;
+          box-shadow: 0 10px 30px rgba(5, 150, 105, 0.35);
+          z-index: 2147483641;
+          animation: chToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
+        }
+        @keyframes chToastIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.9); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
 
-      /* ── Click-away overlay ── */
-      .ch-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 2147483639;
-        background: transparent;
-      }
-    `;
+        /* ── Click-away overlay ── */
+        .ch-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 2147483639;
+          background: transparent;
+        }
+      `;
       headEl.appendChild(style);
     }
 
@@ -921,7 +957,8 @@
     let productConfig = {};       // loaded from products_keys.json
     let selectedProduct = null;   // product key e.g. 'AC'
     let selectedWorkType = null;  // work type key e.g. 'installation'
-    let activeDropdown = null;    // 'product' | 'work' | null
+    let selectedPreset = null;    // active user preset object
+    let activeDropdown = null;    // 'product' | 'work' | 'preset' | null
 
     buildBar();
     loadProductConfig();
@@ -944,16 +981,45 @@
       });
     }
 
-    /* ─── Get work types for selected product ─── */
-    function getWorkTypes() {
-      if (!selectedProduct || !productConfig[selectedProduct]) return [];
-      const wt = productConfig[selectedProduct].workTypes || {};
-      return Object.keys(wt).map(key => ({ code: key, label: wt[key].label }));
+    function getWorkTypeLabel(code, defaultLabel) {
+      const codeUpper = (code || '').toUpperCase().replace(/[^A-Z]/g, '');
+      if (codeUpper === 'INSTALLATION' || defaultLabel === 'Installation') return 'Installation (II)';
+      if (codeUpper === 'REPAIR' || defaultLabel === 'Repair') return 'Repair (IH)';
+      if (codeUpper.includes('CUSTOMERCARE') || defaultLabel === 'Customer Care') return 'Customer Care (CC)';
+      if (codeUpper.includes('DEMONSTRATION') || codeUpper === 'DEMO' || defaultLabel === 'Demonstration') return 'Demonstration (DM)';
+      if (codeUpper.includes('STOCKREPAIR') || defaultLabel === 'Stock Repair') return 'Stock Repair (SR)';
+      return defaultLabel || code;
     }
 
-    /* ─── Build the three-button bar ─── */
+    const UNIVERSAL_WORK_TYPES = [
+      { code: 'installation', label: 'Installation (II)' },
+      { code: 'repair', label: 'Repair (IH)' },
+      { code: 'customer_care', label: 'Customer Care (CC)' },
+      { code: 'demonstration', label: 'Demonstration (DM)' },
+      { code: 'stock_repair', label: 'Stock Repair (SR)' }
+    ];
+
+    /* ─── Get work types for selected product ─── */
+    function getWorkTypes() {
+      if (!selectedProduct) return [];
+      const wt = (productConfig[selectedProduct] && productConfig[selectedProduct].workTypes) ? productConfig[selectedProduct].workTypes : {};
+
+      const list = UNIVERSAL_WORK_TYPES.map(item => ({ ...item }));
+
+      // Append any additional product-specific work types from JSON if not present
+      Object.keys(wt).forEach(key => {
+        if (!list.some(item => item.code === key)) {
+          list.push({
+            code: key,
+            label: getWorkTypeLabel(key, wt[key].label)
+          });
+        }
+      });
+      return list;
+    }
+
+    /* ─── Build the four-button bar ─── */
     function buildBar() {
-      // Close any overlay
       closeDropdowns();
 
       const productDef = productConfig[selectedProduct];
@@ -961,23 +1027,30 @@
       const workTypes = getWorkTypes();
       const workObj = workTypes.find(w => w.code === selectedWorkType);
       const workLabel = workObj ? workObj.label : 'Work Type';
+      const presetLabel = selectedPreset ? selectedPreset.name : 'Presets';
 
       const isFillReady = selectedProduct && selectedWorkType;
 
       panel.innerHTML = `
-        <button class="ch-bar-btn ${selectedWorkType ? 'ch-selected' : ''}" id="chBtnWork">
-          <span>${escapeHtml(workLabel)}</span>
-          <span class="ch-bar-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.49.49 0 0 0 .12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.05.24.26.42.49.42h4c.24 0 .44-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1a.5.5 0 0 0 .61-.22l2-3.46a.49.49 0 0 0-.12-.64l-2.11-1.65z"/></svg>
-          </span>
-        </button>
-        <button class="ch-bar-btn ${selectedProduct ? 'ch-selected' : ''}" id="chBtnProduct">
+        <button class="ch-bar-btn ${selectedProduct ? 'ch-selected' : ''}" id="chBtnProduct" title="Select Product">
           <span>${escapeHtml(productLabel)}</span>
           <span class="ch-bar-icon">
             <svg viewBox="0 0 24 24"><path d="M13.6 4.2c-.2-.5-.4-.7-.7-.7-.3 0-.5.2-.7.7L9.8 9.5l-5.6.5c-.5 0-.8.2-.9.5-.1.3 0 .6.4.9l4.2 3.6-1.3 5.5c-.1.5 0 .8.3 1 .2.1.5.1.9-.1l4.8-2.9 4.8 2.9c.4.2.7.2.9.1.3-.2.4-.5.3-1l-1.3-5.5 4.2-3.6c.4-.3.5-.6.4-.9-.1-.3-.4-.5-.9-.5l-5.6-.5-2.4-5.3z"/></svg>
           </span>
         </button>
-        <button class="ch-bar-btn ${isFillReady ? 'ch-fill-ready' : ''}" id="chBtnFill" title="Apply autofill">
+        <button class="ch-bar-btn ${selectedWorkType ? 'ch-selected' : ''}" id="chBtnWork" title="Select Work Type">
+          <span>${escapeHtml(workLabel)}</span>
+          <span class="ch-bar-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.49.49 0 0 0 .12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.05.24.26.42.49.42h4c.24 0 .44-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1a.5.5 0 0 0 .61-.22l2-3.46a.49.49 0 0 0-.12-.64l-2.11-1.65z"/></svg>
+          </span>
+        </button>
+        <button class="ch-bar-btn ${selectedPreset ? 'ch-selected' : ''}" id="chBtnPreset" title="Select Saved Preset">
+          <span>${escapeHtml(presetLabel)}</span>
+          <span class="ch-bar-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </span>
+        </button>
+        <button class="ch-bar-btn ${isFillReady ? 'ch-fill-ready' : ''}" id="chBtnFill" title="Apply Autofill">
           <span class="ch-bar-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 6 15 12 9 18"/>
@@ -995,6 +1068,10 @@
         e.stopPropagation();
         toggleDropdown('work');
       });
+      document.getElementById('chBtnPreset').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown('preset');
+      });
       document.getElementById('chBtnFill').addEventListener('click', (e) => {
         e.stopPropagation();
         handleFill();
@@ -1010,9 +1087,9 @@
       closeDropdowns();
       activeDropdown = which;
 
-      const btn = which === 'product'
-        ? document.getElementById('chBtnProduct')
-        : document.getElementById('chBtnWork');
+      let btn = document.getElementById('chBtnProduct');
+      if (which === 'work') btn = document.getElementById('chBtnWork');
+      if (which === 'preset') btn = document.getElementById('chBtnPreset');
 
       const dropdown = document.createElement('div');
       dropdown.className = 'ch-dropdown';
@@ -1024,7 +1101,7 @@
           dropdown.innerHTML = `
             <div class="ch-dropdown-empty">No products loaded.<br>Check products_keys.json</div>
             <div class="ch-dropdown-settings">
-              <a id="chDdSettings">⚙ Open Settings</a>
+              <a id="chDdSettings">⚙ Manage</a>
             </div>
           `;
         } else {
@@ -1037,11 +1114,11 @@
             </div>`;
           }).join('') + `
             <div class="ch-dropdown-settings">
-              <a id="chDdSettings">⚙ Manage Presets</a>
+              <a id="chDdSettings">⚙ Manage</a>
             </div>
           `;
         }
-      } else {
+      } else if (which === 'work') {
         const workTypes = getWorkTypes();
         if (workTypes.length === 0) {
           dropdown.innerHTML = `
@@ -1053,7 +1130,47 @@
               <span class="ch-check">${w.code === selectedWorkType ? '✓' : ''}</span>
               ${escapeHtml(w.label)}
             </div>
-          `).join('');
+          `).join('') + `
+            <div class="ch-dropdown-settings">
+              <a id="chDdSettings">⚙ Manage</a>
+            </div>
+          `;
+        }
+      } else if (which === 'preset') {
+        let matchingPresets = presets;
+        if (selectedProduct) {
+          matchingPresets = presets.filter(p => p.product === selectedProduct);
+        }
+        if (matchingPresets.length === 0) {
+          dropdown.innerHTML = `
+            <div class="ch-dropdown-empty">
+              ${selectedProduct ? `No presets for ${escapeHtml(selectedProduct)}` : 'No presets created yet'}<br>
+              <span style="font-size:11px; color:#64748b;">Create presets in Settings</span>
+            </div>
+            <div class="ch-dropdown-settings">
+              <a id="chDdSettings">⚙ Manage</a>
+              <span style="opacity:0.35; color:#94a3b8; margin:0 4px;">|</span>
+              <a id="chDdCopyJson" title="Extract and download focused SO details as Preset JSON">📋 COPY</a>
+            </div>
+          `;
+        } else {
+          dropdown.innerHTML = matchingPresets.map(p => {
+            const isAct = selectedPreset && selectedPreset.id === p.id;
+            return `
+            <div class="ch-dropdown-item ${isAct ? 'ch-active' : ''}" data-preset-id="${p.id}">
+              <span class="ch-check">${isAct ? '✓' : ''}</span>
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <span style="font-weight:600; color:#0f172a;">${escapeHtml(p.name)}</span>
+                <span style="font-size:11px; color:#64748b;">${escapeHtml(p.product || 'All')} • ${escapeHtml(getWorkTypeLabel(p.workType, p.workType))}</span>
+              </div>
+            </div>`;
+          }).join('') + `
+            <div class="ch-dropdown-settings">
+              <a id="chDdSettings">⚙ Manage</a>
+              <span style="opacity:0.35; color:#94a3b8; margin:0 4px;">|</span>
+              <a id="chDdCopyJson" title="Extract and download focused SO details as Preset JSON">📋 COPY</a>
+            </div>
+          `;
         }
       }
 
@@ -1074,8 +1191,22 @@
           if (which === 'product') {
             selectedProduct = el.dataset.id;
             selectedWorkType = null; // reset work type when product changes
-          } else {
+            selectedPreset = null;
+          } else if (which === 'work') {
             selectedWorkType = el.dataset.code;
+            selectedPreset = null;
+          } else if (which === 'preset') {
+            const presetId = el.dataset.presetId;
+            const foundPreset = presets.find(p => p.id === presetId);
+            if (foundPreset) {
+              selectedPreset = foundPreset;
+              selectedProduct = foundPreset.product || selectedProduct;
+              selectedWorkType = foundPreset.workType || selectedWorkType;
+              closeDropdowns();
+              buildBar();
+              handleFill(foundPreset);
+              return;
+            }
           }
           closeDropdowns();
           buildBar();
@@ -1091,6 +1222,17 @@
           chrome.runtime.sendMessage({ action: 'openCloserSettings' });
         });
       }
+
+      // Copy JSON link
+      const copyJsonLink = dropdown.querySelector('#chDdCopyJson');
+      if (copyJsonLink) {
+        copyJsonLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          closeDropdowns();
+          extractCurrentSoPreset();
+        });
+      }
     }
 
     /* ─── Close dropdowns ─── */
@@ -1103,46 +1245,34 @@
     }
 
     /* ─── Handle Fill ─── */
-    function handleFill() {
-      if (!selectedProduct) {
+    function handleFill(explicitPreset) {
+      const targetProduct = explicitPreset?.product || selectedProduct;
+      const targetWorkType = explicitPreset?.workType || selectedWorkType;
+
+      if (!targetProduct) {
         showToast('⚠ Select a Product first!', true);
         return;
       }
-      if (!selectedWorkType) {
+      if (!targetWorkType) {
         showToast('⚠ Select a Work Type first!', true);
         return;
       }
 
-      // Find preset matching product + workType
-      let preset = presets.find(p => p.product === selectedProduct && p.workType === selectedWorkType);
-      
-      // Fallback: build default preset from productConfig JSON if no custom user preset exists
-      if (!preset && productConfig[selectedProduct] && productConfig[selectedProduct].workTypes && productConfig[selectedProduct].workTypes[selectedWorkType]) {
-        const wtObj = productConfig[selectedProduct].workTypes[selectedWorkType];
-        const fields = wtObj.fields || {};
-        preset = {
-          name: `${selectedProduct} ${wtObj.label || selectedWorkType} (Default)`,
-          product: selectedProduct,
-          workType: selectedWorkType,
-          repairDetailDesc: fields.REPAIRDESC_L?.value || fields.EDITEXT?.value || '',
-          defectDetailDesc: fields.DEFECTDESC_L?.value || '',
-          statusComment: fields.STATUS_COMMENT?.value || '',
-          remark: fields.REMARK?.value || '',
-          editText: fields.EDITEXT?.value || '',
-          conditionCode: fields.IRIS_CONDI?.value || '',
-          defectType: fields.LAB_TYPE?.value || '',
-          defectBlock: fields.DEF_BLK?.value || '',
-          reasonCode: fields.REASON?.value || '',
-          defectCode: fields.IRIS_DEFECT?.value || '',
-          symptomQCode: fields.IRIS_SYMPT_QCODE?.value || '',
-          symptomCode: fields.IRIS_SYMPT?.value || '',
-          repairQCode: fields.IRIS_REPAIR_QCODE?.value || '',
-          repairCode: fields.IRIS_REPAIR?.value || ''
-        };
+      // Priority 1: Explicitly passed preset or active selectedPreset matching criteria
+      let preset = explicitPreset;
+      if (!preset && selectedPreset && selectedPreset.product === targetProduct && selectedPreset.workType === targetWorkType) {
+        preset = selectedPreset;
       }
 
+      // Priority 2: Find preset created in settings matching product + workType
       if (!preset) {
-        showToast(`⚠ No preset saved for ${selectedProduct} → ${selectedWorkType}. Create one in Settings.`, true);
+        preset = presets.find(p => p.product === targetProduct && p.workType === targetWorkType);
+      }
+
+      // Strict check: If preset is NOT available, show "Preset is NA" error toast!
+      if (!preset) {
+        const wtLabel = getWorkTypeLabel(targetWorkType, targetWorkType);
+        showToast(`⚠ Preset is NA — No preset found for ${targetProduct} → ${wtLabel}`, true);
         return;
       }
 
@@ -1169,16 +1299,15 @@
         try {
           console.log(`${LOG}   → Posting CLOSER_HELPER_FILL to iframe[${idx}] id=${fr.id || '(none)'}`);
           fr.contentWindow.postMessage({ type: 'CLOSER_HELPER_FILL', preset }, '*');
-        } catch(e) {
+        } catch (e) {
           console.log(`${LOG}   ❌ iframe[${idx}] cross-origin blocked: ${e.message}`);
         }
       });
 
       // Toast shows AFTER all queued ops + AJAX wait complete
-      const workTypes = getWorkTypes();
-      const workObj = workTypes.find(w => w.code === selectedWorkType);
+      const workLabel = getWorkTypeLabel(preset.workType, preset.workType);
       setTimeout(() => {
-        showToast(`✓ "${preset.name}" — ${workObj ? workObj.label : ''} applied!`);
+        showToast(`✓ "${preset.name}" — ${workLabel} applied!`);
         console.log(`${LOG} ✅ Toast shown — all fills complete`);
       }, 2500);
     }
@@ -1191,9 +1320,9 @@
 
       function findEl(idOrName) {
         const el = doc.getElementById(idOrName)
-            || doc.querySelector(`[name="${idOrName}"]`)
-            || doc.querySelector(`[id*="${idOrName}" i]`)
-            || doc.querySelector(`[name*="${idOrName}" i]`);
+          || doc.querySelector(`[name="${idOrName}"]`)
+          || doc.querySelector(`[id*="${idOrName}" i]`)
+          || doc.querySelector(`[name*="${idOrName}" i]`);
         console.log(`${LOG}   findEl('${idOrName}') → ${el ? `FOUND <${el.tagName} id=${el.id}>` : 'NOT FOUND'}`);
         return el;
       }
@@ -1283,24 +1412,24 @@
       const ops = [];
       function q(fn) { ops.push(fn); }
 
-      q(() => tryText(fm.repairDetail,  'REPAIRDESC_L',  preset.repairDetailDesc));
+      q(() => tryText(fm.repairDetail, 'REPAIRDESC_L', preset.repairDetailDesc));
       q(() => setTextValue('REPAIR_DESC', preset.repairDetailDesc));
-      q(() => tryText(fm.defectDetail,  'DEFECTDESC_L',  preset.defectDetailDesc));
+      q(() => tryText(fm.defectDetail, 'DEFECTDESC_L', preset.defectDetailDesc));
       q(() => setTextValue('DEFECT_DESC', preset.defectDetailDesc));
       q(() => tryText(fm.statusComment, 'STATUS_COMMENT', preset.statusComment));
-      q(() => tryText(fm.remark,        'REMARK',         preset.remark));
-      q(() => tryText(fm.editText,      'EDITEXT',        preset.editText || preset.repairDetailDesc));
-      q(() => trySelect(fm.defectBlock, 'DEF_BLK',   preset.defectBlock));
-      q(() => trySelect(fm.condition,   'IRIS_CONDI', preset.conditionCode));
-      q(() => trySelect(fm.defectType,  'LAB_TYPE',   preset.defectType));
-      q(() => trySelect(fm.reasonCode,  'REASON',     preset.reasonCode));
-      q(() => trySelect(fm.defectCode,  'IRIS_DEFECT', preset.defectCode));
+      q(() => tryText(fm.remark, 'REMARK', preset.remark));
+      q(() => tryText(fm.editText, 'EDITEXT', preset.editText || preset.repairDetailDesc));
+      q(() => trySelect(fm.defectBlock, 'DEF_BLK', preset.defectBlock));
+      q(() => trySelect(fm.condition, 'IRIS_CONDI', preset.conditionCode));
+      q(() => trySelect(fm.defectType, 'LAB_TYPE', preset.defectType));
+      q(() => trySelect(fm.reasonCode, 'REASON', preset.reasonCode));
+      q(() => trySelect(fm.defectCode, 'IRIS_DEFECT', preset.defectCode));
       q(() => { if (preset.symptomQCode) setSelectValue('IRIS_SYMPT_QCODE', preset.symptomQCode); });
-      q(() => { if (preset.repairQCode)  setSelectValue('IRIS_REPAIR_QCODE', preset.repairQCode); });
+      q(() => { if (preset.repairQCode) setSelectValue('IRIS_REPAIR_QCODE', preset.repairQCode); });
 
       let delay = 0;
       ops.forEach((fn, i) => {
-        setTimeout(() => { console.log(`${LOG} step ${i+1}/${ops.length}`); fn(); }, delay);
+        setTimeout(() => { console.log(`${LOG} step ${i + 1}/${ops.length}`); fn(); }, delay);
         delay += 30 + Math.floor(Math.random() * 50);
       });
 
@@ -1314,6 +1443,227 @@
       }, delay + 800);
     }
 
+    /* ─── Local & child iframe DOM scraper for extraction ─── */
+    function findLiveFieldValue(rootDoc, fieldKeys) {
+      for (const key of fieldKeys) {
+        const el = rootDoc.getElementById(key)
+          || rootDoc.querySelector(`[name="${key}"]`)
+          || rootDoc.querySelector(`[id*="${key}" i]`)
+          || rootDoc.querySelector(`[name*="${key}" i]`);
+        if (el) {
+          if (el.tagName === 'SELECT') {
+            if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
+              const opt = el.options[el.selectedIndex];
+              const val = (opt.value || opt.text || '').trim();
+              if (val && val !== 'Select' && val !== '0' && val !== '--' && val !== 'NONE') return val;
+            }
+            const val = (el.value || '').trim();
+            if (val && val !== 'Select' && val !== '0' && val !== '--' && val !== 'NONE') return val;
+          } else {
+            const val = (el.value || el.textContent || '').trim();
+            if (val) return val;
+          }
+        }
+      }
+      return '';
+    }
+
+    function findLiveSoId(rootDoc) {
+      const keys = ['OBJECT_ID', 'objectID', 'OBJECTID', 'soNo', 'SO_NO', 'so_no', 'jobNo', 'JOB_NO'];
+      for (const key of keys) {
+        const el = rootDoc.getElementById(key)
+          || rootDoc.querySelector(`[name="${key}"]`)
+          || rootDoc.querySelector(`[id*="${key}" i]`);
+        if (el && el.value && el.value.trim()) return el.value.trim();
+      }
+      return '';
+    }
+
+    function scrapeDocumentTree(rootDoc) {
+      let soId = findLiveSoId(rootDoc);
+      const scrapedFields = {};
+
+      const fieldMapConfig = {
+        'REPAIRDESC_L': ['REPAIRDESC_L', 'REPAIR_DESC', 'repairDetailDesc', 'repair_detail'],
+        'DEFECTDESC_L': ['DEFECTDESC_L', 'DEFECT_DESC', 'defectDetailDesc', 'defect_detail'],
+        'STATUS_COMMENT': ['STATUS_COMMENT', 'statusComment', 'status_comment'],
+        'REMARK': ['REMARK', 'remark'],
+        'EDITEXT': ['EDITEXT', 'editText', 'edit_text'],
+        'IRIS_CONDI': ['IRIS_CONDI', 'IRIS_CONDI_CD', 'conditionCode', 'condition'],
+        'LAB_TYPE': ['LAB_TYPE', 'defectType', 'defect_type'],
+        'DEF_BLK': ['DEF_BLK', 'DEF_BLK_CD', 'defectBlock', 'defect_block'],
+        'REASON': ['REASON', 'REASON_CD', 'reasonCode', 'reason_code'],
+        'IRIS_DEFECT': ['IRIS_DEFECT', 'IRIS_DEFECT_CD', 'defectCode', 'defect_code'],
+        'IRIS_SYMPT_QCODE': ['IRIS_SYMPT_QCODE', 'symptomQCode', 'symptom_qcode'],
+        'IRIS_SYMPT': ['IRIS_SYMPT', 'symptomCode', 'symptom_code', 'symptom'],
+        'IRIS_REPAIR_QCODE': ['IRIS_REPAIR_QCODE', 'repairQCode', 'repair_qcode'],
+        'IRIS_REPAIR': ['IRIS_REPAIR', 'repairCode', 'repair_code', 'repair']
+      };
+
+      Object.keys(fieldMapConfig).forEach(fid => {
+        const val = findLiveFieldValue(rootDoc, fieldMapConfig[fid]);
+        if (val) scrapedFields[fid] = val;
+      });
+
+      // Recursive scan of accessible same-origin child frames
+      try {
+        const iframes = rootDoc.querySelectorAll('iframe');
+        iframes.forEach(fr => {
+          try {
+            if (fr.contentDocument) {
+              const childRes = scrapeDocumentTree(fr.contentDocument);
+              if (!soId && childRes.soId) soId = childRes.soId;
+              Object.assign(scrapedFields, childRes.scrapedFields);
+            }
+          } catch (e) { }
+        });
+      } catch (e) { }
+
+      // Mirror text fields
+      if (scrapedFields['REPAIRDESC_L'] && !scrapedFields['REPAIR_DESC']) {
+        scrapedFields['REPAIR_DESC'] = scrapedFields['REPAIRDESC_L'];
+      }
+      if (scrapedFields['DEFECTDESC_L'] && !scrapedFields['DEFECT_DESC']) {
+        scrapedFields['DEFECT_DESC'] = scrapedFields['DEFECTDESC_L'];
+      }
+
+      return { soId, scrapedFields, count: Object.keys(scrapedFields).length };
+    }
+
+    /* ─── Extract focused SO details and copy/download as Preset JSON ─── */
+    function extractCurrentSoPreset() {
+      console.log('[CloserHelper] Extracting live SO details for Preset JSON...');
+      const responses = [];
+
+      // 1. Scrape local document & same-origin child frames
+      const localRes = scrapeDocumentTree(document);
+      if (localRes.count > 0 || localRes.soId) {
+        responses.push(localRes);
+      }
+
+      // 2. Broadcast extract request to all cross-origin iframes
+      const frames = document.querySelectorAll('iframe');
+      frames.forEach(fr => {
+        try {
+          fr.contentWindow.postMessage({ type: 'CLOSER_HELPER_EXTRACT_REQUEST' }, '*');
+        } catch (e) { }
+      });
+
+      function onExtractResponse(e) {
+        if (e.data && e.data.type === 'CLOSER_HELPER_EXTRACT_RESPONSE') {
+          responses.push(e.data);
+        }
+      }
+
+      window.addEventListener('message', onExtractResponse);
+
+      // Wait 500ms for all nested subframes to report scraped data
+      setTimeout(() => {
+        window.removeEventListener('message', onExtractResponse);
+
+        let soId = '';
+        const mergedFields = {};
+
+        responses.forEach(r => {
+          if (!soId && r.soId) soId = r.soId;
+          if (r.scrapedFields) {
+            Object.assign(mergedFields, r.scrapedFields);
+          }
+        });
+
+        if (!soId) {
+          try {
+            const params = new URLSearchParams(window.location.search);
+            soId = params.get('objectID') || params.get('objectId') || params.get('soNo') || params.get('SO_NO') || '';
+          } catch (e) { }
+        }
+
+        if (!soId) {
+          soId = '41' + Date.now().toString().slice(-8);
+        }
+
+        const prod = selectedProduct || 'AC';
+        const wt = selectedWorkType || 'installation';
+
+        const presetObj = {
+          id: Date.now().toString(),
+          name: `Preset_SO_${soId}`,
+          team: 'Installation-AC',
+          product: prod,
+          workType: wt,
+          fields: mergedFields,
+          repairDetailDesc: mergedFields['REPAIRDESC_L'] || mergedFields['REPAIR_DESC'] || '',
+          defectDetailDesc: mergedFields['DEFECTDESC_L'] || mergedFields['DEFECT_DESC'] || '',
+          statusComment: mergedFields['STATUS_COMMENT'] || '',
+          remark: mergedFields['REMARK'] || '',
+          editText: mergedFields['EDITEXT'] || mergedFields['REPAIRDESC_L'] || '',
+          conditionCode: mergedFields['IRIS_CONDI'] || '',
+          defectType: mergedFields['LAB_TYPE'] || '',
+          defectBlock: mergedFields['DEF_BLK'] || '',
+          reasonCode: mergedFields['REASON'] || '',
+          defectCode: mergedFields['IRIS_DEFECT'] || '',
+          symptomQCode: mergedFields['IRIS_SYMPT_QCODE'] || '',
+          symptomCode: mergedFields['IRIS_SYMPT'] || '',
+          repairQCode: mergedFields['IRIS_REPAIR_QCODE'] || '',
+          repairCode: mergedFields['IRIS_REPAIR'] || '',
+          fieldMap: {
+            repairDetail: 'REPAIRDESC_L',
+            defectDetail: 'DEFECTDESC_L',
+            statusComment: 'STATUS_COMMENT',
+            remark: 'REMARK',
+            editText: 'EDITEXT',
+            symptom: 'IRIS_SYMPT',
+            defectBlock: 'DEF_BLK',
+            repairCode: 'IRIS_REPAIR',
+            condition: 'IRIS_CONDI',
+            defectType: 'LAB_TYPE',
+            defectCode: 'IRIS_DEFECT'
+          }
+        };
+
+        const jsonStr = JSON.stringify(presetObj, null, 2);
+
+        // Copy to clipboard (with fallback)
+        copyTextToClipboard(jsonStr);
+
+        // Download as JSON file
+        try {
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `preset_SO_${soId}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          console.error('[CloserHelper] Failed to download JSON file:', err);
+        }
+
+        showToast(`✓ Preset SO #${soId} copied & downloaded!`);
+      }, 500);
+    }
+
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopyText(text));
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { }
+      ta.remove();
+    }
+
     /* ─── Show toast ─── */
     function showToast(msg, isError = false) {
       const existing = document.querySelector('.ch-toast-msg');
@@ -1321,10 +1671,13 @@
 
       const toast = document.createElement('div');
       toast.className = 'ch-toast-msg';
-      if (isError) toast.style.background = '#d93025';
+      if (isError) {
+        toast.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        toast.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.4)';
+      }
       toast.textContent = msg;
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2500);
+      setTimeout(() => toast.remove(), 3000);
     }
 
     function escapeHtml(str) {
@@ -1333,10 +1686,31 @@
       return div.innerHTML;
     }
 
-    /* ─── Listen for fill-done from child frames ─── */
+    /* ─── Listen for frame messages & forward recursively ─── */
     window.addEventListener('message', (e) => {
-      if (e.data && e.data.type === 'CLOSER_HELPER_DONE') {
-        // Already showing toast above
+      if (!e.data) return;
+      if (e.data.type === 'CLOSER_HELPER_EXTRACT_REQUEST') {
+        const res = scrapeDocumentTree(document);
+
+        // Forward to any child iframes inside this frame
+        try {
+          const childIframes = document.querySelectorAll('iframe');
+          childIframes.forEach(fr => {
+            try {
+              fr.contentWindow.postMessage({ type: 'CLOSER_HELPER_EXTRACT_REQUEST' }, '*');
+            } catch (err) { }
+          });
+        } catch (err) { }
+
+        // Send response back to top window
+        if (window.top) {
+          window.top.postMessage({
+            type: 'CLOSER_HELPER_EXTRACT_RESPONSE',
+            soId: res.soId,
+            scrapedFields: res.scrapedFields,
+            count: res.count
+          }, '*');
+        }
       }
     });
   }

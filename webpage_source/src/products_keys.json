@@ -199,6 +199,27 @@
                             "parent": "IRIS_REPAIR_QCODE"
                         }
                     }
+                },
+                "customer_care": {
+                    "label": "Customer Care",
+                    "fields": {
+                        "STATUS_COMMENT": { "type": "text", "label": "Status Comment", "value": "" },
+                        "REMARK": { "type": "text", "label": "Remark (readonly)", "value": "" }
+                    }
+                },
+                "demonstration": {
+                    "label": "Demonstration",
+                    "fields": {
+                        "STATUS_COMMENT": { "type": "text", "label": "Status Comment", "value": "DEMO DONE SET OK" },
+                        "REMARK": { "type": "text", "label": "Remark (readonly)", "value": "DEMO DONE SET OK" }
+                    }
+                },
+                "stock_repair": {
+                    "label": "Stock Repair",
+                    "fields": {
+                        "STATUS_COMMENT": { "type": "text", "label": "Status Comment", "value": "" },
+                        "REMARK": { "type": "text", "label": "Remark (readonly)", "value": "" }
+                    }
                 }
             }
         },

@@ -119,7 +119,8 @@ function parseTicketBlock(tableEl) {
       // Check if this cell is a label cell (bold class)
       const isLabel = className.includes('PboxV_T_bold') ||
                       className.includes('PboxV_B_bold') ||
-                      className.includes('Pboxv_B_bold');
+                      className.includes('Pboxv_B_bold') ||
+                      className.includes('Pboxv_T_bold');
 
       if (isLabel) {
         const labelText = cleanText(cell.textContent);
@@ -149,6 +150,13 @@ function parseTicketBlock(tableEl) {
         }
       }
     }
+  }
+
+  if (data['Service Order No']) {
+    data['SO'] = data['Service Order No'];
+  }
+  if (data['Customer Name']) {
+    data['CX Name'] = data['Customer Name'];
   }
 
   return data;
@@ -678,7 +686,7 @@ function initExtractionDialog() {
         <button class="ctrl-btn" id="btnClose" title="Close">✕</button>
       </div>
     </div>
-    <iframe class="popup-frame" src="${chrome.runtime.getURL('popup.html')}"></iframe>
+    <iframe class="popup-frame" src="${chrome.runtime.getURL('popup.html')}" allow="clipboard-read; clipboard-write"></iframe>
   `;
 
   shadow.appendChild(container);

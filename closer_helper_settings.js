@@ -171,6 +171,63 @@ const codeSelectOptions = {
     { value: 'HBB', label: 'HBB-Faulty humidity display' },
     { value: 'HLL', label: 'HLL-No light in the unit' },
     { value: 'HX8', label: 'HX8-Installation requested' }
+  ],
+  IRIS_REPAIR_QCODE: [
+    { value: '', label: '- select -' },
+    { value: 'SRC003', label: 'SRC003-Cleaning' },
+    { value: 'SRC004', label: 'SRC004-Installation Problem' },
+    { value: 'SRC007', label: 'SRC007-OS/SW' },
+    { value: 'SRC008', label: 'SRC008-Other' },
+    { value: 'SRC011', label: 'SRC011-Case Problem' },
+    { value: 'SRC012', label: 'SRC012-Power Problem' },
+    { value: 'SRC013', label: 'SRC013-Operating Problem' },
+    { value: 'SRC014', label: 'SRC014-Display Problem' },
+    { value: 'SRC015', label: 'SRC015-Vibration/Noise' },
+    { value: 'SRC016', label: 'SRC016-Charging Problem' },
+    { value: 'SRC017', label: 'SRC017-Sound' },
+    { value: 'SRC018', label: 'SRC018-Communication' },
+    { value: 'SRC019', label: 'SRC019-Connection' },
+    { value: 'SRC020', label: 'SRC020-Accessory missing' },
+    { value: 'SRC021', label: 'SRC021-Heating/Cooling' },
+    { value: 'SRC022', label: 'SRC022-Leakage' },
+    { value: 'SRC026', label: 'SRC026-Button/Key Problem' },
+    { value: 'SRC029', label: 'SRC029-Water Supply' },
+    { value: 'SRC030', label: 'SRC030-Rotate Problem' },
+    { value: 'SRC031', label: 'SRC031-Smell/Smoke' },
+    { value: 'SRC032', label: 'SRC032-Cosmetic' },
+    { value: 'SRC038', label: 'SRC038-NDF' },
+    { value: 'SRC047', label: 'SRC047-Customer Request' }
+  ],
+  IRIS_REPAIR: [
+    { value: '', label: '- select -' },
+    { value: 'E01', label: 'E01-Initial installation' },
+    { value: 'E02', label: 'E02-Re-installation' },
+    { value: 'E03', label: 'E03-Demonstration' },
+    { value: 'E04', label: 'E04-Inspection/Explanation' },
+    { value: 'A01', label: 'A01-Part replacement' },
+    { value: 'A02', label: 'A02-PCB replacement' },
+    { value: 'A03', label: 'A03-Compressor replacement' },
+    { value: 'A04', label: 'A04-Motor replacement' },
+    { value: 'B01', label: 'B01-Adjustment/Cleaning' },
+    { value: 'B02', label: 'B02-Gas charge' },
+    { value: 'B03', label: 'B03-Soldering/Braze' },
+    { value: 'B04', label: 'B04-Software upgrade' },
+    { value: 'C01', label: 'C01-Customer explanation' },
+    { value: 'C02', label: 'C02-NDF/No defect found' }
+  ],
+  REASON: [
+    { value: '', label: '- Select -' },
+    { value: 'HLZ23', label: 'HLZ23-Installation Done' },
+    { value: 'HLZ01', label: 'HLZ01-Completed' },
+    { value: 'HLZ02', label: 'HLZ02-Customer Cancellation' },
+    { value: 'HLZ03', label: 'HLZ03-Part Pending' },
+    { value: 'HLZ04', label: 'HLZ04-Customer Delay' },
+    { value: 'HLZ05', label: 'HLZ05-Address Not Found' },
+    { value: 'HLZ06', label: 'HLZ06-Dealer Issue' },
+    { value: 'HLZ07', label: 'HLZ07-Duplicate Call' },
+    { value: 'HLZ08', label: 'HLZ08-Wrong Product' },
+    { value: 'HLZ09', label: 'HLZ09-Demo Given' },
+    { value: 'HLZ10', label: 'HLZ10-Stock Repair' }
   ]
 };
 
@@ -180,7 +237,10 @@ const codeSelectClasses = {
   IRIS_CONDI: 'selectIDS',
   IRIS_DEFECT: 'selectF',
   IRIS_SYMPT_QCODE: 'selectF',
-  IRIS_SYMPT: 'selectIDS'
+  IRIS_SYMPT: 'selectIDS',
+  IRIS_REPAIR_QCODE: 'selectF',
+  IRIS_REPAIR: 'selectIDS',
+  REASON: 'selectF'
 };
 
 function renderSelectOptions(fieldId, selectedValue) {
@@ -291,18 +351,35 @@ function populateProductDropdown(selectedProduct) {
   });
 }
 
+const UNIVERSAL_WORK_TYPES = [
+  { code: 'installation', label: 'Installation (II)' },
+  { code: 'repair', label: 'Repair (IH)' },
+  { code: 'customer_care', label: 'Customer Care (CC)' },
+  { code: 'demonstration', label: 'Demonstration (DM)' },
+  { code: 'stock_repair', label: 'Stock Repair (SR)' }
+];
+
 /* ─── Populate work type dropdown based on selected product ─── */
 function populateWorkTypeDropdown(productKey, selectedWorkType) {
   const sel = $('presetWorkType');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select Work Type —</option>';
+  
   const product = productConfig[productKey];
-  if (!product || !product.workTypes) return;
-  Object.keys(product.workTypes).forEach(key => {
+  const wt = (product && product.workTypes) ? product.workTypes : {};
+
+  const list = UNIVERSAL_WORK_TYPES.map(item => ({ ...item }));
+  Object.keys(wt).forEach(key => {
+    if (!list.some(item => item.code === key)) {
+      list.push({ code: key, label: wt[key].label || key });
+    }
+  });
+
+  list.forEach(item => {
     const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = product.workTypes[key].label;
-    if (key === selectedWorkType) opt.selected = true;
+    opt.value = item.code;
+    opt.textContent = item.label;
+    if (item.code === selectedWorkType) opt.selected = true;
     sel.appendChild(opt);
   });
 }
@@ -313,13 +390,35 @@ function renderFieldEditor(productKey, workTypeKey) {
   if (!container) return;
   container.innerHTML = '';
 
-  const product = productConfig[productKey];
-  if (!product || !product.workTypes || !product.workTypes[workTypeKey]) {
+  if (!productKey || !workTypeKey) {
     container.innerHTML = '<p class="section-hint">Select a Category and Work Type above to see fields.</p>';
     return;
   }
 
-  const fields = product.workTypes[workTypeKey].fields;
+  const product = productConfig[productKey];
+  let fields = (product && product.workTypes && product.workTypes[workTypeKey]) ? product.workTypes[workTypeKey].fields : null;
+
+  if (!fields) {
+    fields = {
+      REPAIRDESC_L: { type: 'text', label: 'Repair Detail DESC', value: '' },
+      REPAIR_DESC: { type: 'hidden', label: 'Repair Detail (mirror)', value: '' },
+      DEFECTDESC_L: { type: 'text', label: 'Defect Detail DESC', value: '' },
+      DEFECT_DESC: { type: 'hidden', label: 'Defect Detail (mirror)', value: '' },
+      STATUS_COMMENT: { type: 'text', label: 'Status Comment', value: '' },
+      REMARK: { type: 'text', label: 'Remark (readonly)', value: '' },
+      EDITEXT: { type: 'text', label: 'Edit Text (GSPN Update)', value: '' },
+      IRIS_CONDI: { type: 'select', label: 'Condition Code', value: '1' },
+      LAB_TYPE: { type: 'select', label: 'Defect Type', value: '' },
+      DEF_BLK: { type: 'select', label: 'Defect Block', value: '9999' },
+      REASON: { type: 'select', label: 'Reason Code', value: '' },
+      IRIS_DEFECT: { type: 'select', label: 'Defect Code', value: '' },
+      IRIS_SYMPT_QCODE: { type: 'select_parent', label: 'Symptom Q-Code', value: '' },
+      IRIS_SYMPT: { type: 'select_child', label: 'Symptom Code', value: '' },
+      IRIS_REPAIR_QCODE: { type: 'select_parent', label: 'Repair Q-Code', value: '' },
+      IRIS_REPAIR: { type: 'select_child', label: 'Repair Code', value: '' }
+    };
+  }
+
   const preset = presets.find(p => p.id === activePresetId);
   const savedFields = preset?.fields || {};
 
@@ -379,9 +478,9 @@ function renderFieldEditor(productKey, workTypeKey) {
   // Edit Text (EDITEXT)
   if (fields['EDITEXT']) {
     html += `<tr>
-      <td class="gspn-label">▪ Edit Text (EDITEXT)</td>
+      <td class="gspn-label">▪ LOGS EDITEXT</td>
       <td class="gspn-input" colspan="3">
-        <textarea id="field_EDITEXT" data-field-id="EDITEXT" rows="2" placeholder="Edit Text for Update (EDITEXT)...">${escapeHtml(val('EDITEXT'))}</textarea>
+        <textarea id="field_EDITEXT" data-field-id="EDITEXT" rows="2" placeholder="Logs Edit Text for Update (EDITEXT)...">${escapeHtml(val('EDITEXT'))}</textarea>
       </td>
     </tr>`;
   }
@@ -426,8 +525,8 @@ function renderFieldEditor(productKey, workTypeKey) {
     <td class="gspn-label">Repair Code</td>
     <td class="gspn-input">
       <div class="gspn-dual-input">
-        <input id="field_IRIS_REPAIR_QCODE" type="text" data-field-id="IRIS_REPAIR_QCODE" value="${escapeHtml(val('IRIS_REPAIR_QCODE'))}" placeholder="${hint('IRIS_REPAIR_QCODE') || 'Q-Code'}" title="Repair Q-Code (parent)" />
-        <input id="field_IRIS_REPAIR" type="text" data-field-id="IRIS_REPAIR" value="${escapeHtml(val('IRIS_REPAIR'))}" placeholder="${hint('IRIS_REPAIR') || 'Code'}" title="Repair Code (child)" />
+        ${renderSelect('IRIS_REPAIR_QCODE', val('IRIS_REPAIR_QCODE'))}
+        ${renderSelect('IRIS_REPAIR', val('IRIS_REPAIR'))}
       </div>
     </td>
   </tr>`;
@@ -437,7 +536,7 @@ function renderFieldEditor(productKey, workTypeKey) {
     html += `<tr>
       <td class="gspn-label">▪ Reason Code</td>
       <td class="gspn-input" colspan="3">
-        <input id="field_REASON" type="text" data-field-id="REASON" value="${escapeHtml(val('REASON'))}" placeholder="${hint('REASON') || 'e.g. HLZ23'}" />
+        ${renderSelect('REASON', val('REASON'))}
       </td>
     </tr>`;
   }
@@ -695,6 +794,122 @@ $('btnDelete').addEventListener('click', () => {
     showToast('Preset deleted');
   });
 });
+
+/* ─── Import Preset JSON ─── */
+const btnImportPreset = $('btnImportPreset');
+const fileImportPreset = $('fileImportPreset');
+
+if (btnImportPreset && fileImportPreset) {
+  btnImportPreset.addEventListener('click', () => {
+    fileImportPreset.click();
+  });
+
+  fileImportPreset.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const importedData = JSON.parse(evt.target.result);
+        const importedItems = Array.isArray(importedData) ? importedData : [importedData];
+
+        let lastImportedId = null;
+        let importCount = 0;
+
+        importedItems.forEach(item => {
+          if (!item || typeof item !== 'object') return;
+
+          const fields = item.fields || {};
+
+          // Extract values from flat properties if fields map is empty
+          if (!fields['REPAIRDESC_L'] && (item.repairDetailDesc || item.repairDetail)) fields['REPAIRDESC_L'] = item.repairDetailDesc || item.repairDetail;
+          if (!fields['REPAIR_DESC'] && (item.repairDetailDesc || fields['REPAIRDESC_L'])) fields['REPAIR_DESC'] = item.repairDetailDesc || fields['REPAIRDESC_L'];
+          if (!fields['DEFECTDESC_L'] && (item.defectDetailDesc || item.defectDetail)) fields['DEFECTDESC_L'] = item.defectDetailDesc || item.defectDetail;
+          if (!fields['DEFECT_DESC'] && (item.defectDetailDesc || fields['DEFECTDESC_L'])) fields['DEFECT_DESC'] = item.defectDetailDesc || fields['DEFECTDESC_L'];
+          if (!fields['STATUS_COMMENT'] && item.statusComment) fields['STATUS_COMMENT'] = item.statusComment;
+          if (!fields['REMARK'] && item.remark) fields['REMARK'] = item.remark;
+          if (!fields['EDITEXT'] && item.editText) fields['EDITEXT'] = item.editText;
+          if (!fields['IRIS_CONDI'] && item.conditionCode) fields['IRIS_CONDI'] = item.conditionCode;
+          if (!fields['LAB_TYPE'] && item.defectType) fields['LAB_TYPE'] = item.defectType;
+          if (!fields['DEF_BLK'] && item.defectBlock) fields['DEF_BLK'] = item.defectBlock;
+          if (!fields['REASON'] && item.reasonCode) fields['REASON'] = item.reasonCode;
+          if (!fields['IRIS_DEFECT'] && item.defectCode) fields['IRIS_DEFECT'] = item.defectCode;
+          if (!fields['IRIS_SYMPT_QCODE'] && item.symptomQCode) fields['IRIS_SYMPT_QCODE'] = item.symptomQCode;
+          if (!fields['IRIS_SYMPT'] && item.symptomCode) fields['IRIS_SYMPT'] = item.symptomCode;
+          if (!fields['IRIS_REPAIR_QCODE'] && item.repairQCode) fields['IRIS_REPAIR_QCODE'] = item.repairQCode;
+          if (!fields['IRIS_REPAIR'] && item.repairCode) fields['IRIS_REPAIR'] = item.repairCode;
+
+          const newId = (item.id && !presets.some(p => p.id === item.id)) ? item.id : Date.now().toString() + Math.floor(Math.random() * 100);
+
+          const normalizedPreset = {
+            id: newId,
+            name: item.name || `Imported_${newId.slice(-4)}`,
+            team: item.team || 'Installation-AC',
+            product: item.product || 'AC',
+            workType: item.workType || 'installation',
+            fields: fields,
+            repairDetailDesc: fields['REPAIRDESC_L'] || '',
+            defectDetailDesc: fields['DEFECTDESC_L'] || '',
+            statusComment: fields['STATUS_COMMENT'] || '',
+            remark: fields['REMARK'] || '',
+            editText: fields['EDITEXT'] || '',
+            conditionCode: fields['IRIS_CONDI'] || '',
+            defectType: fields['LAB_TYPE'] || '',
+            defectBlock: fields['DEF_BLK'] || '',
+            reasonCode: fields['REASON'] || '',
+            defectCode: fields['IRIS_DEFECT'] || '',
+            symptomQCode: fields['IRIS_SYMPT_QCODE'] || '',
+            symptomCode: fields['IRIS_SYMPT'] || '',
+            repairQCode: fields['IRIS_REPAIR_QCODE'] || '',
+            repairCode: fields['IRIS_REPAIR'] || '',
+            fieldMap: item.fieldMap || {
+              repairDetail: 'REPAIRDESC_L',
+              defectDetail: 'DEFECTDESC_L',
+              statusComment: 'STATUS_COMMENT',
+              remark: 'REMARK',
+              editText: 'EDITEXT',
+              symptom: 'IRIS_SYMPT',
+              defectBlock: 'DEF_BLK',
+              repairCode: 'IRIS_REPAIR',
+              condition: 'IRIS_CONDI',
+              defectType: 'LAB_TYPE',
+              defectCode: 'IRIS_DEFECT'
+            }
+          };
+
+          // If preset with same ID exists, update it; otherwise add to list
+          const existingIdx = presets.findIndex(p => p.id === normalizedPreset.id);
+          if (existingIdx >= 0) {
+            presets[existingIdx] = normalizedPreset;
+          } else {
+            presets.push(normalizedPreset);
+          }
+
+          lastImportedId = normalizedPreset.id;
+          importCount++;
+        });
+
+        if (importCount > 0) {
+          savePresets().then(() => {
+            activePresetId = lastImportedId;
+            selectPreset(activePresetId);
+            renderTabs();
+            showToast(`✓ Imported ${importCount} preset(s) successfully!`);
+          });
+        } else {
+          showToast('No valid preset found in file', true);
+        }
+      } catch (err) {
+        console.error('Failed to import JSON file:', err);
+        showToast('Invalid JSON preset file', true);
+      }
+      fileImportPreset.value = '';
+    };
+
+    reader.readAsText(file);
+  });
+}
 
 /* ─── Product / Work Type change handlers ─── */
 document.addEventListener('change', (e) => {
