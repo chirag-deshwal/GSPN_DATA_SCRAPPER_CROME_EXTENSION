@@ -326,10 +326,14 @@ const progressBar111 = document.getElementById('progressBar111');
 const tableBody111 = document.getElementById('tableBody111');
 const recordsCount111 = document.getElementById('recordsCount111');
 
-// Closer Helper — toggle & settings
+// Module Checkboxes (Others, 1-1-1, Health Check Dialog)
 const btnCloserSettings = document.getElementById('btnCloserSettings');
 const chkCloserHelper = document.getElementById('chkCloserHelper');
 const chkCloserStatus = document.getElementById('chkCloserStatus');
+const chk111Scraper = document.getElementById('chk111Scraper');
+const chk111Status = document.getElementById('chk111Status');
+const chkHealthCheck = document.getElementById('chkHealthCheck');
+const chkHealthStatus = document.getElementById('chkHealthStatus');
 const chkOpenInNewTab = document.getElementById('chkOpenInNewTab');
 const closerCard = document.querySelector('.closer-helper-card');
 const btnCopyPreset = document.getElementById('btnCopyPreset');
@@ -480,21 +484,54 @@ setupTabNavigation();
 /**
  * Load profile settings on popup open
  */
+function updateCloserUI(enabled) {
+  if (chkCloserHelper) chkCloserHelper.checked = enabled;
+  if (chkCloserStatus) {
+    chkCloserStatus.textContent = enabled
+      ? 'Enabled — floating panel active on GSPN page'
+      : 'Disabled — toggle to enable on GSPN page';
+    chkCloserStatus.classList.toggle('active', enabled);
+  }
+  if (closerCard) {
+    closerCard.classList.toggle('enabled', enabled);
+  }
+}
+
+function update111UI(enabled) {
+  if (chk111Scraper) chk111Scraper.checked = enabled;
+  if (autoAddToggle) autoAddToggle.checked = enabled;
+  if (chk111Status) {
+    chk111Status.textContent = enabled
+      ? 'Enabled — auto-add manual tickets on GSPN'
+      : 'Disabled — toggle auto-add tickets';
+    chk111Status.classList.toggle('active', enabled);
+  }
+}
+
+function updateHealthUI(enabled) {
+  if (chkHealthCheck) chkHealthCheck.checked = enabled;
+  if (chkHealthStatus) {
+    chkHealthStatus.textContent = enabled
+      ? 'Enabled — Complaint Health popup dialog active on GSPN'
+      : 'Disabled — toggle to enable dialog';
+    chkHealthStatus.classList.toggle('active', enabled);
+  }
+}
+
+/**
+ * Load profile settings and module toggle states on popup open
+ */
 async function loadProfileSettings() {
   try {
     const currentProfile = await profileManager.getCurrentProfile();
     if (currentProfile) {
       // Apply settings from profile
-      if (chkCloserHelper) {
-        const enabled = currentProfile.settings.closerHelperEnabled !== false;
-        chkCloserHelper.checked = enabled;
-        updateCloserUI(enabled);
-      }
+      const enabled = currentProfile.settings.closerHelperEnabled !== false;
+      updateCloserUI(enabled);
     } else {
       // No active profile, load from chrome.storage.local (legacy support)
       chrome.storage.local.get(['closerHelperEnabled', 'openRequestsInNewTab'], (data) => {
         const enabled = data.closerHelperEnabled !== false;
-        if (chkCloserHelper) chkCloserHelper.checked = enabled;
         if (chkOpenInNewTab) chkOpenInNewTab.checked = !!data.openRequestsInNewTab;
         updateCloserUI(enabled);
       });
@@ -502,13 +539,21 @@ async function loadProfileSettings() {
   } catch (error) {
     console.warn('Failed to load profile settings:', error);
   }
+
+  // Load 1-1-1 and Health Check Dialog module states
+  chrome.storage.local.get(['autoAddManualTicketsEnabled', 'complaintHealthEnabled'], (data) => {
+    const autoAddEnabled = !!data.autoAddManualTicketsEnabled;
+    const healthEnabled = data.complaintHealthEnabled !== false;
+    update111UI(autoAddEnabled);
+    updateHealthUI(healthEnabled);
+  });
 }
 
 // Load profile settings on popup open
 updateLoginGateVisibility();
 loadProfileSettings();
 
-// Toggle handler
+// Toggle 1: Others (Closer Helper)
 if (chkCloserHelper) {
   chkCloserHelper.addEventListener('change', () => {
     const enabled = chkCloserHelper.checked;
@@ -526,22 +571,36 @@ if (chkCloserHelper) {
   });
 }
 
+// Toggle 2: 1-1-1 Scraper
+if (chk111Scraper) {
+  chk111Scraper.addEventListener('change', () => {
+    const enabled = chk111Scraper.checked;
+    chrome.storage.local.set({ autoAddManualTicketsEnabled: enabled });
+    update111UI(enabled);
+  });
+}
+
+if (autoAddToggle) {
+  autoAddToggle.addEventListener('change', () => {
+    const enabled = autoAddToggle.checked;
+    chrome.storage.local.set({ autoAddManualTicketsEnabled: enabled });
+    update111UI(enabled);
+  });
+}
+
+// Toggle 3: Health Check Dialog
+if (chkHealthCheck) {
+  chkHealthCheck.addEventListener('change', () => {
+    const enabled = chkHealthCheck.checked;
+    chrome.storage.local.set({ complaintHealthEnabled: enabled });
+    updateHealthUI(enabled);
+  });
+}
+
 if (chkOpenInNewTab) {
   chkOpenInNewTab.addEventListener('change', () => {
     chrome.storage.local.set({ openRequestsInNewTab: chkOpenInNewTab.checked });
   });
-}
-
-function updateCloserUI(enabled) {
-  if (chkCloserStatus) {
-    chkCloserStatus.textContent = enabled
-      ? 'Enabled — floating panel active on GSPN page'
-      : 'Disabled — toggle to enable on GSPN page';
-    chkCloserStatus.classList.toggle('active', enabled);
-  }
-  if (closerCard) {
-    closerCard.classList.toggle('enabled', enabled);
-  }
 }
 
 // Open settings page

@@ -841,33 +841,68 @@
           </div>
         </div>
 
-        <!-- Closer Helper Card -->
+        <!-- Feature Controls & Module Toggles Card -->
         <div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">security</span>
-              <h3 class="font-label-caps text-xs font-bold text-on-surface-variant uppercase tracking-wider">Closer
-                Helper</h3>
+              <span class="material-symbols-outlined text-primary">toggle_on</span>
+              <h3 class="font-label-caps text-xs font-bold text-on-surface-variant uppercase tracking-wider">Module Toggles</h3>
             </div>
             <button id="btnCloserSettings"
               class="bg-primary text-white font-bold text-[10px] py-1 px-2.5 rounded-lg flex items-center gap-1 hover:bg-primary-container transition-colors">
               <span class="material-symbols-outlined text-xs">settings</span>
-              Settings
+              Closer Settings
             </button>
           </div>
 
           <p class="font-body-sm text-[11px] text-on-surface-variant/80 leading-relaxed">
-            Automates field filling on GSPN pages using active profile settings.
+            Click checkboxes to turn features ON or OFF on GSPN pages.
           </p>
 
-          <!-- Toggle Switch -->
+          <!-- Toggle 1: Others (Closer Helper) -->
           <div
             class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-outline-variant hover:bg-surface-container transition-colors">
-            <label for="chkCloserHelper" id="chkCloserStatus"
-              class="font-bold text-[11px] text-on-surface cursor-pointer select-none flex-grow py-1">Disabled — toggle
-              to enable on GSPN page</label>
+            <div class="flex items-center gap-2 flex-grow pr-2">
+              <span class="material-symbols-outlined text-primary text-base">security</span>
+              <div>
+                <span class="font-bold text-[11px] text-on-surface block">Others (Closer Helper)</span>
+                <span id="chkCloserStatus" class="font-normal text-[10px] text-on-surface-variant/80 block">Disabled — toggle to enable on GSPN page</span>
+              </div>
+            </div>
             <label class="switch">
               <input type="checkbox" id="chkCloserHelper">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Toggle 2: 1-1-1 Scraper -->
+          <div
+            class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-outline-variant hover:bg-surface-container transition-colors">
+            <div class="flex items-center gap-2 flex-grow pr-2">
+              <span class="material-symbols-outlined text-primary text-base">auto_mode</span>
+              <div>
+                <span class="font-bold text-[11px] text-on-surface block">1-1-1 Scraper</span>
+                <span id="chk111Status" class="font-normal text-[10px] text-on-surface-variant/80 block">Disabled — toggle auto-add tickets</span>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chk111Scraper">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Toggle 3: Health Check Dialog -->
+          <div
+            class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-outline-variant hover:bg-surface-container transition-colors">
+            <div class="flex items-center gap-2 flex-grow pr-2">
+              <span class="material-symbols-outlined text-primary text-base">health_and_safety</span>
+              <div>
+                <span class="font-bold text-[11px] text-on-surface block">Health Check Dialog</span>
+                <span id="chkHealthStatus" class="font-normal text-[10px] text-on-surface-variant/80 block">Disabled — toggle to enable dialog</span>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chkHealthCheck">
               <span class="slider"></span>
             </label>
           </div>

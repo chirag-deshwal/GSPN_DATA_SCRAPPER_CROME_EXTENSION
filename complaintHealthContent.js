@@ -904,59 +904,88 @@
    */
   function monitorComplaintDetails() {
     log('Starting complaint detail monitor...');
-    
-    // Initial check
-    if (window._complaintHealthDisabled) {
-      log('Complaint health injection disabled for this page (user closed it)');
-      return;
-    }
 
-    if (isComplaintDetailVisible()) {
-      log('Complaint detail visible on init');
-      removeExistingHealthBox();
-      injectHealthBox();
-    } else {
-      log('No complaint detail on initial check');
-    }
-
-    // Watch for DOM changes but target a narrower container when possible
-    const preferredSelectors = ['#content', '#detailDiv', '.detail', '#main', 'body'];
-    let target = null;
-    for (const sel of preferredSelectors) {
-      const el = document.querySelector(sel);
-      if (el) { target = el; break; }
-    }
-
-    const observerTarget = target || document.body;
-    const observer = new MutationObserver((mutations) => {
-      clearTimeout(observer.debounceTimer);
-      observer.debounceTimer = setTimeout(() => {
-        if (window._complaintHealthDisabled) {
-          removeExistingHealthBox();
-          return;
+    // Storage listener for live ON/OFF toggling from popup
+    try {
+      chrome.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName === 'local' && Object.prototype.hasOwnProperty.call(changes, 'complaintHealthEnabled')) {
+          const enabled = changes.complaintHealthEnabled.newValue !== false;
+          if (!enabled) {
+            window._complaintHealthDisabled = true;
+            removeExistingHealthBox();
+          } else {
+            window._complaintHealthDisabled = false;
+            if (isComplaintDetailVisible()) {
+              removeExistingHealthBox();
+              injectHealthBox();
+            }
+          }
         }
+      });
+    } catch (e) {
+      log('Failed to attach storage listener', e);
+    }
 
-        if (isComplaintDetailVisible()) {
-          if (_healthBoxInjected) {
-            updateHealthBox();
+    // Check extension setting first
+    chrome.storage.local.get(['complaintHealthEnabled'], (data) => {
+      if (data.complaintHealthEnabled === false) {
+        window._complaintHealthDisabled = true;
+        log('Complaint health dialog disabled via popup setting');
+        return;
+      }
+
+      if (window._complaintHealthDisabled) {
+        log('Complaint health injection disabled for this page (user closed it)');
+        return;
+      }
+
+      if (isComplaintDetailVisible()) {
+        log('Complaint detail visible on init');
+        removeExistingHealthBox();
+        injectHealthBox();
+      } else {
+        log('No complaint detail on initial check');
+      }
+
+      // Watch for DOM changes but target a narrower container when possible
+      const preferredSelectors = ['#content', '#detailDiv', '.detail', '#main', 'body'];
+      let target = null;
+      for (const sel of preferredSelectors) {
+        const el = document.querySelector(sel);
+        if (el) { target = el; break; }
+      }
+
+      const observerTarget = target || document.body;
+      const observer = new MutationObserver((mutations) => {
+        clearTimeout(observer.debounceTimer);
+        observer.debounceTimer = setTimeout(() => {
+          if (window._complaintHealthDisabled) {
+            removeExistingHealthBox();
+            return;
+          }
+
+          if (isComplaintDetailVisible()) {
+            if (_healthBoxInjected) {
+              updateHealthBox();
+            } else {
+              removeExistingHealthBox();
+              injectHealthBox();
+              _healthBoxInjected = true;
+            }
           } else {
             removeExistingHealthBox();
-            injectHealthBox();
-            _healthBoxInjected = true;
+            _healthBoxInjected = false;
           }
-        } else {
-          removeExistingHealthBox();
-          _healthBoxInjected = false;
-        }
-      }, 500);
-    });
+        }, 500);
+      });
 
-    observer.observe(observerTarget, {
-      childList: true,
-      subtree: true
-    });
+      observer.observe(observerTarget, {
+        childList: true,
+        subtree: true
+      });
 
-    log('Monitor started - watching for mutations on', observerTarget.tagName || 'BODY');
+      log('Monitor started - watching for mutations on', observerTarget.tagName || 'BODY');
+    });
   }
 
   /**
