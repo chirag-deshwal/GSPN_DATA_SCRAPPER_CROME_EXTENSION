@@ -1177,6 +1177,14 @@ function showHealthReportDialog(ticket) {
 }
 
 async function handleReportClick() {
+  try {
+    const stored = await new Promise(r => chrome.storage.local.get(['ghostModeEnabled', 'hideHealthBtn'], r));
+    if (stored && (stored.ghostModeEnabled || stored.hideHealthBtn)) {
+      console.log('[FAB Report] Execution blocked: Ghost Mode or Hide Health is active.');
+      return;
+    }
+  } catch (e) {}
+
   const shadow = getFabShadow();
   if (!shadow) return;
   const reportBtn = shadow.querySelector('.report-btn');
@@ -1185,12 +1193,24 @@ async function handleReportClick() {
     reportBtn.style.opacity = '0.7';
   }
   try {
-    const ticket = await parseViewModeTicket();
-    if (!ticket) {
-      showFabToast('No service order data found on this page.', 'error');
-      return;
+    let handledByComplaintHealth = false;
+
+    window.dispatchEvent(new CustomEvent('GSPN_SHOW_HEALTH_CHECK'));
+    if (typeof window.openGspnHealthCheck === 'function') {
+      window.openGspnHealthCheck();
+      handledByComplaintHealth = true;
+    } else if (document.getElementById('complaint-health-wrapper')) {
+      handledByComplaintHealth = true;
     }
-    showHealthReportDialog(ticket);
+
+    if (!handledByComplaintHealth) {
+      const ticket = await parseViewModeTicket();
+      if (!ticket) {
+        showFabToast('No service order data found on this page.', 'error');
+        return;
+      }
+      showHealthReportDialog(ticket);
+    }
   } catch (err) {
     console.error('[FAB Report]', err);
     showFabToast('Error generating report: ' + err.message, 'error');
@@ -1252,17 +1272,17 @@ function createFab() {
   const container = document.createElement('div');
   container.className = 'fab-container';
 
-  // Report button
+  // Report/Health button
   const reportBtn = document.createElement('button');
   reportBtn.className = 'report-btn';
-  reportBtn.title = 'Check health report check dialog';
+  reportBtn.title = 'Open Health Check dialog';
   reportBtn.innerHTML =
     '<span class="fab-icon">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
         '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' +
       '</svg>' +
     '</span>' +
-    '<span class="fab-label">Report</span>';
+    '<span class="fab-label">Health</span>';
   reportBtn.addEventListener('click', handleReportClick);
   container.appendChild(reportBtn);
 
@@ -1291,6 +1311,57 @@ function createFab() {
 
   // Append host to <html>, not <body>, to escape any body-level constraints
   (targetDoc.documentElement || targetDoc.body).appendChild(host);
+
+  // Apply initial storage visibility settings
+  try {
+    chrome.storage.local.get(['ghostModeEnabled', 'hideHealthBtn', 'hide111Btn', 'complaintHealthEnabled'], (settings) => {
+      applyFabVisibility(settings || {});
+    });
+  } catch (e) {}
+}
+
+/**
+ * Apply button visibility according to extension settings
+ */
+function applyFabVisibility(settings) {
+  const ghostMode = !!settings.ghostModeEnabled;
+  const hideHealth = !!settings.hideHealthBtn || settings.complaintHealthEnabled === false;
+  const hide111 = !!settings.hide111Btn;
+
+  let targetDoc = document;
+  try {
+    if (window.top && window.top.document) {
+      targetDoc = window.top.document;
+    }
+  } catch (e) {}
+
+  const host = targetDoc.getElementById(FAB_HOST_ID);
+  if (!host) return;
+
+  const shadow = host.shadowRoot || _fabShadow;
+  if (!shadow) return;
+
+  const reportBtn = shadow.querySelector('.report-btn');
+  const fabBtn = shadow.querySelector('.fab-btn');
+
+  if (ghostMode) {
+    host.style.display = 'none';
+    return;
+  }
+
+  if (reportBtn) {
+    reportBtn.style.display = hideHealth ? 'none' : 'inline-flex';
+  }
+
+  if (fabBtn) {
+    fabBtn.style.display = hide111 ? 'none' : 'inline-flex';
+  }
+
+  if (hideHealth && hide111) {
+    host.style.display = 'none';
+  } else {
+    host.style.display = 'block';
+  }
 }
 
 /** Show a toast inside the shadow DOM */
@@ -1371,6 +1442,14 @@ function getProduct111(model) {
 
 // ── Main FAB click handler ────────────────────────────────────────────────────
 async function handleFabClick() {
+  try {
+    const stored = await new Promise(r => chrome.storage.local.get(['ghostModeEnabled', 'hide111Btn'], r));
+    if (stored && (stored.ghostModeEnabled || stored.hide111Btn)) {
+      console.log('[FAB] Execution blocked: Ghost Mode or Hide 1-1-1 is active.');
+      return;
+    }
+  } catch (e) {}
+
   setFabLoading(true);
   try {
     // 1. Scrape
@@ -1502,7 +1581,8 @@ function shouldShowFab() {
 async function autoAddManualTicketIfEnabled() {
   if (window.__autoAddedManualTicket) return;
   
-  chrome.storage.local.get(['autoAddManualTicketsEnabled'], async (settings) => {
+  chrome.storage.local.get(['autoAddManualTicketsEnabled', 'ghostModeEnabled', 'hide111Btn'], async (settings) => {
+    if (settings && (settings.ghostModeEnabled || settings.hide111Btn)) return;
     if (settings && settings.autoAddManualTicketsEnabled) {
       window.__autoAddedManualTicket = true;
       try {
@@ -1518,6 +1598,18 @@ async function autoAddManualTicketIfEnabled() {
 
 (function initFab() {
   if (!shouldInitFabScript()) return;
+
+  try {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === 'local') {
+        if (changes.ghostModeEnabled || changes.hideHealthBtn || changes.hide111Btn || changes.complaintHealthEnabled) {
+          chrome.storage.local.get(['ghostModeEnabled', 'hideHealthBtn', 'hide111Btn', 'complaintHealthEnabled'], (settings) => {
+            applyFabVisibility(settings || {});
+          });
+        }
+      }
+    });
+  } catch (e) {}
   
   const attemptInit = () => {
     if (shouldShowFab()) {

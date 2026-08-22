@@ -830,11 +830,16 @@
             <textarea id="txtPrintIds"
               class="w-full h-24 bg-white border border-outline-variant rounded-lg p-2.5 font-data-mono text-xs focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all resize-none custom-scrollbar"
               placeholder="Enter Service Order Numbers (one per line)...&#10;4437419726&#10;4437419830"></textarea>
-            <button id="btnPrintInNewTab"
-              class="w-full bg-primary hover:bg-primary-container text-on-primary font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-200 shadow-md group">
-              <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">open_in_new</span>
-              <span>Print in New Tab</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button id="btnPrintInNewTab"
+                class="flex-grow bg-primary hover:bg-primary-container text-on-primary font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-200 shadow-md group">
+                <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">open_in_new</span>
+                <span>Print in New Tab</span>
+              </button>
+              <label class="flex items-center justify-center cursor-pointer bg-white px-3 py-3 border border-outline-variant rounded-xl hover:bg-surface-container transition-colors" title="Open into New Tab">
+                <input type="checkbox" id="chkPrintNewTab" class="w-4 h-4 rounded text-primary focus:ring-primary accent-primary cursor-pointer" checked>
+              </label>
+            </div>
             <p class="text-center text-[10px] text-on-surface-variant/70 italic">
               Multiple IDs will be opened in print tabs.
             </p>
@@ -903,6 +908,54 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="chkHealthCheck">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Ghost Mode (Turn Off All Floating Buttons & Functions) -->
+          <div
+            class="flex items-center justify-between py-2 px-3 bg-red-50/60 rounded-lg border border-red-200 hover:bg-red-50 transition-colors">
+            <div class="flex items-center gap-2 flex-grow pr-2">
+              <span class="material-symbols-outlined text-red-600 text-base">visibility_off</span>
+              <div>
+                <span class="font-bold text-[11px] text-red-900 block">Ghost Mode (Disable Floating Features)</span>
+                <span id="chkGhostStatus" class="font-normal text-[10px] text-red-700 block">Off — floating buttons active</span>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chkGhostMode">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Hide Health Floating Button -->
+          <div
+            class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-outline-variant hover:bg-surface-container transition-colors">
+            <div class="flex items-center gap-2 flex-grow pr-2">
+              <span class="material-symbols-outlined text-primary text-base">hide</span>
+              <div>
+                <span class="font-bold text-[11px] text-on-surface block">Hide Health Floating Button</span>
+                <span id="chkHideHealthStatus" class="font-normal text-[10px] text-on-surface-variant/80 block">Off — Health button visible on GSPN</span>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chkHideHealthBtn">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Hide "Add 1-1-1 Data" Floating Button -->
+          <div
+            class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-outline-variant hover:bg-surface-container transition-colors">
+            <div class="flex items-center gap-2 flex-grow pr-2">
+              <span class="material-symbols-outlined text-primary text-base">cancel</span>
+              <div>
+                <span class="font-bold text-[11px] text-on-surface block">Hide "Add 1-1-1 Data" Button</span>
+                <span id="chkHide111Status" class="font-normal text-[10px] text-on-surface-variant/80 block">Off — Add 1-1-1 button visible on GSPN</span>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chkHide111Btn">
               <span class="slider"></span>
             </label>
           </div>

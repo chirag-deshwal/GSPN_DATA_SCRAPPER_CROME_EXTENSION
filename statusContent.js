@@ -24,22 +24,33 @@ function cleanStatusText(text) {
  * Parse the status table and return an array of status records.
  * Each record is keyed by Service Order No.
  */
-function scrapeStatusData() {
+function scrapeStatusData(targetDoc = document) {
   const records = [];
 
-  // Try to find the table body — it could be in the main document or inside an iframe
-  let tbody = document.getElementById('searchContentTableBody');
+  // 1. Try to find the table body directly by ID
+  let tbody = targetDoc.getElementById('searchContentTableBody');
 
-  // If not found directly, search inside iframes (the page uses a frameset)
+  // 2. Fallback: Search for any checkbox input with name="print_id" and get its container tbody/table
   if (!tbody) {
-    const iframes = document.querySelectorAll('iframe');
-    for (const iframe of iframes) {
+    const firstCheckbox = targetDoc.querySelector('input[name="print_id"]');
+    if (firstCheckbox) {
+      tbody = firstCheckbox.closest('tbody') || firstCheckbox.closest('table');
+    }
+  }
+
+  // 3. Fallback: If not found directly, search inside child frames/iframes
+  if (!tbody) {
+    const frames = targetDoc.querySelectorAll('iframe, frame');
+    for (const frame of frames) {
       try {
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        tbody = iframeDoc.getElementById('searchContentTableBody');
-        if (tbody) break;
+        const frameDoc = frame.contentDocument || frame.contentWindow.document;
+        if (!frameDoc) continue;
+        const subRes = scrapeStatusData(frameDoc);
+        if (subRes && subRes.records && subRes.records.length > 0) {
+          return subRes;
+        }
       } catch (e) {
-        // Cross-origin iframe, skip
+        // Cross-origin frame access blocked, skip
       }
     }
   }
@@ -57,7 +68,7 @@ function scrapeStatusData() {
     const row2 = (i + 1 < rows.length) ? rows[i + 1] : null;
 
     // Row 1 should contain a checkbox with the Service Order No
-    const checkbox = row1.querySelector('input[type="checkBox"][name="print_id"]');
+    const checkbox = row1.querySelector('input[name="print_id"]');
     if (!checkbox) {
       i++;
       continue;

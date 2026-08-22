@@ -334,6 +334,12 @@ const chk111Scraper = document.getElementById('chk111Scraper');
 const chk111Status = document.getElementById('chk111Status');
 const chkHealthCheck = document.getElementById('chkHealthCheck');
 const chkHealthStatus = document.getElementById('chkHealthStatus');
+const chkGhostMode = document.getElementById('chkGhostMode');
+const chkGhostStatus = document.getElementById('chkGhostStatus');
+const chkHideHealthBtn = document.getElementById('chkHideHealthBtn');
+const chkHideHealthStatus = document.getElementById('chkHideHealthStatus');
+const chkHide111Btn = document.getElementById('chkHide111Btn');
+const chkHide111Status = document.getElementById('chkHide111Status');
 const chkOpenInNewTab = document.getElementById('chkOpenInNewTab');
 const closerCard = document.querySelector('.closer-helper-card');
 const btnCopyPreset = document.getElementById('btnCopyPreset');
@@ -518,6 +524,36 @@ function updateHealthUI(enabled) {
   }
 }
 
+function updateGhostUI(enabled) {
+  if (chkGhostMode) chkGhostMode.checked = enabled;
+  if (chkGhostStatus) {
+    chkGhostStatus.textContent = enabled
+      ? 'On — ALL floating buttons & functions disabled'
+      : 'Off — floating buttons active';
+    chkGhostStatus.classList.toggle('active', enabled);
+  }
+}
+
+function updateHideHealthUI(enabled) {
+  if (chkHideHealthBtn) chkHideHealthBtn.checked = enabled;
+  if (chkHideHealthStatus) {
+    chkHideHealthStatus.textContent = enabled
+      ? 'On — Health button hidden on GSPN'
+      : 'Off — Health button visible on GSPN';
+    chkHideHealthStatus.classList.toggle('active', enabled);
+  }
+}
+
+function updateHide111UI(enabled) {
+  if (chkHide111Btn) chkHide111Btn.checked = enabled;
+  if (chkHide111Status) {
+    chkHide111Status.textContent = enabled
+      ? 'On — Add 1-1-1 button hidden on GSPN'
+      : 'Off — Add 1-1-1 button visible on GSPN';
+    chkHide111Status.classList.toggle('active', enabled);
+  }
+}
+
 /**
  * Load profile settings and module toggle states on popup open
  */
@@ -540,12 +576,24 @@ async function loadProfileSettings() {
     console.warn('Failed to load profile settings:', error);
   }
 
-  // Load 1-1-1 and Health Check Dialog module states
-  chrome.storage.local.get(['autoAddManualTicketsEnabled', 'complaintHealthEnabled'], (data) => {
+  // Load 1-1-1, Health Check Dialog, Ghost Mode, and Hide floating button states
+  chrome.storage.local.get([
+    'autoAddManualTicketsEnabled',
+    'complaintHealthEnabled',
+    'ghostModeEnabled',
+    'hideHealthBtn',
+    'hide111Btn'
+  ], (data) => {
     const autoAddEnabled = !!data.autoAddManualTicketsEnabled;
     const healthEnabled = data.complaintHealthEnabled !== false;
+    const ghostEnabled = !!data.ghostModeEnabled;
+    const hideHealthEnabled = !!data.hideHealthBtn;
+    const hide111Enabled = !!data.hide111Btn;
     update111UI(autoAddEnabled);
     updateHealthUI(healthEnabled);
+    updateGhostUI(ghostEnabled);
+    updateHideHealthUI(hideHealthEnabled);
+    updateHide111UI(hide111Enabled);
   });
 }
 
@@ -594,6 +642,33 @@ if (chkHealthCheck) {
     const enabled = chkHealthCheck.checked;
     chrome.storage.local.set({ complaintHealthEnabled: enabled });
     updateHealthUI(enabled);
+  });
+}
+
+// Toggle 4: Ghost Mode (Disable All Floating Features)
+if (chkGhostMode) {
+  chkGhostMode.addEventListener('change', () => {
+    const enabled = chkGhostMode.checked;
+    chrome.storage.local.set({ ghostModeEnabled: enabled });
+    updateGhostUI(enabled);
+  });
+}
+
+// Toggle 5: Hide Health Floating Button
+if (chkHideHealthBtn) {
+  chkHideHealthBtn.addEventListener('change', () => {
+    const enabled = chkHideHealthBtn.checked;
+    chrome.storage.local.set({ hideHealthBtn: enabled });
+    updateHideHealthUI(enabled);
+  });
+}
+
+// Toggle 6: Hide "Add 1-1-1 Data" Button
+if (chkHide111Btn) {
+  chkHide111Btn.addEventListener('change', () => {
+    const enabled = chkHide111Btn.checked;
+    chrome.storage.local.set({ hide111Btn: enabled });
+    updateHide111UI(enabled);
   });
 }
 
@@ -1436,7 +1511,7 @@ btnAddStatus.addEventListener('click', async () => {
       throw new Error('No active tab found.');
     }
 
-    // Inject the statusContent.js script into the current tab
+    // Inject the statusContent.js script into the current tab across all frames
     try {
       await chrome.scripting.executeScript({
         target: { tabId: tab.id, allFrames: true },
@@ -1446,23 +1521,57 @@ btnAddStatus.addEventListener('click', async () => {
       // Script may already be injected
     }
 
-    // Request status data from the status page
-    const response = await chrome.tabs.sendMessage(tab.id, { action: 'scrapeStatus' });
+    // Execute scrapeStatusData across all frames directly in each frame's context
+    let statusRecords = [];
+    let statusError = null;
 
-    if (!response) {
-      throw new Error('No response from status page. Please make sure you are on the Service Order Management Light page.');
+    try {
+      const execResults = await chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        func: () => {
+          if (typeof scrapeStatusData === 'function') {
+            return scrapeStatusData();
+          }
+          return null;
+        }
+      });
+
+      if (Array.isArray(execResults)) {
+        for (const item of execResults) {
+          if (item && item.result && Array.isArray(item.result.records) && item.result.records.length > 0) {
+            statusRecords = item.result.records;
+            statusError = null;
+            break;
+          } else if (item && item.result && item.result.error && !statusError) {
+            statusError = item.result.error;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('executeScript multi-frame scan failed:', e);
     }
 
-    if (!response.success) {
-      throw new Error(response.error || 'Failed to scrape status data.');
+    // Fallback: Request status data via message passing if executeScript returned no records
+    if (!statusRecords || statusRecords.length === 0) {
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, { action: 'scrapeStatus' });
+        if (response && response.success && Array.isArray(response.data) && response.data.length > 0) {
+          statusRecords = response.data;
+          statusError = null;
+        } else if (response && response.error) {
+          statusError = response.error;
+        }
+      } catch (e) {
+        // Message passing fallback error
+      }
     }
 
-    if (response.count === 0) {
-      throw new Error('No status records found on this page. Please ensure Service Order data is loaded.');
+    if (!statusRecords || statusRecords.length === 0) {
+      throw new Error(statusError || 'Status table not found. Make sure you are on the Service Order Management Light page with data loaded.');
     }
 
     // Perform VLOOKUP merge
-    const mergeStats = mergeStatusData(response.data);
+    const mergeStats = mergeStatusData(statusRecords);
 
     // Update columns list (add status columns that aren't already present)
     for (const col of STATUS_COLUMNS) {
@@ -1486,7 +1595,7 @@ btnAddStatus.addEventListener('click', async () => {
     buildPreview(scrapedData, scrapedColumns);
 
     setStatus('success', `Status merged: ${mergeStats.matched} of ${scrapedData.length} matched`);
-    statusMergeHint.textContent = `✓ ${mergeStats.matched} matched, ${mergeStats.unmatched} unmatched — from ${response.count} status records`;
+    statusMergeHint.textContent = `✓ ${mergeStats.matched} matched, ${mergeStats.unmatched} unmatched — from ${statusRecords.length} status records`;
 
   } catch (error) {
     setStatus('error', 'Status merge failed');
@@ -2133,6 +2242,20 @@ if (btnReset) {
 // ---- Print in New Tab Helper ----
 const btnPrintInNewTab = document.getElementById('btnPrintInNewTab');
 const txtPrintIds = document.getElementById('txtPrintIds');
+const chkPrintNewTab = document.getElementById('chkPrintNewTab');
+
+if (chkPrintNewTab) {
+  chrome.storage.local.get(['printNewTabEnabled'], (data) => {
+    if (data.printNewTabEnabled !== undefined) {
+      chkPrintNewTab.checked = !!data.printNewTabEnabled;
+    }
+  });
+
+  chkPrintNewTab.addEventListener('change', () => {
+    chrome.storage.local.set({ printNewTabEnabled: chkPrintNewTab.checked });
+  });
+}
+
 if (btnPrintInNewTab && txtPrintIds) {
   btnPrintInNewTab.addEventListener('click', () => {
     const rawVal = txtPrintIds.value.trim();
@@ -2147,12 +2270,20 @@ if (btnPrintInNewTab && txtPrintIds) {
 
     if (ids.length === 0) return;
 
-    // Open a new tab for each ID
-    ids.forEach(id => {
-      chrome.tabs.create({
-        url: `https://biz2.samsungcsportal.com/svctracking/svcorder/sts/accept_hhp_print.jsp?objectID=${id}&pageType=page`
+    const openInNewTab = chkPrintNewTab ? chkPrintNewTab.checked : true;
+
+    if (openInNewTab) {
+      // Open a separate new tab for each ID
+      ids.forEach(id => {
+        const printUrl = `https://biz2.samsungcsportal.com/gspn/operate.do?print_type=SIEL_ENG&ascCode=*&cmd=ServiceRequestMultiPrintCmd&objectId=${encodeURIComponent(id)}`;
+        chrome.tabs.create({ url: printUrl });
       });
-    });
+    } else {
+      // Combine all IDs into a single tab
+      const objectParams = ids.map(id => `objectId=${encodeURIComponent(id)}`).join('&');
+      const printUrl = `https://biz2.samsungcsportal.com/gspn/operate.do?print_type=SIEL_ENG&ascCode=*&cmd=ServiceRequestMultiPrintCmd&${objectParams}`;
+      chrome.tabs.create({ url: printUrl });
+    }
   });
 }
 

@@ -908,17 +908,21 @@
     // Storage listener for live ON/OFF toggling from popup
     try {
       chrome.storage.onChanged.addListener((changes, areaName) => {
-        if (areaName === 'local' && Object.prototype.hasOwnProperty.call(changes, 'complaintHealthEnabled')) {
-          const enabled = changes.complaintHealthEnabled.newValue !== false;
-          if (!enabled) {
-            window._complaintHealthDisabled = true;
-            removeExistingHealthBox();
-          } else {
-            window._complaintHealthDisabled = false;
-            if (isComplaintDetailVisible()) {
-              removeExistingHealthBox();
-              injectHealthBox();
-            }
+        if (areaName === 'local') {
+          if (
+            Object.prototype.hasOwnProperty.call(changes, 'complaintHealthEnabled') ||
+            Object.prototype.hasOwnProperty.call(changes, 'ghostModeEnabled') ||
+            Object.prototype.hasOwnProperty.call(changes, 'hideHealthBtn')
+          ) {
+            chrome.storage.local.get(['complaintHealthEnabled', 'ghostModeEnabled', 'hideHealthBtn'], (data) => {
+              const isDisabled = data.ghostModeEnabled || data.hideHealthBtn || data.complaintHealthEnabled === false;
+              if (isDisabled) {
+                window._complaintHealthDisabled = true;
+                removeExistingHealthBox();
+              } else {
+                window._complaintHealthDisabled = false;
+              }
+            });
           }
         }
       });
@@ -926,9 +930,31 @@
       log('Failed to attach storage listener', e);
     }
 
+    // Explicit manual trigger method & event listener for Health Button
+    window.openGspnHealthCheck = function() {
+      chrome.storage.local.get(['complaintHealthEnabled', 'ghostModeEnabled', 'hideHealthBtn'], (data) => {
+        if (data.ghostModeEnabled || data.hideHealthBtn || data.complaintHealthEnabled === false) {
+          log('Health check trigger ignored: disabled by setting');
+          return;
+        }
+        window._complaintHealthDisabled = false;
+        if (isComplaintDetailVisible()) {
+          removeExistingHealthBox();
+          injectHealthBox();
+          _healthBoxInjected = true;
+        }
+      });
+    };
+
+    window.addEventListener('GSPN_SHOW_HEALTH_CHECK', () => {
+      if (typeof window.openGspnHealthCheck === 'function') {
+        window.openGspnHealthCheck();
+      }
+    });
+
     // Check extension setting first
-    chrome.storage.local.get(['complaintHealthEnabled'], (data) => {
-      if (data.complaintHealthEnabled === false) {
+    chrome.storage.local.get(['complaintHealthEnabled', 'ghostModeEnabled', 'hideHealthBtn'], (data) => {
+      if (data.ghostModeEnabled || data.hideHealthBtn || data.complaintHealthEnabled === false) {
         window._complaintHealthDisabled = true;
         log('Complaint health dialog disabled via popup setting');
         return;
@@ -939,13 +965,7 @@
         return;
       }
 
-      if (isComplaintDetailVisible()) {
-        log('Complaint detail visible on init');
-        removeExistingHealthBox();
-        injectHealthBox();
-      } else {
-        log('No complaint detail on initial check');
-      }
+      log('Complaint health monitor initialized (auto-show disabled; manual trigger via Health button only)');
 
       // Watch for DOM changes but target a narrower container when possible
       const preferredSelectors = ['#content', '#detailDiv', '.detail', '#main', 'body'];
@@ -967,10 +987,6 @@
           if (isComplaintDetailVisible()) {
             if (_healthBoxInjected) {
               updateHealthBox();
-            } else {
-              removeExistingHealthBox();
-              injectHealthBox();
-              _healthBoxInjected = true;
             }
           } else {
             removeExistingHealthBox();
